@@ -4,8 +4,6 @@ from __future__ import print_function
 
 import gym
 import time
-import serial
-import argparse
 import numpy as np
 
 from gym import spaces
