@@ -47,7 +47,7 @@ def main():
 
     """
     # Another way to run the Qube enviroment
-    env = QubeEnv()
+    env = gym.make('Qube-v0')
 
     num_episodes = 10
     num_steps = 250
