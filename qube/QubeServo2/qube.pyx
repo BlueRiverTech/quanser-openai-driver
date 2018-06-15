@@ -6,7 +6,7 @@ cimport quanser_types as qt
 cimport numpy as np
 cimport hil
 
-from helpers.error_codes import error_codes
+from helpers.error_codes import print_possible_error
 import numpy as np
 import time
 
@@ -128,7 +128,7 @@ cdef class QubeServo2:
                                     self.num_analog_w_channels,
                                     &self.voltages_w[0])
         if result < 0:
-            self._print_possible_error(result)
+            print_possible_error(result)
             raise IOError("Could not set voltages_w to 0")
 
         # Set the encoder encoder_r_buffer to 0
@@ -139,7 +139,7 @@ cdef class QubeServo2:
                                     self.num_encoder_r_channels,
                                     &self.encoder_r_buffer[0])
         if result < 0:
-            self._print_possible_error(result)
+            print_possible_error(result)
             raise IOError("Could not set encoder buffer to 0")
 
         # Enables_r all the motors
@@ -150,7 +150,7 @@ cdef class QubeServo2:
                         self.num_digital_w_channels,
                         &self.enables_r[0])
         if result < 0:
-            self._print_possible_error(result)
+            print_possible_error(result)
             raise IOError("Could not set enables_r to 0")
 
         return self
@@ -174,12 +174,6 @@ cdef class QubeServo2:
                                 &self.digital_w_channels[0],
                                 self.num_digital_w_channels,
                                 &self.enables_r[0])
-
-    @staticmethod
-    def _print_possible_error(int result):
-        """If there is an error, print the error code. TODO: get error codes from HIL API"""
-        if result < 0:
-            print(error_codes[-result])
 
     @staticmethod
     def _validate(channel_type, channels):
@@ -227,11 +221,11 @@ cdef class QubeServo2:
              self.num_other_r_channels, # Other inp channels (gyro, accelerometer, & tach)
              &self.task)
 
-        self._print_possible_error(result)
+        print_possible_error(result)
 
         # Start the task
         result = hil.hil_task_start(self.task, hil.HARDWARE_CLOCK_0, self.frequency, -1)
-        self._print_possible_error(result)
+        print_possible_error(result)
 
     def _stop_task(self):
         if self.task_started:
@@ -264,13 +258,13 @@ cdef class QubeServo2:
             &self.encoder_r_buffer[0], # Encoder input channels (encoder counts, pitch, yaw)
             NULL,                      # Digital input channels (errors and faults)
             &self.other_r_buffer[0])   # Other input channels (gyro, accelerometer, & tach)
-        self._print_possible_error(samples)
+        print_possible_error(samples)
 
         # Then write voltages_w calculated for previous time step
         self.voltages_w = voltages_w
         result = hil.hil_write_analog(self.board, &self.analog_w_channels[0],
                 self.num_analog_w_channels, &self.voltages_w[0])
-        self._print_possible_error(result)
+        print_possible_error(result)
 
         return np.asarray(self.currents_r), \
                 np.asarray(self.encoder_r_buffer), \
