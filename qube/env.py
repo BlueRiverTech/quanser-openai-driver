@@ -10,7 +10,7 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from control_research.projects.qube.QubeServo2 import QubeServo2
+from qube.QubeServo2 import QubeServo2
 
 
 # theta, alpha: positions, velocities, accelerations
@@ -23,21 +23,79 @@ OBSERVATION_HIGH = np.asarray([
 ], dtype=np.float64)
 OBSERVATION_LOW = -OBSERVATION_HIGH
 
-ACTION_HIGH = np.asarray([15.0], dtype=np.float64)
+MAX_MOTOR_VOLTAGE = 8.0
+ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
 
 WARMUP_STEPS = 100
+
+
+STATE_KEYS = [ 
+        'COS_THETA',
+        'SIN_THETA',
+        'COS_ALPHA',
+        'SIN_ALPHA',
+        'THETA_VELOCITY',
+        'ALPHA_VELOCITY',
+        'THETA_ACCELERATION',
+        'ALPHA_ACCELERATION',
+        'TACH0',
+        'SENSE'
+        ]
 
 
 def normalize_angle(theta):
     return ((theta + np.pi) % (2 * np.pi)) - np.pi
 
 
+class QubeReward(object):
+
+    def __init__(self):
+        self.target_space = spaces.Box(
+            low=ACTION_LOW,
+            high=ACTION_HIGH, dtype=np.float32) 
+
+    def __call__(self, state, action):
+        theta_x = state[0]
+        theta_y = state[1]
+        alpha_x = state[2]
+        alpha_y = state[3]
+        theta_velocity = state[4]
+        alpha_velocity = state[5]
+        theta_acceleration = state[6]
+        alpha_acceleration = state[7]
+
+        theta = np.arctan2(theta_y, theta_x) # arm
+        alpha = np.arctan2(alpha_y, alpha_x) # pole
+
+        #target_angle = np.pi
+        #cost = normalize_angle(theta)**2 + \
+        #        normalize_angle(alpha - target_angle)**2
+
+        cost =  normalize_angle(theta)**4 + \
+                normalize_angle(alpha)**2 + \
+                0.1 * alpha_velocity**2
+
+        # sigma = 2
+        # cost = 1 - np.exp(-cost / sigma**2)
+
+        reward = -cost
+
+        return reward
+
+
 class QubeEnv(gym.Env):
 
     def __init__(self):
-        self.observation_space = spaces.Box(OBSERVATION_LOW, OBSERVATION_HIGH, dtype=np.float64)
-        self.action_space = spaces.Box(ACTION_LOW, ACTION_HIGH, dtype=np.float64)
+        self.observation_space = spaces.Box(
+                OBSERVATION_LOW, OBSERVATION_HIGH, 
+                dtype=np.float32)
+
+        self.action_space = spaces.Box(
+                ACTION_LOW, ACTION_HIGH, 
+                dtype=np.float32)
+
+        self.reward_fn = QubeReward()
 
         self._theta = 0
         self._alpha = 0
@@ -51,7 +109,7 @@ class QubeEnv(gym.Env):
         self._prev_t = time.time()
 
         # Open the Qube
-        self.qube = QubeServo2(frequency=100)
+        self.qube = QubeServo2(frequency=25)
         self.qube.__enter__()
 
         self.seed()
@@ -59,32 +117,6 @@ class QubeEnv(gym.Env):
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
-
-    @staticmethod
-    def reward_fn(state, action):
-        theta_x = state[0]
-        theta_y = state[1]
-        alpha_x = state[2]
-        alpha_y = state[3]
-        theta_velocity = state[4]
-        alpha_velocity = state[5]
-        theta_acceleration = state[6]
-        alpha_acceleration = state[7]
-
-        theta = np.arctan2(theta_y, theta_x)
-        alpha = np.arctan2(alpha_y, alpha_x)
-
-        cost = normalize_angle(theta)**2 + \
-               normalize_angle(alpha)**2 + \
-               0.1 * theta_velocity**2 + \
-               0.1 * alpha_velocity**2 + \
-               0.001 * action[0]**2
-
-        # sigma = 2
-        # cost = 1 - np.exp(-cost / sigma**2)
-
-        reward = -cost
-        return reward
 
     def _step(self, action):
         M_PI = 3.14159
@@ -147,7 +179,7 @@ class QubeEnv(gym.Env):
 
     def step(self, action):
         state = self._step(action)
-        reward = QubeEnv.reward_fn(state, action)
+        reward = self.reward_fn(state, action)
         done = False
         info = {}
         return state, reward, done, info
@@ -173,6 +205,7 @@ def main():
                     break
                 state = next_state
     finally:
+        # Note: to set all encoders and motor voltages to 0, you must call env.close()
         env.close()
 
 if __name__ == '__main__':
