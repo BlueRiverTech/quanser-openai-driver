@@ -1,12 +1,12 @@
 # QUBE Servo 2 (Quanser HIL API wrapper)
 
 To compile the QUBE wrapper:
-- cd into the directory: `cd <directory of git repo>/ControlsResearch/control_research/projects/qube/QubeServo2`.
+- cd into the directory containing QubeServo2: `cd <directory of git repo>/quanser-openai-driver/gym-enviroments/gym_qube/envs/QubeServo2`.
 - Then use the `make` command to compile.
 
 For example:
 ```
-$ cd ~/ControlsResearch/control_research/projects/qube/QubeServo2
+$ cd /~quanser-openai-driver/gym-enviroments/gym_qube/envs/QubeServo2
 $ make
 ```
 

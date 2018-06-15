@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 
 import gym
 import time
@@ -10,7 +10,7 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from qube.QubeServo2 import QubeServo2
+from gym_qube.envs.QubeServo2 import QubeServo2
 
 
 # theta, alpha: positions, velocities, accelerations
