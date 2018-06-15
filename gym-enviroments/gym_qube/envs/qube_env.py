@@ -10,7 +10,7 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from qube.QubeServo2 import QubeServo2
+from gym_qube.envs.QubeServo2 import QubeServo2
 
 
 # theta, alpha: positions, velocities, accelerations
