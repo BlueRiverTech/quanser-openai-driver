@@ -114,6 +114,12 @@ class QubeEnv(gym.Env):
 
         self.seed()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
+
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
@@ -190,11 +196,25 @@ class QubeEnv(gym.Env):
 
 
 def main():
+    num_episodes = 10
+    num_steps = 250
+
+    with QubeEnv() as env:
+        for episode in range(num_episodes):
+            state = env.reset()
+            for step in range(num_steps):
+                action = env.action_space.sample()
+                next_state, reward, done, _ = env.step(action)
+                if done:
+                    break
+                state = next_state
+
+    """
+    # Another way to run the Qube enviroment
     env = QubeEnv()
 
     num_episodes = 10
     num_steps = 250
-
     try:
         for episode in range(num_episodes):
             state = env.reset()
@@ -207,6 +227,7 @@ def main():
     finally:
         # Note: to set all encoders and motor voltages to 0, you must call env.close()
         env.close()
+    """
 
 if __name__ == '__main__':
     main()
