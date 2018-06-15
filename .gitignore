@@ -1,4 +1,5 @@
 *.DS_Store
+*/QubeServo2/*.c
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
