@@ -1,3 +1,4 @@
+
 error_codes = {	
 	1: "Error 1: QERR_OUT_OF_MEMORY: Not enough memory to perform the operation.",
 	2: "Error 2: QERR_OUT_OF_RESOURCES: Not enough system resources are available to perform the operation.",
@@ -1174,3 +1175,9 @@ error_codes = {
 	1173: "Error 1173: QERR_MAGNETOMETER_NOT_RESPONDING: The magnetometer is not responding. The device may have been damaged.",
 	1174: "Error 1174: QERR_CONFLICTING_DIGITAL_MODES: The specified digital IO is a generic IO (e.g. DIO, PWM, Encoder, SPI, I2C, UARC), but have conflicting mode setting. Refer to the device documentation for limitations",
 }
+
+
+def print_possible_error(result):
+    """If there is an error, print the error code. TODO: get error codes from HIL API"""
+    if result < 0:
+        print(error_codes[-result])

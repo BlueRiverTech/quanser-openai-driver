@@ -1,10 +1,12 @@
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 
 cimport quanser_types as qt
 cimport numpy as np
 cimport hil
 
-from helpers.error_codes import error_codes
+from helpers.error_codes import print_possible_error
 import numpy as np
 import time
 
@@ -28,15 +30,19 @@ cdef class QubeServo2:
 
     cdef bint task_started
 
-    cdef qt.t_uint32[::] analog_r_channels, analog_w_channels, digital_w_channels, encoder_r_channels, other_r_channels, led_w_channels
-    cdef qt.t_uint32 num_analog_r_channels, num_analog_w_channels, num_digital_w_channels, num_encoder_r_channels, num_other_r_channels, num_led_w_channels
+    cdef qt.t_uint32[::] analog_r_channels, analog_w_channels, \
+            digital_w_channels, encoder_r_channels, other_r_channels, led_w_channels
+
+    cdef qt.t_uint32 num_analog_r_channels, num_analog_w_channels, \
+            num_digital_w_channels, num_encoder_r_channels, num_other_r_channels, \
+            num_led_w_channels
 
     cdef qt.t_double[::] currents_r # num_analog_r_channels
     cdef qt.t_double[::] voltages_w # num_analog_w_channels
     cdef qt.t_boolean[::] enables_r # num_digital_w_channels
     cdef qt.t_int32[::] encoder_r_buffer # num_encoder_r_channels
-    cdef qt.t_double[::] other_r_buffer # num_other_r_channels 
-    cdef qt.t_double[::] led_r_buffer # num_other_r_channels 
+    cdef qt.t_double[::] other_r_buffer # num_other_r_channels
+    cdef qt.t_double[::] led_r_buffer # num_other_r_channels
 
     cdef qt.t_double frequency, period
 
@@ -54,19 +60,19 @@ cdef class QubeServo2:
         """Make sure to free the board!"""
         hil.hil_close(self.board)
 
-    def __init__(self, frequency=1000):
+    def __init__(self, frequency=25):
         """
         Args:
-            - analog_r_channels:  [INPUT]  a list of analog channels to use for commumication
-            - analog_w_channels:  [OUTPUT] a list of analog channels to use for commumication
-            - digital_w_channels: [INPUT]  a list of digital channels to use for commumication
-            - encoder_r_channels: [INPUT]  a list of encoder channels to use for commumication
-            - other_r_channels:   [INPUT]  a list of other channels to use for commumication
-            - led_w_channels:     [OUTPUT] a list of led channels to use for commumication
-            - board_type:       the name of the board (to find the board_type goto 
-                                file:///opt/quanser/hil_sdk/help/quarc_supported_quanser_cards.html
-                                and find you card)
-            - frequency:  Frequency of the reading/writing task (in Hz)
+        - analog_r_channels:  [INPUT]  a list of analog channels to use for commumication
+        - analog_w_channels:  [OUTPUT] a list of analog channels to use for commumication
+        - digital_w_channels: [INPUT]  a list of digital channels to use for commumication
+        - encoder_r_channels: [INPUT]  a list of encoder channels to use for commumication
+        - other_r_channels:   [INPUT]  a list of other channels to use for commumication
+        - led_w_channels:     [OUTPUT] a list of led channels to use for commumication
+        - board_type:       the name of the board (to find the board_type goto
+                            file:///opt/quanser/hil_sdk/help/quarc_supported_quanser_cards.html
+                            and find you card)
+        - frequency:  Frequency of the reading/writing task (in Hz)
         """
         analog_r_channels  = [0]
         analog_w_channels  = [0]
@@ -103,33 +109,48 @@ cdef class QubeServo2:
     def __enter__(self):
         """Start the hardware in a deterministic way (all motors, encoders, etc at 0)"""
         # Create a memoryview for currents
-        self.currents_r = np.zeros(self.num_analog_r_channels, dtype=np.float64) # t_double is 64 bits
+        self.currents_r = np.zeros(self.num_analog_r_channels,
+                                    dtype=np.float64) # t_double is 64 bits
 
         # Create a memoryview for -ometers
-        self.other_r_buffer = np.zeros(self.num_other_r_channels, dtype=np.float64) # t_double is 64 bits
+        self.other_r_buffer = np.zeros(self.num_other_r_channels,
+                                    dtype=np.float64) # t_double is 64 bits
 
         # Create a memoryview for leds
-        self.led_r_buffer = np.zeros(self.num_led_w_channels, dtype=np.float64) # t_double is 64 bits
+        self.led_r_buffer = np.zeros(self.num_led_w_channels,
+                                    dtype=np.float64) # t_double is 64 bits
 
         # Set all motor voltages_w to 0
-        self.voltages_w = np.zeros(self.num_analog_w_channels, dtype=np.float64) # t_double is 64 bits
-        result = hil.hil_write_analog(self.board, &self.analog_w_channels[0], self.num_analog_w_channels, &self.voltages_w[0])
+        self.voltages_w = np.zeros(self.num_analog_w_channels,
+                                    dtype=np.float64) # t_double is 64 bits
+        result = hil.hil_write_analog(self.board,
+                                    &self.analog_w_channels[0],
+                                    self.num_analog_w_channels,
+                                    &self.voltages_w[0])
         if result < 0:
-            self._print_possible_error(result)
+            print_possible_error(result)
             raise IOError("Could not set voltages_w to 0")
 
         # Set the encoder encoder_r_buffer to 0
-        self.encoder_r_buffer = np.zeros(self.num_encoder_r_channels, dtype=np.int32) # t_int32 is 32 bits
-        result = hil.hil_set_encoder_counts(self.board, &self.encoder_r_channels[0], self.num_encoder_r_channels, &self.encoder_r_buffer[0])
+        self.encoder_r_buffer = np.zeros(self.num_encoder_r_channels,
+                                    dtype=np.int32) # t_int32 is 32 bits
+        result = hil.hil_set_encoder_counts(self.board,
+                                    &self.encoder_r_channels[0],
+                                    self.num_encoder_r_channels,
+                                    &self.encoder_r_buffer[0])
         if result < 0:
-            self._print_possible_error(result)
+            print_possible_error(result)
             raise IOError("Could not set encoder buffer to 0")
 
         # Enables_r all the motors
-        self.enables_r = np.ones(self.num_digital_w_channels, dtype=np.int8) # t_bool is char (8 bits)
-        result = hil.hil_write_digital(self.board, &self.digital_w_channels[0], self.num_digital_w_channels, &self.enables_r[0])
+        self.enables_r = np.ones(self.num_digital_w_channels,
+                            dtype=np.int8) # t_bool is char (8 bits)
+        result = hil.hil_write_digital(self.board,
+                        &self.digital_w_channels[0],
+                        self.num_digital_w_channels,
+                        &self.enables_r[0])
         if result < 0:
-            self._print_possible_error(result)
+            print_possible_error(result)
             raise IOError("Could not set enables_r to 0")
 
         return self
@@ -139,18 +160,20 @@ cdef class QubeServo2:
         self._stop_task()
 
         # Set the motor voltages_w to 0
-        self.voltages_w = np.zeros(self.num_analog_w_channels, dtype=np.float64) # t_double is 64 bits
-        hil.hil_write_analog(self.board, &self.analog_w_channels[0], self.num_analog_w_channels, &self.voltages_w[0])
+        self.voltages_w = np.zeros(self.num_analog_w_channels,
+                                    dtype=np.float64) # t_double is 64 bits
+        hil.hil_write_analog(self.board,
+                                &self.analog_w_channels[0],
+                                self.num_analog_w_channels,
+                                &self.voltages_w[0])
 
         # Disable all the motors
-        self.enables_r = np.zeros(self.num_digital_w_channels, dtype=np.int8) # t_bool is char (8 bits)
-        hil.hil_write_digital(self.board, &self.digital_w_channels[0], self.num_digital_w_channels, &self.enables_r[0])
-
-    @staticmethod
-    def _print_possible_error(int result):
-        """If there is an error, print the error code. TODO: get error codes from HIL API"""
-        if result < 0:
-            print(error_codes[-result])
+        self.enables_r = np.zeros(self.num_digital_w_channels,
+                                dtype=np.int8) # t_bool is char (8 bits)
+        hil.hil_write_digital(self.board,
+                                &self.digital_w_channels[0],
+                                self.num_digital_w_channels,
+                                &self.enables_r[0])
 
     @staticmethod
     def _validate(channel_type, channels):
@@ -186,17 +209,23 @@ cdef class QubeServo2:
     def _create_task(self):
         """Start a task reads and writes at fixed intervals"""
 
-        result =  hil.hil_task_create_reader(self.board, 1,
-                                             &self.analog_r_channels[0], self.num_analog_r_channels,   # Analog input channels (motor current sense)
-                                             &self.encoder_r_channels[0], self.num_encoder_r_channels, # Encoder input channels (encoder counts, pitch, yaw)
-                                             NULL, 0,                                                  # Digital input channels (errors and faults)
-                                             &self.other_r_channels[0], self.num_other_r_channels,     # Other input channels (gyro, accelerometer, & tach)
-                                             &self.task)
-        self._print_possible_error(result)
+        result =  hil.hil_task_create_reader(self.board,
+             10000, # The size of the internal buffer (making this >> 1 prevents
+                    # error 111 but may also occasionally miss a read of state)
+             &self.analog_r_channels[0],
+             self.num_analog_r_channels, # Analog inp channels (motor current sense)
+             &self.encoder_r_channels[0],
+             self.num_encoder_r_channels, # Encoder inp channels (encoder counts, pitch, yaw)
+             NULL, 0, # Digital input channels (errors and faults)
+             &self.other_r_channels[0],
+             self.num_other_r_channels, # Other inp channels (gyro, accelerometer, & tach)
+             &self.task)
+
+        print_possible_error(result)
 
         # Start the task
         result = hil.hil_task_start(self.task, hil.HARDWARE_CLOCK_0, self.frequency, -1)
-        self._print_possible_error(result)
+        print_possible_error(result)
 
     def _stop_task(self):
         if self.task_started:
@@ -206,7 +235,6 @@ cdef class QubeServo2:
 
     def action(self, voltages_w):
         """Make sure you get safe data!"""
-        
         # If it's the first time running action, then start the background r/w task
         if not self.task_started:
             self._create_task()
@@ -226,15 +254,18 @@ cdef class QubeServo2:
         """Perform actions on the device (voltages_w must always be ndarray!)"""
         # First read using task_read (blocking call that enforces timing)
         samples = hil.hil_task_read(self.task, 1,
-                                    &self.currents_r[0],       # Analog input channels (motor current sense)
-                                    &self.encoder_r_buffer[0], # Encoder input channels (encoder counts, pitch, yaw)
-                                    NULL,                      # Digital input channels (errors and faults)
-                                    &self.other_r_buffer[0])   # Other input channels (gyro, accelerometer, & tach)
-        self._print_possible_error(samples)
+            &self.currents_r[0],       # Analog input channels (motor current sense)
+            &self.encoder_r_buffer[0], # Encoder input channels (encoder counts, pitch, yaw)
+            NULL,                      # Digital input channels (errors and faults)
+            &self.other_r_buffer[0])   # Other input channels (gyro, accelerometer, & tach)
+        print_possible_error(samples)
 
         # Then write voltages_w calculated for previous time step
         self.voltages_w = voltages_w
-        result = hil.hil_write_analog(self.board, &self.analog_w_channels[0], self.num_analog_w_channels, &self.voltages_w[0])
-        self._print_possible_error(result)
+        result = hil.hil_write_analog(self.board, &self.analog_w_channels[0],
+                self.num_analog_w_channels, &self.voltages_w[0])
+        print_possible_error(result)
 
-        return np.asarray(self.currents_r), np.asarray(self.encoder_r_buffer), np.asarray(self.other_r_buffer)
+        return np.asarray(self.currents_r), \
+                np.asarray(self.encoder_r_buffer), \
+                np.asarray(self.other_r_buffer)

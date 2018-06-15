@@ -34,7 +34,7 @@ def test_py_control():
     alpha_n_k1 = 0
     alpha_dot_k1 = 0
 
-    with QubeServo2(300) as a:
+    with QubeServo2(25) as a:
         voltages = np.array([0.], dtype=np.float64)
         currents, encoders, others = a.action(voltages)
 
