@@ -3,7 +3,7 @@ from __future__ import division
 
 import numpy as np
 import time
-from qube import QubeServo2
+from gym_qube.envs.QubeServo2 import QubeServo2
 
 
 def time_func(f, *args, **kwargs):
