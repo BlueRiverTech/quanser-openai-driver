@@ -6,7 +6,7 @@ cimport quanser_types as qt
 cimport numpy as np
 cimport hil
 
-from helpers.error_codes import print_possible_error
+from gym_qube.envs.QubeServo2.helpers.error_codes import print_possible_error
 import numpy as np
 import time
 
