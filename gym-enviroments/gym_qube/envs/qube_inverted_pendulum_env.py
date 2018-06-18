@@ -46,7 +46,7 @@ def normalize_angle(theta):
     return ((theta + np.pi) % (2 * np.pi)) - np.pi
 
 
-class QubeReward(object):
+class QubeInvertedPendulumReward(object):
 
     def __init__(self):
         self.target_space = spaces.Box(
@@ -66,23 +66,15 @@ class QubeReward(object):
         theta = np.arctan2(theta_y, theta_x) # arm
         alpha = np.arctan2(alpha_y, alpha_x) # pole
 
-        #target_angle = np.pi
-        #cost = normalize_angle(theta)**2 + \
-        #        normalize_angle(alpha - target_angle)**2
-
         cost =  normalize_angle(theta)**4 + \
                 normalize_angle(alpha)**2 + \
                 0.1 * alpha_velocity**2
 
-        # sigma = 2
-        # cost = 1 - np.exp(-cost / sigma**2)
-
         reward = -cost
-
         return reward
 
 
-class QubeEnv(gym.Env):
+class QubeInvertedPendulumEnv(gym.Env):
 
     def __init__(self):
         self.observation_space = spaces.Box(
@@ -93,7 +85,7 @@ class QubeEnv(gym.Env):
                 ACTION_LOW, ACTION_HIGH, 
                 dtype=np.float32)
 
-        self.reward_fn = QubeReward()
+        self.reward_fn = QubeInvertedPendulumReward()
 
         self._theta = 0
         self._alpha = 0
