@@ -21,29 +21,32 @@ STATE_KEYS = [
         ]
 
 
-def print_info(state, action):
-    print("\nAction: {}".format(action))
+def print_info(state, action, reward):
     print("State:")
     for name, val in zip(STATE_KEYS, state):
         print("\t{}: {}".format(name, val))
+    print("\nAction: {}".format(action))
+    print("Reward: {}".format(reward))
 
 
-
-def main():
+def test_env(env_name, action_func=None):
     num_episodes = 10
     num_steps = 250
 
-    with gym.make('Qube-v0') as env:
+    with gym.make(env_name) as env:
         for episode in range(num_episodes):
             state = env.reset()
             for step in range(num_steps):
-                action = env.action_space.sample()
+                if action_func is None:
+                    action = env.action_space.sample()
+                else:
+                    action = action_func(state)
                 next_state, reward, done, _ = env.step(action)
                 if done:
                     break
                 state = next_state
 
-                print_info(state, action)
+                print_info(state, action, reward)
 
     """
     # Another way to run the Qube enviroment
@@ -67,4 +70,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # print('Testing Qube-Inverted-Pendulum (easier)')
+    # test_env('Qube-Inverted-Pendulum-v0', lambda s: np.array([0]))
+
+    print('Testing Qube-Inverted-Pendulum-Sparse-Reward (harder)')
+    test_env('Qube-Inverted-Pendulum-Sparse-v0', lambda s: np.array([0]))
