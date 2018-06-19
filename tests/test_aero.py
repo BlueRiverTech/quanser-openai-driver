@@ -3,23 +3,24 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
-from gym_brt import QubeInvertedPendulumEnv, QubeInvertedPendulumSparseRewardEnv
+from gym_brt import AeroPositionEnv
 import gym
 
 
 STATE_KEYS = [ 
-        'COS_THETA',
-        'SIN_THETA',
-        'COS_ALPHA',
-        'SIN_ALPHA',
-        'THETA_VELOCITY',
-        'ALPHA_VELOCITY',
-        'THETA_ACCELERATION',
-        'ALPHA_ACCELERATION',
-        'TACH0',
-        'SENSE'
+        'PITCH',
+        'YAW',
+        'VELOCITY_X',
+        'VELOCITY_Y',
+        'VELOCITY_Z',
+        'ACCELERATION_X',
+        'ACCELERATION_Y',
+        'ACCELERATION_Z',
+        'TACH_PITCH',
+        'TACH_YAW',
+        'SENSE0',
+        'SENSE1'
         ]
-
 
 def print_info(state, action, reward):
     print("State:")
@@ -70,8 +71,5 @@ def test_env(env_name, action_func=None):
 
 
 if __name__ == '__main__':
-    # print('Testing Qube-Inverted-Pendulum (easier)')
-    # test_env('Qube-Inverted-Pendulum-v0', lambda s: np.array([0]))
-
-    print('Testing Qube-Inverted-Pendulum-Sparse-Reward (harder)')
-    test_env('Qube-Inverted-Pendulum-Sparse-v0', lambda s: np.array([0]))
+    print('Testing Aero Position Env')
+    test_env('Aero-Position-v0')

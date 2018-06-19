@@ -1,6 +1,14 @@
 from setuptools import setup
 
-setup(name='gym_qube',
-      version='0.0.1',
-      install_requires=['gym', 'numpy'],
+
+VERSION = 0.01
+INSTALL_REQUIRES = ['gym', 'numpy']
+
+setup(name='gym_brt',
+      version=VERSION,
+      install_requires=INSTALL_REQUIRES,
+      description='Blue River\'s OpenAI Gym wrapper around Quanser hardware.',
+      url='https://github.com/BlueRiverTech/quanser-openai-driver/',
+      author='Blue River Technology',
+      license='MIT'
 )
