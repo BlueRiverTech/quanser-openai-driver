@@ -1,2 +1,0 @@
-from gym_qube.envs.qube_inverted_pendulum_env import QubeInvertedPendulumEnv
-from gym_qube.envs.qube_inverted_pendulum_sparse_env import QubeInvertedPendulumSparseRewardEnv

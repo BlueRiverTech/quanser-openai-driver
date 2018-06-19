@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import numpy as np
 from gym import spaces
-from gym_qube.envs import QubeInvertedPendulumEnv
+from gym_brt.qube.envs import QubeInvertedPendulumEnv
 
 
 MAX_MOTOR_VOLTAGE = 8.0
