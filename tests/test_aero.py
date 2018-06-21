@@ -5,6 +5,7 @@ from __future__ import print_function
 import numpy as np
 from gym_brt import AeroPositionEnv
 import gym
+import time
 
 
 STATE_KEYS = [ 
@@ -47,6 +48,8 @@ def test_env(env_name, action_func=None):
                     break
                 state = next_state
 
+                rand_time = 0.1 * np.random.rand()
+                time.sleep(1)
                 print_info(state, action, reward)
 
     """

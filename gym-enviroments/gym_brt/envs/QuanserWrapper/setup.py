@@ -4,7 +4,7 @@ from Cython.Build import cythonize
 import numpy
 
 extensions = [
-    Extension("aero", ["aero.pyx"],
+    Extension("quanser_wrapper", ["quanser_wrapper.pyx"],
         include_dirs = ["/opt/quanser/hil_sdk/include", numpy.get_include()],
         libraries = ["hil", "quanser_runtime", "quanser_common", "rt", "pthread", "dl", "m", "c"],
         library_dirs = ["/opt/quanser/hil_sdk/lib"],

@@ -6,7 +6,7 @@ from __future__ import division
 
 import numpy as np
 import time
-from gym_brt.aero.envs.QuanserAero import QuanserAero
+from gym_brt.envs.QuanserWrapper import QuanserAero
 
 
 def time_func(f, *args, **kwargs):
@@ -25,7 +25,7 @@ def print_state(currents, encoders, others):
     print("\t Tachometer: ({}, {}, {}, {})".format(others[6], others[7], others[8], others[9]))
 
 
-def test_py_control():
+def test_aero_control():
 
     # variables for control
     desired = [0, 0, 0, 0] # 0 => pitch,  1 ==> yaw
