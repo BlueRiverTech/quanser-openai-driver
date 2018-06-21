@@ -4,21 +4,13 @@ cimport quanser_types as qt
 cimport numpy as np
 cimport hil
 
-from gym_brt.aero.envs.QuanserAero.helpers.error_codes import print_possible_error
+from gym_brt.envs.QuanserWrapper.helpers.error_codes import print_possible_error
 
 import numpy as np
 import time
 
 
-ALLOWED_ANALOG_R_CHANNELS  = [0, 1]
-ALLOWED_ANALOG_W_CHANNELS  = [0, 1]
-ALLOWED_DIGITAL_W_CHANNELS = [0, 1]
-ALLOWED_ENCODER_R_CHANNELS = [0, 1, 2, 3]
-ALLOWED_OTHER_R_CHANNELS   = [3000, 3001, 3002, 4000, 4001, 4002, 14000, 14001, 14002, 14003]
-ALLOWED_LED_W_CHANNELS     = [11000, 11001, 11002]
-
-
-cdef class QuanserAero:
+cdef class QuanserWrapper:
     cdef hil.t_card  board
     cdef hil.t_error result
     cdef hil.t_task  task
@@ -38,23 +30,16 @@ cdef class QuanserAero:
     cdef qt.t_double[::] other_r_buffer # num_other_r_channels 
     cdef qt.t_double[::] led_r_buffer # num_other_r_channels 
 
-    cdef qt.t_double frequency, period
+    cdef qt.t_double frequency, period, prev_action_time
 
-    def __cinit__(self):
-        board_type="quanser_aero_usb"
-        board_identifier="0"
-        try:
-            result = hil.hil_open(board_type, board_identifier, &self.board)
-            print("Successfully opened board")
-
-        except:
-            print("Failed to open board")
-
-    def __dealloc__(self):
-        """Make sure to free the board!"""
-        hil.hil_close(self.board)
-
-    def __init__(self, frequency=1000):
+    def __init__(self,
+                 analog_r_channels,
+                 analog_w_channels,
+                 digital_w_channels,
+                 encoder_r_channels,
+                 other_r_channels,
+                 led_w_channels,
+                 frequency=1000):
         """
         Args:
             - analog_r_channels:  [INPUT]  a list of analog channels to use for commumication
@@ -68,21 +53,6 @@ cdef class QuanserAero:
                                 and find you card)
             - frequency:  Frequency of the reading/writing task (in Hz)
         """
-        analog_r_channels  = [0, 1]
-        analog_w_channels  = [0, 1]
-        digital_w_channels = [0, 1]
-        encoder_r_channels = [0, 1, 2, 3]
-        other_r_channels   = [3000, 3001, 3002, 4000, 4001, 4002, 14000, 14001, 14002, 14003]
-        led_w_channels     = [11000, 11001, 11002]
-
-        # Make sure channel names are valid
-        self._validate("analog_r_channels", analog_r_channels)
-        self._validate("analog_w_channels", analog_w_channels)
-        self._validate("digital_w_channels", digital_w_channels)
-        self._validate("encoder_r_channels", encoder_r_channels)
-        self._validate("other_r_channels", other_r_channels)
-        self._validate("led_w_channels", led_w_channels)
-
         # Convert the channels into numpy arrays which are then stored in memoryviews (to pass C buffers to the HIL API)
         self.num_analog_r_channels  = len(analog_r_channels)
         self.num_analog_w_channels  = len(analog_w_channels)
@@ -99,6 +69,7 @@ cdef class QuanserAero:
 
         self.frequency = frequency
         self.task_started = False
+        self.prev_action_time = 0
 
     def __enter__(self):
         """Start the hardware in a deterministic way (all motors, encoders, etc at 0)"""
@@ -163,37 +134,6 @@ cdef class QuanserAero:
                                     self.num_digital_w_channels,
                                     &self.enables_r[0])
 
-    @staticmethod
-    def _validate(channel_type, channels):
-        """Make sure the channels given are valid for the hardware"""
-        def check_channels(allowed_channels, channels):
-            if len(channels) > len(allowed_channels):
-                raise ValueError("Too many channels given! Channels: {}".format(channels))
-            elif len(set(channels)) != len(channels):
-                raise ValueError("Channels repeated! Channels: {}".format(channels))
-            elif len(channels) == len(allowed_channels):
-                if set(channels) != set(allowed_channels):
-                    return
-            else:
-                for el in channels:
-                    if el not in set(allowed_channels):
-                        raise ValueError("Channels that are not in allowed channels! Channels: {}, Allowed Channels: {}".format(channels, allowed_channels))
-                return
-        if channel_type == "analog_r_channels":
-            allowed_channels = ALLOWED_ANALOG_R_CHANNELS
-        elif channel_type == "analog_w_channels":
-            allowed_channels = ALLOWED_ANALOG_W_CHANNELS
-        elif channel_type == "digital_w_channels":
-            allowed_channels = ALLOWED_DIGITAL_W_CHANNELS
-        elif channel_type == "encoder_r_channels":
-            allowed_channels = ALLOWED_ENCODER_R_CHANNELS
-        elif channel_type == "other_r_channels":
-            allowed_channels = ALLOWED_OTHER_R_CHANNELS
-        elif channel_type == "led_w_channels":
-            allowed_channels = ALLOWED_LED_W_CHANNELS
-        else:
-            raise ValueError("Channel type '{}' is invalid".format(channel_type))
-
     def _create_task(self):
         """Start a task reads and writes at fixed intervals"""
 
@@ -224,6 +164,7 @@ cdef class QuanserAero:
         if not self.task_started:
             self._create_task()
             self.task_started = True
+            self.prev_action_time = time.time()
 
         if isinstance(voltages_w, list):
             voltages_w = np.array(voltages_w, dtype=np.float64)
@@ -232,6 +173,16 @@ cdef class QuanserAero:
         assert voltages_w.dtype == np.float64
         for i in range(self.num_analog_w_channels):
             assert -25.0 <= voltages_w[i] <= 25.0 # Operating range
+
+        # current_time = time.time()
+        # if (current_time - self.prev_action_time) > (1 / self.frequency):
+        #     print("Warning: the previous read has been missed.",
+        #         "Current read request time:", current_time,
+        #         ", Previous read time: self.prev_action_time")
+
+        # currents, encoders, others = self._action(voltages_w)
+        # self.prev_action_time = time.time()
+        # return currents, encoders, others
 
         return self._action(voltages_w)
 
@@ -255,3 +206,65 @@ cdef class QuanserAero:
         print_possible_error(result)
 
         return np.asarray(self.currents_r), np.asarray(self.encoder_r_buffer), np.asarray(self.other_r_buffer)
+
+
+cdef class QuanserAero(QuanserWrapper):
+    def __cinit__(self):
+        board_type = "quanser_aero_usb"
+        board_identifier = "0"
+        result = hil.hil_open(board_type, board_identifier, &self.board)
+        print_possible_error(result)
+        if result < 0:
+            raise IOError
+
+    def __init__(self, frequency=100):
+        analog_r_channels  = [0, 1]
+        analog_w_channels  = [0, 1]
+        digital_w_channels = [0, 1]
+        encoder_r_channels = [0, 1, 2, 3]
+        other_r_channels   = [3000, 3001, 3002, 4000, 4001, 4002, 14000, 14001, 14002, 14003]
+        led_w_channels     = [11000, 11001, 11002]
+
+        super(QuanserAero, self).__init__(analog_r_channels=analog_r_channels,
+                                          analog_w_channels=analog_w_channels,
+                                          digital_w_channels=digital_w_channels,
+                                          encoder_r_channels=encoder_r_channels,
+                                          other_r_channels=other_r_channels,
+                                          led_w_channels=led_w_channels,
+                                          frequency=frequency)
+
+    def __dealloc__(self):
+        """Make sure to free the board!"""
+        print("In QuanserAero __dealloc__")
+        hil.hil_close(self.board)
+
+
+cdef class QubeServo2(QuanserWrapper):
+    def __cinit__(self):
+        board_type="qube_servo2_usb"
+        board_identifier="0"
+        result = hil.hil_open(board_type, board_identifier, &self.board)
+        print_possible_error(result)
+
+    def __init__(self, frequency=100):
+        analog_r_channels  = [0]
+        analog_w_channels  = [0]
+        digital_w_channels = [0]
+        encoder_r_channels = [0, 1]
+        other_r_channels   = [14000]
+        led_w_channels     = [11000, 11001, 11002]
+
+        super(QubeServo2, self).__init__(analog_r_channels=analog_r_channels,
+                                         analog_w_channels=analog_w_channels,
+                                         digital_w_channels=digital_w_channels,
+                                         encoder_r_channels=encoder_r_channels,
+                                         other_r_channels=other_r_channels,
+                                         led_w_channels=led_w_channels,
+                                         frequency=frequency)
+
+    def __dealloc__(self):
+        """Make sure to free the board!"""
+        hil.hil_close(self.board)
+
+
+

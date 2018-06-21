@@ -8,7 +8,7 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from gym_brt.qube.envs.QubeServo2 import QubeServo2
+from gym_brt.envs.QuanserWrapper import QubeServo2
 
 
 # theta, alpha: positions, velocities, accelerations

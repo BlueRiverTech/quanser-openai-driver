@@ -8,7 +8,7 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from gym_brt.aero.envs.QuanserAero import QuanserAero
+from gym_brt.envs.QuanserWrapper import QuanserAero
 
 
 # pitch, yaw, gyro, acceleration, current sense
