@@ -3,7 +3,7 @@ Has an OpenAI Gym wrapper for the Quanser Qube Servo 2 and Quanser Aero
 
 
 # Installation
-This was _ONLY_ tested on Ubuntu 16.04 LTS using Python 2.7. <br>
+This was _ONLY_ tested on Ubuntu 16.04 LTS and Ubunbtu 18.04 LTS using Python 2.7. <br>
 To compile the Cython wrapper, you need a to have the Cython package installed (we recommend using virtualenv). <br>
 Cython is not needed once you have the wrapper compiled (only Python). <br>
 
