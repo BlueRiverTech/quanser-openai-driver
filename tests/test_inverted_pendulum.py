@@ -8,23 +8,26 @@ import gym
 
 
 STATE_KEYS = [ 
-        'COS_THETA',
-        'SIN_THETA',
-        'COS_ALPHA',
-        'SIN_ALPHA',
-        'THETA_VELOCITY',
-        'ALPHA_VELOCITY',
+        'COS_THETA         ',
+        'SIN_THETA         ',
+        'COS_ALPHA         ',
+        'SIN_ALPHA         ',
+        'THETA_VELOCITY    ',
+        'ALPHA_VELOCITY    ',
         'THETA_ACCELERATION',
         'ALPHA_ACCELERATION',
-        'TACH0',
-        'SENSE'
+        'TACH0             ',
+        'SENSE             '
         ]
 
 
 def print_info(state, action, reward):
     print("State:")
     for name, val in zip(STATE_KEYS, state):
-        print("\t{}: {}".format(name, val))
+        if val < 0:
+            print("\t{}: {}".format(name, val))
+        else:
+            print("\t{}:  {}".format(name, val))
     print("\nAction: {}".format(action))
     print("Reward: {}".format(reward))
 

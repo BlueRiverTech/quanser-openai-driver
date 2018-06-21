@@ -9,24 +9,27 @@ import time
 
 
 STATE_KEYS = [ 
-        'PITCH',
-        'YAW',
-        'VELOCITY_X',
-        'VELOCITY_Y',
-        'VELOCITY_Z',
+        'PITCH         ',
+        'YAW           ',
+        'VELOCITY_X    ',
+        'VELOCITY_Y    ',
+        'VELOCITY_Z    ',
         'ACCELERATION_X',
         'ACCELERATION_Y',
         'ACCELERATION_Z',
-        'TACH_PITCH',
-        'TACH_YAW',
-        'SENSE0',
-        'SENSE1'
+        'TACH_PITCH    ',
+        'TACH_YAW      ',
+        'SENSE0        ',
+        'SENSE1        '
         ]
 
 def print_info(state, action, reward):
     print("State:")
     for name, val in zip(STATE_KEYS, state):
-        print("\t{}: {}".format(name, val))
+        if val < 0:
+            print("\t{}: {}".format(name, val))
+        else:
+            print("\t{}:  {}".format(name, val))
     print("\nAction: {}".format(action))
     print("Reward: {}".format(reward))
 
