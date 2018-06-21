@@ -11,10 +11,10 @@ register(
 
 register(
     id='Qube-Inverted-Pendulum-v0',
-    entry_point='gym_brt.qube.envs:QubeInvertedPendulumEnv',
+    entry_point='gym_brt.envs:QubeInvertedPendulumEnv',
 )
 
 register(
     id='Qube-Inverted-Pendulum-Sparse-v0',
-    entry_point='gym_brt.qube.envs:QubeInvertedPendulumSparseRewardEnv',
+    entry_point='gym_brt.envs:QubeInvertedPendulumSparseRewardEnv',
 )
