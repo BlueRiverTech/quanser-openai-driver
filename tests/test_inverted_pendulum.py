@@ -8,16 +8,16 @@ import gym
 
 
 STATE_KEYS = [ 
-        'COS_THETA         ',
-        'SIN_THETA         ',
-        'COS_ALPHA         ',
-        'SIN_ALPHA         ',
-        'THETA_VELOCITY    ',
-        'ALPHA_VELOCITY    ',
-        'THETA_ACCELERATION',
-        'ALPHA_ACCELERATION',
-        'TACH0             ',
-        'SENSE             '
+    'COS_THETA         ',
+    'SIN_THETA         ',
+    'COS_ALPHA         ',
+    'SIN_ALPHA         ',
+    'THETA_VELOCITY    ',
+    'ALPHA_VELOCITY    ',
+    'THETA_ACCELERATION',
+    'ALPHA_ACCELERATION',
+    'TACH0             ',
+    'SENSE             '
 ]
 
 

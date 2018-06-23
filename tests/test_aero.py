@@ -9,18 +9,18 @@ import time
 
 
 STATE_KEYS = [ 
-        'PITCH         ',
-        'YAW           ',
-        'VELOCITY_X    ',
-        'VELOCITY_Y    ',
-        'VELOCITY_Z    ',
-        'ACCELERATION_X',
-        'ACCELERATION_Y',
-        'ACCELERATION_Z',
-        'TACH_PITCH    ',
-        'TACH_YAW      ',
-        'SENSE0        ',
-        'SENSE1        '
+    'PITCH         ',
+    'YAW           ',
+    'VELOCITY_X    ',
+    'VELOCITY_Y    ',
+    'VELOCITY_Z    ',
+    'ACCELERATION_X',
+    'ACCELERATION_Y',
+    'ACCELERATION_Z',
+    'TACH_PITCH    ',
+    'TACH_YAW      ',
+    'SENSE0        ',
+    'SENSE1        '
 ]
 
 def print_info(state, action, reward):
