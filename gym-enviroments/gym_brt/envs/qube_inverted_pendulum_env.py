@@ -13,11 +13,11 @@ from gym_brt.envs.QuanserWrapper import QubeServo2
 
 # theta, alpha: positions, velocities, accelerations
 OBSERVATION_HIGH = np.asarray([
-    1, 1, 1, 1, # angles
-    np.pi / 4, np.pi / 4, # velocities
-    np.pi / 4, np.pi / 4, # accelerations
-    4100, # tach0
-    0.2, # sense
+    1, 1, 1, 1,  # angles
+    np.pi / 4, np.pi / 4,  # velocities
+    np.pi / 4, np.pi / 4,  # accelerations
+    4100,  # tach0
+    0.2,  # sense
 ], dtype=np.float64)
 OBSERVATION_LOW = -OBSERVATION_HIGH
 
@@ -28,7 +28,7 @@ ACTION_LOW = -ACTION_HIGH
 WARMUP_STEPS = 100
 
 
-STATE_KEYS = [ 
+STATE_KEYS = [
         'COS_THETA',
         'SIN_THETA',
         'COS_ALPHA',
@@ -39,7 +39,7 @@ STATE_KEYS = [
         'ALPHA_ACCELERATION',
         'TACH0',
         'SENSE'
-        ]
+]
 
 
 def normalize_angle(theta):
@@ -51,7 +51,7 @@ class QubeInvertedPendulumReward(object):
     def __init__(self):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
-            high=ACTION_HIGH, dtype=np.float32) 
+            high=ACTION_HIGH, dtype=np.float32)
 
     def __call__(self, state, action):
         theta_x = state[0]
@@ -63,12 +63,12 @@ class QubeInvertedPendulumReward(object):
         theta_acceleration = state[6]
         alpha_acceleration = state[7]
 
-        theta = np.arctan2(theta_y, theta_x) # arm
-        alpha = np.arctan2(alpha_y, alpha_x) # pole
+        theta = np.arctan2(theta_y, theta_x)  # arm
+        alpha = np.arctan2(alpha_y, alpha_x)  # pole
 
-        cost =  normalize_angle(theta)**4 + \
-                normalize_angle(alpha)**2 + \
-                0.1 * alpha_velocity**2
+        cost = normalize_angle(theta)**4 + \
+            normalize_angle(alpha)**2 + \
+            0.1 * alpha_velocity**2
 
         reward = -cost
         return reward
@@ -78,12 +78,12 @@ class QubeInvertedPendulumEnv(gym.Env):
 
     def __init__(self):
         self.observation_space = spaces.Box(
-                OBSERVATION_LOW, OBSERVATION_HIGH, 
-                dtype=np.float32)
+            OBSERVATION_LOW, OBSERVATION_HIGH,
+            dtype=np.float32)
 
         self.action_space = spaces.Box(
-                ACTION_LOW, ACTION_HIGH, 
-                dtype=np.float32)
+            ACTION_LOW, ACTION_HIGH,
+            dtype=np.float32)
 
         self.reward_fn = QubeInvertedPendulumReward()
 
@@ -115,26 +115,27 @@ class QubeInvertedPendulumEnv(gym.Env):
         return [seed]
 
     def _step(self, action):
-        M_PI = 3.14159
-
-        motor_voltages = np.clip(np.array([action[0]], dtype=np.float64), ACTION_LOW, ACTION_HIGH)
+        motor_voltages = np.clip(np.array([action[0]], dtype=np.float64),
+                                 ACTION_LOW, ACTION_HIGH)
         currents, encoders, others = self.qube.action(motor_voltages)
 
         encoder0 = encoders[0]
         encoder1 = encoders[1] % 2048
-        if (encoder1 < 0):
+        if encoder1 < 0:
             encoder1 = 2048 + encoder1
 
-        theta_next = encoder0 * (-2.0 * M_PI / 2048);
-        alpha_next = encoder1 * (2.0 * M_PI / 2048) - M_PI
+        theta_next = encoder0 * (-2.0 * np.pi / 2048)
+        alpha_next = encoder1 * (2.0 * np.pi / 2048) - np.pi
         self._sense = currents[0]
         self._tach0 = others[0]
 
         theta_velocity_next = normalize_angle(theta_next - self._theta)
         alpha_velocity_next = normalize_angle(alpha_next - self._alpha)
 
-        self._theta_acceleration = normalize_angle(theta_velocity_next - self._theta_velocity)
-        self._alpha_acceleration = normalize_angle(alpha_velocity_next - self._alpha_velocity)
+        self._theta_acceleration = normalize_angle(
+            theta_velocity_next - self._theta_velocity)
+        self._alpha_acceleration = normalize_angle(
+            alpha_velocity_next - self._alpha_velocity)
 
         self._theta_velocity = theta_velocity_next
         self._alpha_velocity = alpha_velocity_next
@@ -218,6 +219,7 @@ def main():
         # Note: to set all encoders and motor voltages to 0, you must call env.close()
         env.close()
     """
+
 
 if __name__ == '__main__':
     main()
