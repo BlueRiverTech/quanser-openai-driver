@@ -89,23 +89,19 @@ cdef class QuanserWrapper:
         """
         # Create a memoryview for currents
         self.currents_r = np.zeros(
-            self.num_analog_r_channels,
-            dtype=np.float64) # t_double is 64 bits
+            self.num_analog_r_channels, dtype=np.float64) # t_double is 64 bits
 
         # Create a memoryview for -ometers
         self.other_r_buffer = np.zeros(
-            self.num_other_r_channels,
-            dtype=np.float64) # t_double is 64 bits
+            self.num_other_r_channels, dtype=np.float64) # t_double is 64 bits
 
         # Create a memoryview for leds
         self.led_w_buffer = np.zeros(
-            self.num_led_w_channels,
-            dtype=np.float64) # t_double is 64 bits
+            self.num_led_w_channels, dtype=np.float64) # t_double is 64 bits
 
         # Set all motor voltages_w to 0
         self.voltages_w = np.zeros(
-            self.num_analog_w_channels,
-            dtype=np.float64) # t_double is 64 bits
+            self.num_analog_w_channels, dtype=np.float64) # t_double is 64 bits
         result = hil.hil_write_analog(
             self.board,
             &self.analog_w_channels[0],
@@ -115,8 +111,7 @@ cdef class QuanserWrapper:
 
         # Set the encoder encoder_r_buffer to 0
         self.encoder_r_buffer = np.zeros(
-            self.num_encoder_r_channels,
-            dtype=np.int32) # t_int32 is 32 bits
+            self.num_encoder_r_channels, dtype=np.int32) # t_int32 is 32 bits
         result = hil.hil_set_encoder_counts(
             self.board,
             &self.encoder_r_channels[0],
@@ -126,8 +121,7 @@ cdef class QuanserWrapper:
 
         # Enables_r all the motors
         self.enables_r = np.ones(
-            self.num_digital_w_channels,
-            dtype=np.int8) # t_bool is char (8 bits)
+            self.num_digital_w_channels, dtype=np.int8) # t_bool is char 8 bits
         result = hil.hil_write_digital(
             self.board,
             &self.digital_w_channels[0],
@@ -143,8 +137,7 @@ cdef class QuanserWrapper:
 
         # Set the motor voltages_w to 0
         self.voltages_w = np.zeros(
-            self.num_analog_w_channels,
-            dtype=np.float64) # t_double is 64 bits
+            self.num_analog_w_channels, dtype=np.float64) # t_double is 64 bits
         hil.hil_write_analog(
             self.board,
             &self.analog_w_channels[0],
@@ -153,8 +146,7 @@ cdef class QuanserWrapper:
 
         # Disable all the motors
         self.enables_r = np.zeros(
-            self.num_digital_w_channels,
-            dtype=np.int8) # t_bool is char (8 bits)
+            self.num_digital_w_channels, dtype=np.int8) # t_bool is char 8 bits
         hil.hil_write_digital(
             self.board,
             &self.digital_w_channels[0],
@@ -249,9 +241,9 @@ cdef class QuanserAero(QuanserWrapper):
         analog_w_channels = [0, 1]
         digital_w_channels = [0, 1]
         encoder_r_channels = [0, 1, 2, 3]
-        other_r_channels  = [3000, 3001, 3002, 4000, 4001, 4002, 14000, 14001, \
+        other_r_channels = [3000, 3001, 3002, 4000, 4001, 4002, 14000, 14001, \
                              14002, 14003]
-        led_w_channels    = [11000, 11001, 11002]
+        led_w_channels = [11000, 11001, 11002]
 
         super(QuanserAero, self).__init__(
             analog_r_channels=analog_r_channels,
@@ -280,8 +272,8 @@ cdef class QubeServo2(QuanserWrapper):
         analog_w_channels = [0]
         digital_w_channels = [0]
         encoder_r_channels = [0, 1]
-        other_r_channels  = [14000]
-        led_w_channels    = [11000, 11001, 11002]
+        other_r_channels = [14000]
+        led_w_channels = [11000, 11001, 11002]
 
         super(QubeServo2, self).__init__(
             analog_r_channels=analog_r_channels,
