@@ -8,17 +8,17 @@ import gym
 
 
 STATE_KEYS = [ 
-        'COS_THETA         ',
-        'SIN_THETA         ',
-        'COS_ALPHA         ',
-        'SIN_ALPHA         ',
-        'THETA_VELOCITY    ',
-        'ALPHA_VELOCITY    ',
-        'THETA_ACCELERATION',
-        'ALPHA_ACCELERATION',
-        'TACH0             ',
-        'SENSE             '
-        ]
+    'COS_THETA         ',
+    'SIN_THETA         ',
+    'COS_ALPHA         ',
+    'SIN_ALPHA         ',
+    'THETA_VELOCITY    ',
+    'ALPHA_VELOCITY    ',
+    'THETA_ACCELERATION',
+    'ALPHA_ACCELERATION',
+    'TACH0             ',
+    'SENSE             '
+]
 
 
 def print_info(state, action, reward):
@@ -67,7 +67,8 @@ def test_env(env_name, action_func=None):
                     break
                 state = next_state
     finally:
-        # Note: to set all encoders and motor voltages to 0, you must call env.close()
+        # Note: to set all encoders and motor voltages to 0, you must call
+        # env.close()
         env.close()
     """
 

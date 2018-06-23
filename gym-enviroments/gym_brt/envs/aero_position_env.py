@@ -3,7 +3,6 @@ from __future__ import division
 from __future__ import print_function
 
 import gym
-import time
 import numpy as np
 
 from gym import spaces
@@ -13,38 +12,40 @@ from gym_brt.envs.QuanserWrapper import QuanserAero
 
 # pitch, yaw, gyro, acceleration, current sense
 OBSERVATION_HIGH = np.asarray([
-    2048, # pitch
-    np.inf, # yaw (technically unlimited...)
-    np.pi / 4, np.pi / 4, np.pi / 4, # gyro/velocity (x,y,z)
-    np.pi / 4, np.pi / 4, np.pi / 4, # acceleration (x,y,z)
-    4100, # tach for pitch
-    4100, # tach for yaw
-    2., 2., # peak current
+    2048,  # pitch
+    np.inf,  # yaw (technically unlimited...)
+    np.pi / 4, np.pi / 4, np.pi / 4,  # gyro/velocity (x,y,z)
+    np.pi / 4, np.pi / 4, np.pi / 4,  # acceleration (x,y,z)
+    4100,  # tach for pitch
+    4100,  # tach for yaw
+    2., 2.,  # peak current
 ], dtype=np.float64)
 
 OBSERVATION_LOW = -OBSERVATION_HIGH
 
 MAX_MOTOR_VOLTAGE = 15.0
-ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE, MAX_MOTOR_VOLTAGE], dtype=np.float64)
+ACTION_HIGH = np.asarray(
+    [MAX_MOTOR_VOLTAGE, MAX_MOTOR_VOLTAGE],
+    dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
 
 WARMUP_STEPS = 100
 
 
-STATE_KEYS = [ 
-        'PITCH',
-        'YAW',
-        'VELOCITY_X',
-        'VELOCITY_Y',
-        'VELOCITY_Z',
-        'ACCELERATION_X',
-        'ACCELERATION_Y',
-        'ACCELERATION_Z',
-        'TACH_PITCH',
-        'TACH_YAW',
-        'SENSE0',
-        'SENSE1'
-        ]
+STATE_KEYS = [
+    'PITCH',
+    'YAW',
+    'VELOCITY_X',
+    'VELOCITY_Y',
+    'VELOCITY_Z',
+    'ACCELERATION_X',
+    'ACCELERATION_Y',
+    'ACCELERATION_Z',
+    'TACH_PITCH',
+    'TACH_YAW',
+    'SENSE0',
+    'SENSE1'
+]
 
 
 def normalize_angle(theta):
@@ -56,7 +57,7 @@ class AeroPositionReward(object):
     def __init__(self):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
-            high=ACTION_HIGH, dtype=np.float32) 
+            high=ACTION_HIGH, dtype=np.float32)
 
     def __call__(self, state, action):
         pitch = state[0]
@@ -69,13 +70,13 @@ class AeroPositionReward(object):
         acceleration_z = state[6]
 
         cost = pitch**2 + \
-               yaw**2 + \
-               0.01 * velocity_x**2 + \
-               0.01 * velocity_y**2 + \
-               0.01 * velocity_z**2 + \
-               0.01 * acceleration_x**2 + \
-               0.01 * acceleration_y**2 + \
-               0.01 * acceleration_z**2
+            yaw**2 + \
+            0.01 * velocity_x**2 + \
+            0.01 * velocity_y**2 + \
+            0.01 * velocity_z**2 + \
+            0.01 * acceleration_x**2 + \
+            0.01 * acceleration_y**2 + \
+            0.01 * acceleration_z**2
 
         reward = -cost
         return reward
@@ -85,12 +86,12 @@ class AeroPositionEnv(gym.Env):
 
     def __init__(self):
         self.observation_space = spaces.Box(
-                OBSERVATION_LOW, OBSERVATION_HIGH, 
-                dtype=np.float32)
+            OBSERVATION_LOW, OBSERVATION_HIGH,
+            dtype=np.float32)
 
         self.action_space = spaces.Box(
-                ACTION_LOW, ACTION_HIGH, 
-                dtype=np.float32)
+            ACTION_LOW, ACTION_HIGH,
+            dtype=np.float32)
 
         self.reward_fn = AeroPositionReward()
 
@@ -122,11 +123,13 @@ class AeroPositionEnv(gym.Env):
         return [seed]
 
     def _step(self, action):
-        motor_voltages = np.clip(np.array([action[0], action[1]], dtype=np.float64), ACTION_LOW, ACTION_HIGH)
+        motor_voltages = np.clip(
+            np.array([action[0], action[1]], dtype=np.float64),
+            ACTION_LOW, ACTION_HIGH)
         currents, encoders, others = self.aero.action(motor_voltages)
 
-        self._pitch = encoders[2] * ((2 * np.pi) / 2048.0) # In rads
-        self._yaw   = encoders[3] * ((2 * np.pi) / 4096.0) # In rads
+        self._pitch = encoders[2] * ((2 * np.pi) / 2048.0)  # In rads
+        self._yaw = encoders[3] * ((2 * np.pi) / 4096.0)  # In rads
 
         self._pitch = 0
         self._yaw = 0
@@ -157,7 +160,7 @@ class AeroPositionEnv(gym.Env):
         return state
 
     def reset(self):
-        # step once with no action to init state
+        # Step once with no action to init state
         if WARMUP_STEPS > 0:
             for i in range(WARMUP_STEPS):
                 action = np.zeros(
@@ -212,9 +215,11 @@ def main():
                     break
                 state = next_state
     finally:
-        # Note: to set all encoders and motor voltages to 0, you must call env.close()
+        # Note: to set all encoders and motor voltages to 0, you must call 
+        # env.close()
         env.close()
     """
+
 
 if __name__ == '__main__':
     main()

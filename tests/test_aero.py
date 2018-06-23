@@ -9,19 +9,19 @@ import time
 
 
 STATE_KEYS = [ 
-        'PITCH         ',
-        'YAW           ',
-        'VELOCITY_X    ',
-        'VELOCITY_Y    ',
-        'VELOCITY_Z    ',
-        'ACCELERATION_X',
-        'ACCELERATION_Y',
-        'ACCELERATION_Z',
-        'TACH_PITCH    ',
-        'TACH_YAW      ',
-        'SENSE0        ',
-        'SENSE1        '
-        ]
+    'PITCH         ',
+    'YAW           ',
+    'VELOCITY_X    ',
+    'VELOCITY_Y    ',
+    'VELOCITY_Z    ',
+    'ACCELERATION_X',
+    'ACCELERATION_Y',
+    'ACCELERATION_Z',
+    'TACH_PITCH    ',
+    'TACH_YAW      ',
+    'SENSE0        ',
+    'SENSE1        '
+]
 
 def print_info(state, action, reward):
     print("State:")
@@ -71,7 +71,8 @@ def test_env(env_name, action_func=None):
                     break
                 state = next_state
     finally:
-        # Note: to set all encoders and motor voltages to 0, you must call env.close()
+        # Note: to set all encoders and motor voltages to 0, you must call 
+        # env.close()
         env.close()
     """
 

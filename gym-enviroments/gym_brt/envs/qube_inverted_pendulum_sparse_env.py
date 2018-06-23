@@ -20,8 +20,7 @@ class QubeInvertedPendulumSparseReward(object):
 
     def __init__(self):
         self.target_space = spaces.Box(
-            low=ACTION_LOW,
-            high=ACTION_HIGH, dtype=np.float32) 
+            low=ACTION_LOW, high=ACTION_HIGH, dtype=np.float32)
 
     def __call__(self, state, action):
         theta_x = state[0]
@@ -33,8 +32,8 @@ class QubeInvertedPendulumSparseReward(object):
         theta_acceleration = state[6]
         alpha_acceleration = state[7]
 
-        theta = np.arctan2(theta_y, theta_x) # arm
-        alpha = np.arctan2(alpha_y, alpha_x) # arm
+        theta = np.arctan2(theta_y, theta_x)  # arm
+        alpha = np.arctan2(alpha_y, alpha_x)  # arm
 
         cost = 0
 
@@ -48,8 +47,8 @@ class QubeInvertedPendulumSparseReward(object):
 
         reward = -cost
         return reward
-        
-        
+
+
 class QubeInvertedPendulumSparseRewardEnv(QubeInvertedPendulumEnv):
     def __init__(self):
         super(QubeInvertedPendulumSparseRewardEnv, self).__init__()
