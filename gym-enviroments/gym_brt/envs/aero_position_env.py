@@ -131,8 +131,6 @@ class AeroPositionEnv(gym.Env):
         self._pitch = encoders[2] * ((2 * np.pi) / 2048.0)  # In rads
         self._yaw = encoders[3] * ((2 * np.pi) / 4096.0)  # In rads
 
-        self._pitch = 0
-        self._yaw = 0
         self._velocity_x = others[0]
         self._velocity_y = others[1]
         self._velocity_z = others[2]
