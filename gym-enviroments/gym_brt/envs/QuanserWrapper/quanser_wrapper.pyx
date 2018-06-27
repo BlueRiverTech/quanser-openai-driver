@@ -45,7 +45,7 @@ cdef class QuanserWrapper:
     cdef float _last_read_time
     cdef bint _task_started, _new_state_read
     cdef object _bg_thread, _lock
-    cdef int _num_samples_missed
+    cdef int _num_samples_read_since_action
 
     def __init__(self,
                  analog_r_channels,
@@ -87,7 +87,7 @@ cdef class QuanserWrapper:
         self.frequency = frequency
         self._task_started = False
         self._new_state_read = False
-        self._num_samples_missed = 0
+        self._num_samples_read_since_action = 0
         self._bg_thread = Thread(target=self.run_reader_writer, args=())
         self._last_read_time = 0
 
@@ -187,9 +187,7 @@ cdef class QuanserWrapper:
             raise ValueError("Could not start hil task")
 
         self._task_started = True
-        print("BEFORE")
         self._bg_thread.start()
-        print("Task has started, lock is locked:", self._lock.locked())
 
     def _stop_task(self):
         if self._task_started:
@@ -215,11 +213,8 @@ cdef class QuanserWrapper:
         cdef qt.t_double[::] temp_other_r_buffer = np.empty_like(
             self.other_r_buffer)
 
-        print("First run, lock is locked:", self._lock.locked())
-        print("Task has started:", self._task_started)
         while self._task_started:
             # First read using task_read (blocking call that enforces timing)
-            print("About to read")
             samples_read = hil.hil_task_read(
                 self.task,
                 1, # Number of samples to read
@@ -230,20 +225,12 @@ cdef class QuanserWrapper:
             if samples_read < 0:
                 print_possible_error(samples_read)
 
-
-            # print("Before grabbing lock in run_RW")
-            # print("run_RW: trying to grab lock for state update")
-            # if self._lock.locked():
-            #     print("Lock is locked")
-            # if self._num_samples_missed > 100:
-            #     print("Num samples missed: ", self._num_samples_missed)
-
             with self._lock:
-                # print("run_RW: grabed! lock for state update")
-                # print("After grabbing lock in run_RW")
+                # Copy the temp state buffers into the quanser wrapper buffers
                 self.currents_r = temp_currents_r
                 self.encoder_r_buffer = temp_encoder_r_buffer
                 self.other_r_buffer = temp_other_r_buffer
+
                 # Then write voltages_w calculated for previous time step
                 result_write = hil.hil_write_analog(
                     self.board,
@@ -254,21 +241,12 @@ cdef class QuanserWrapper:
                     print_possible_error(result_write)
 
                 self._new_state_read = True
-                self._num_samples_missed += 1
-                print("Num samples missed is: ", self._num_samples_missed)
-                print("period: ", 1 / self.frequency)
-                print("\n\n Time of the write is: {}\n\n".format(time.time()))# - self._last_read_time))
-
-                self._last_read_time = time.time()
-                if self._num_samples_missed > 1:
-                    print("\n\n\n********************************************************************\
-                        \nBuffer has overflowed\n\n\n")
+                self._num_samples_read_since_action += 1
 
             time.sleep(0.1 / self.frequency)
 
     def action(self, voltages_w):
-        """Make sure you get safe data!"""
-        
+        """Make sure you get safe data!"""    
         # If it's the first time running action, then start the background r/w 
         # task
         if not self._task_started:
@@ -282,32 +260,35 @@ cdef class QuanserWrapper:
         for i in range(self.num_analog_w_channels):
             assert -25.0 <= voltages_w[i] <= 25.0 # Operating range
 
+        self._action(voltages_w)
+        self._action(voltages_w)
+        self._action(voltages_w)
         return self._action(voltages_w)
 
     def _action(self,
                 np.ndarray[qt.t_double, ndim=1, mode="c"] voltages_w not None):
         """Perform actions on the device (voltages_w must always be ndarray!)"""
 
-        # print("ACTION: lock is locked:", self._lock.locked())
-        print("Action: Want to update voltages_w")
         with self._lock:
-            # print("Action: lock to update voltages")
+            # Print warning if buffer read has been missed
+            if self._num_samples_read_since_action > 1:
+                print("Warning:", self._num_samples_read_since_action - 1,
+                      "samples have been missed since last env step")
+
+            # Update the action in the quanser wrapper buffer
             self.voltages_w = voltages_w.copy()
 
         while True:
-            num_attempts = 0
+            # Make sure to get the most recent state from the background reader
+            time.sleep(0.1 / self.frequency)
             with self._lock:
-                num_attempts += 1
                 if self._new_state_read:
                     currents_r = np.asarray(self.currents_r).copy()
                     encoder_r_buffer = np.asarray(self.encoder_r_buffer).copy()
                     other_r_buffer = np.asarray(self.other_r_buffer).copy()
-                    self._num_samples_missed = 0
+                    self._num_samples_read_since_action = 0
                     self._new_state_read = False
-                    print("\n\nNum attempts is: {}\n\n".format(num_attempts))
                     break
-                # time.sleep(0.1 / self.frequency)
-
         return currents_r, encoder_r_buffer, other_r_buffer
 
 
