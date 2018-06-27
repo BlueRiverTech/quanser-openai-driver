@@ -67,9 +67,9 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
         t_uint32 num_channels,
         const t_int32 buffer[])
     t_error hil_write_analog(
-        t_card card
-        const t_uint32 analog_channels[]
-        t_uint32 num_channels
+        t_card card,
+        const t_uint32 analog_channels[],
+        t_uint32 num_channels,
         const t_double buffer[])
     t_error hil_write_digital(
         t_card card,
