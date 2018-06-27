@@ -6,6 +6,7 @@ cimport hil
 
 from gym_brt.envs.QuanserWrapper.helpers.error_codes import print_possible_error
 
+from threading import Thread, Lock
 import numpy as np
 import time
 
@@ -14,8 +15,6 @@ cdef class QuanserWrapper:
     cdef hil.t_card  board
     cdef hil.t_error result
     cdef hil.t_task  task
-
-    cdef bint task_started
 
     cdef qt.t_uint32[::] analog_r_channels
     cdef qt.t_uint32 num_analog_r_channels
@@ -41,7 +40,12 @@ cdef class QuanserWrapper:
     cdef qt.t_uint32 num_led_w_channels
     cdef qt.t_double[::] led_w_buffer
 
-    cdef qt.t_double frequency, period, prev_action_time
+    cdef qt.t_double frequency, period
+
+
+    cdef bint _task_started, _new_state_read
+    cdef object _bg_thread, _lock
+    cdef int _num_samples_missed
 
     def __init__(self,
                  analog_r_channels,
@@ -79,8 +83,12 @@ cdef class QuanserWrapper:
         self.other_r_channels = np.array(other_r_channels, dtype=np.uint32)
         self.led_w_channels = np.array(led_w_channels, dtype=np.uint32)
 
+        self._lock = Lock()
         self.frequency = frequency
-        self.task_started = False
+        self._task_started = False
+        self._new_state_read = False
+        self._num_samples_missed = 0
+        self._bg_thread = Thread(target=self.run_reader_writer, args=())
 
     def __enter__(self):
         """
@@ -155,12 +163,11 @@ cdef class QuanserWrapper:
 
     def _create_task(self):
         """Start a task reads and writes at fixed intervals"""
-
         result =  hil.hil_task_create_reader(
             self.board,
-            1000, # The size of the internal buffer (making this >> 1 
-                  # prevents error 111 but may also occasionally miss a read
-                  # of state)
+            1,  # The size of the internal buffer (making this >> 1 
+                # prevents error 111 but may also occasionally miss a read
+                # of state)
             &self.analog_r_channels[0], self.num_analog_r_channels,
             &self.encoder_r_channels[0], self.num_encoder_r_channels,
             NULL, 0,
@@ -175,21 +182,87 @@ cdef class QuanserWrapper:
             self.frequency,
             -1) # Read continuously 
         print_possible_error(result)
+        if result < 0:
+            raise ValueError("Could not start hil task")
+
+        self._task_started = True
+        print("BEFORE")
+        self._bg_thread.start()
+        print("Task has started, lock is locked:", self._lock.locked())
 
     def _stop_task(self):
-        if self.task_started:
+        if self._task_started:
+            self._task_started = False
+            self._bg_thread.join()
             hil.hil_task_flush(self.task)
             hil.hil_task_stop(self.task)
             hil.hil_task_delete(self.task)
+
+    def run_reader_writer(self):
+        """Helper function to pass as a python callable to `Thread`"""
+        self._run_reader_writer()
+
+    cdef _run_reader_writer(self):
+        """Run background thread that continously updates QuanserWrapper's
+        internal buffers with the newest state at a sample instant, and writes
+        the current action buffer to the board.
+        """
+        cdef hil.t_error samples_read, result_write
+        cdef qt.t_double[::] temp_currents_r = np.empty_like(self.currents_r)
+        cdef qt.t_int32[::] temp_encoder_r_buffer = np.empty_like(
+            self.encoder_r_buffer)
+        cdef qt.t_double[::] temp_other_r_buffer = np.empty_like(
+            self.other_r_buffer)
+
+        print("First run, lock is locked:", self._lock.locked())
+        while self._task_started:
+            # First read using task_read (blocking call that enforces timing)
+            # print("About to read")
+            samples_read = hil.hil_task_read(
+                self.task,
+                1, # Number of samples to read
+                &temp_currents_r[0],
+                &temp_encoder_r_buffer[0],
+                NULL,
+                &temp_other_r_buffer[0])
+
+            # print("Before grabbing lock in run_RW")
+            # print("run_RW: trying to grab lock for state update")
+            if self._lock.locked():
+                print("Lock is locked")
+            if self._num_samples_missed > 100:
+                print("Num samples missed: ", self._num_samples_missed)
+
+            with self._lock:
+                # print("run_RW: grabed! lock for state update")
+                # print("After grabbing lock in run_RW")
+                self.currents_r = temp_currents_r
+                self.encoder_r_buffer = temp_encoder_r_buffer
+                self.other_r_buffer = temp_other_r_buffer
+                # Then write voltages_w calculated for previous time step
+                result_write = hil.hil_write_analog(
+                    self.board,
+                    &self.analog_w_channels[0],
+                    self.num_analog_w_channels,
+                    &self.voltages_w[0])
+
+                self._new_state_read = True
+                self._num_samples_missed += 1
+                # if self._num_samples_missed > 1:
+                    # print("Buffer has overflowed")
+            # print("Updated state")
+            # print("run_RW returned lock")
+
+            print_possible_error(samples_read)
+            print_possible_error(result_write)
 
     def action(self, voltages_w):
         """Make sure you get safe data!"""
         
         # If it's the first time running action, then start the background r/w 
         # task
-        if not self.task_started:
+        if not self._task_started:
             self._create_task()
-            self.task_started = True
 
         if isinstance(voltages_w, list):
             voltages_w = np.array(voltages_w, dtype=np.float64)
@@ -204,27 +277,20 @@ cdef class QuanserWrapper:
     def _action(self,
                 np.ndarray[qt.t_double, ndim=1, mode="c"] voltages_w not None):
         """Perform actions on the device (voltages_w must always be ndarray!)"""
-        # First read using task_read (blocking call that enforces timing)
-        samples = hil.hil_task_read(
-            self.task,
-            1, # Number of samples to read
-            &self.currents_r[0],
-            &self.encoder_r_buffer[0],
-            NULL,
-            &self.other_r_buffer[0])
-        print_possible_error(samples)
 
-        # Then write voltages_w calculated for previous time step
-        self.voltages_w = voltages_w
-        result = hil.hil_write_analog(
-            self.board,
-            &self.analog_w_channels[0],
-            self.num_analog_w_channels,
-            &self.voltages_w[0])
-        print_possible_error(result)
+        # print("ACTION: lock is locked:", self._lock.locked())
+        print("Action: Want to update voltages_w")
+        # time.time
+        # with self._lock:
+        # print("Action: lock to update voltages")
+        self.voltages_w = voltages_w.copy()
+        currents_r = np.asarray(self.currents_r).copy()
+        encoder_r_buffer = np.asarray(self.encoder_r_buffer).copy()
+        other_r_buffer = np.asarray(self.other_r_buffer).copy()
+        self._num_samples_missed = 0
+        self._new_state_read = False
 
-        return np.asarray(self.currents_r), np.asarray(self.encoder_r_buffer), \
-            np.asarray(self.other_r_buffer)
+        return currents_r, encoder_r_buffer, other_r_buffer
 
 
 cdef class QuanserAero(QuanserWrapper):
@@ -287,6 +353,4 @@ cdef class QubeServo2(QuanserWrapper):
     def __dealloc__(self):
         """Make sure to free the board!"""
         hil.hil_close(self.board)
-
-
 
