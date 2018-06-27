@@ -42,7 +42,7 @@ cdef class QuanserWrapper:
 
     cdef qt.t_double frequency, period
 
-
+    cdef float _last_read_time
     cdef bint _task_started, _new_state_read
     cdef object _bg_thread, _lock
     cdef int _num_samples_missed
@@ -89,6 +89,7 @@ cdef class QuanserWrapper:
         self._new_state_read = False
         self._num_samples_missed = 0
         self._bg_thread = Thread(target=self.run_reader_writer, args=())
+        self._last_read_time = 0
 
     def __enter__(self):
         """
@@ -215,9 +216,10 @@ cdef class QuanserWrapper:
             self.other_r_buffer)
 
         print("First run, lock is locked:", self._lock.locked())
+        print("Task has started:", self._task_started)
         while self._task_started:
             # First read using task_read (blocking call that enforces timing)
-            # print("About to read")
+            print("About to read")
             samples_read = hil.hil_task_read(
                 self.task,
                 1, # Number of samples to read
@@ -225,13 +227,16 @@ cdef class QuanserWrapper:
                 &temp_encoder_r_buffer[0],
                 NULL,
                 &temp_other_r_buffer[0])
+            if samples_read < 0:
+                print_possible_error(samples_read)
+
 
             # print("Before grabbing lock in run_RW")
             # print("run_RW: trying to grab lock for state update")
-            if self._lock.locked():
-                print("Lock is locked")
-            if self._num_samples_missed > 100:
-                print("Num samples missed: ", self._num_samples_missed)
+            # if self._lock.locked():
+            #     print("Lock is locked")
+            # if self._num_samples_missed > 100:
+            #     print("Num samples missed: ", self._num_samples_missed)
 
             with self._lock:
                 # print("run_RW: grabed! lock for state update")
@@ -245,16 +250,21 @@ cdef class QuanserWrapper:
                     &self.analog_w_channels[0],
                     self.num_analog_w_channels,
                     &self.voltages_w[0])
+                if result_write < 0:
+                    print_possible_error(result_write)
 
                 self._new_state_read = True
                 self._num_samples_missed += 1
-                # if self._num_samples_missed > 1:
-                    # print("Buffer has overflowed")
-            # print("Updated state")
-            # print("run_RW returned lock")
+                print("Num samples missed is: ", self._num_samples_missed)
+                print("period: ", 1 / self.frequency)
+                print("\n\n Time of the write is: {}\n\n".format(time.time()))# - self._last_read_time))
 
-            print_possible_error(samples_read)
-            print_possible_error(result_write)
+                self._last_read_time = time.time()
+                if self._num_samples_missed > 1:
+                    print("\n\n\n********************************************************************\
+                        \nBuffer has overflowed\n\n\n")
+
+            time.sleep(0.1 / self.frequency)
 
     def action(self, voltages_w):
         """Make sure you get safe data!"""
@@ -280,15 +290,23 @@ cdef class QuanserWrapper:
 
         # print("ACTION: lock is locked:", self._lock.locked())
         print("Action: Want to update voltages_w")
-        # time.time
-        # with self._lock:
-        # print("Action: lock to update voltages")
-        self.voltages_w = voltages_w.copy()
-        currents_r = np.asarray(self.currents_r).copy()
-        encoder_r_buffer = np.asarray(self.encoder_r_buffer).copy()
-        other_r_buffer = np.asarray(self.other_r_buffer).copy()
-        self._num_samples_missed = 0
-        self._new_state_read = False
+        with self._lock:
+            # print("Action: lock to update voltages")
+            self.voltages_w = voltages_w.copy()
+
+        while True:
+            num_attempts = 0
+            with self._lock:
+                num_attempts += 1
+                if self._new_state_read:
+                    currents_r = np.asarray(self.currents_r).copy()
+                    encoder_r_buffer = np.asarray(self.encoder_r_buffer).copy()
+                    other_r_buffer = np.asarray(self.other_r_buffer).copy()
+                    self._num_samples_missed = 0
+                    self._new_state_read = False
+                    print("\n\nNum attempts is: {}\n\n".format(num_attempts))
+                    break
+                # time.sleep(0.1 / self.frequency)
 
         return currents_r, encoder_r_buffer, other_r_buffer
 
