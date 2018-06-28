@@ -89,19 +89,19 @@ cdef class QuanserWrapper:
         """
         # Create a memoryview for currents
         self.currents_r = np.zeros(
-            self.num_analog_r_channels, dtype=np.float64) # t_double is 64 bits
+            self.num_analog_r_channels, dtype=np.float64)  # t_double is 64 bits
 
         # Create a memoryview for -ometers
         self.other_r_buffer = np.zeros(
-            self.num_other_r_channels, dtype=np.float64) # t_double is 64 bits
+            self.num_other_r_channels, dtype=np.float64)  # t_double is 64 bits
 
         # Create a memoryview for leds
         self.led_w_buffer = np.zeros(
-            self.num_led_w_channels, dtype=np.float64) # t_double is 64 bits
+            self.num_led_w_channels, dtype=np.float64)  # t_double is 64 bits
 
         # Set all motor voltages_w to 0
         self.voltages_w = np.zeros(
-            self.num_analog_w_channels, dtype=np.float64) # t_double is 64 bits
+            self.num_analog_w_channels, dtype=np.float64)  # t_double is 64 bits
         result = hil.hil_write_analog(
             self.board,
             &self.analog_w_channels[0],
@@ -111,7 +111,7 @@ cdef class QuanserWrapper:
 
         # Set the encoder encoder_r_buffer to 0
         self.encoder_r_buffer = np.zeros(
-            self.num_encoder_r_channels, dtype=np.int32) # t_int32 is 32 bits
+            self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
         result = hil.hil_set_encoder_counts(
             self.board,
             &self.encoder_r_channels[0],
@@ -121,7 +121,7 @@ cdef class QuanserWrapper:
 
         # Enables_r all the motors
         self.enables_r = np.ones(
-            self.num_digital_w_channels, dtype=np.int8) # t_bool is char 8 bits
+            self.num_digital_w_channels, dtype=np.int8)  # t_bool is char 8 bits
         result = hil.hil_write_digital(
             self.board,
             &self.digital_w_channels[0],
@@ -137,7 +137,7 @@ cdef class QuanserWrapper:
 
         # Set the motor voltages_w to 0
         self.voltages_w = np.zeros(
-            self.num_analog_w_channels, dtype=np.float64) # t_double is 64 bits
+            self.num_analog_w_channels, dtype=np.float64)  # t_double is 64 bits
         hil.hil_write_analog(
             self.board,
             &self.analog_w_channels[0],
@@ -146,12 +146,14 @@ cdef class QuanserWrapper:
 
         # Disable all the motors
         self.enables_r = np.zeros(
-            self.num_digital_w_channels, dtype=np.int8) # t_bool is char 8 bits
+            self.num_digital_w_channels, dtype=np.int8)  # t_bool is char 8 bits
         hil.hil_write_digital(
             self.board,
             &self.digital_w_channels[0],
             self.num_digital_w_channels,
             &self.enables_r[0])
+
+        hil.hil_close(self.board)  # Safely close the board
 
     def _create_task(self):
         """Start a task reads and writes at fixed intervals"""
@@ -234,7 +236,7 @@ cdef class QuanserAero(QuanserWrapper):
         result = hil.hil_open(board_type, board_identifier, &self.board)
         print_possible_error(result)
         if result < 0:
-            raise IOError
+            raise IOError("Board could not be opened.")
 
     def __init__(self, frequency=100):
         analog_r_channels = [0, 1]
@@ -254,11 +256,6 @@ cdef class QuanserAero(QuanserWrapper):
             led_w_channels=led_w_channels,
             frequency=frequency)
 
-    def __dealloc__(self):
-        """Make sure to free the board!"""
-        print("In QuanserAero __dealloc__")
-        hil.hil_close(self.board)
-
 
 cdef class QubeServo2(QuanserWrapper):
     def __cinit__(self):
@@ -266,6 +263,8 @@ cdef class QubeServo2(QuanserWrapper):
         board_identifier="0"
         result = hil.hil_open(board_type, board_identifier, &self.board)
         print_possible_error(result)
+        if result < 0:
+            raise IOError("Board could not be opened.")
 
     def __init__(self, frequency=100):
         analog_r_channels = [0]
@@ -283,10 +282,3 @@ cdef class QubeServo2(QuanserWrapper):
             other_r_channels=other_r_channels,
             led_w_channels=led_w_channels,
             frequency=frequency)
-
-    def __dealloc__(self):
-        """Make sure to free the board!"""
-        hil.hil_close(self.board)
-
-
-
