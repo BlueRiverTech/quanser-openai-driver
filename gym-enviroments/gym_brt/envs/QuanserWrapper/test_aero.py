@@ -106,4 +106,4 @@ def test_aero_control():
 
 
 if __name__ == '__main__':
-    test_py_control()
+    test_aero_control()

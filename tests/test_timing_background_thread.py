@@ -67,11 +67,23 @@ def test_env(env_name,
 
     with env_name() as env:
         ctrl_sys = controller(env)
+        t = time.time()
         for episode in range(num_episodes):
             state = env.reset()
             for step in range(num_steps):
+                print("\nStep:")
+                # Calculate the next action to do using some control system
                 action = ctrl_sys.action(state)
-                state, reward, done, _ = env.step(action)
+
+                x = 0.09 * np.random.rand()
+                time.sleep(x)
+                print("Sleeping:", x, "seconds")
+
+                next_state, reward, done, _ = env.step(action)
+
+                print("Time since last env step: {}".format(time.time() - t))
+                t = time.time()
+
                 if done:
                     break
                 if state_keys is not None:
