@@ -44,26 +44,29 @@ def test_py_control():
             encoder1 = encoders[1] % 2048
             if (encoder1 < 0):
                 encoder1 = 2048 + encoder1
-            theta = encoder0 * (-2.0 * M_PI / 2048);
+            theta = encoder0 * (-2.0 * M_PI / 2048)
             alpha = encoder1 * (2.0 * M_PI / 2048) - M_PI
-            currentSense = currents[0]
+            current_sense = currents[0]
 
             print_state(currents, encoders, others)
 
             # Start of Custom Code for controller
-            # if the pendulum is within +/-30 degrees of upright, enable balance control
+            # if the pendulum is within +/-30 degrees of upright, enable balance
+            # control
             if np.abs(alpha) <= (30.0 * M_PI / 180.0):
                 # transfer function = 50s/(s+50)
                 # z-transform at 1ms = (50z - 50)/(z-0.9512)
                 theta_n = -theta
-                theta_dot = (50.0 * theta_n) - (50.0 * theta_n_k1) + (0.9512 * theta_dot_k1)
+                theta_dot = (50.0 * theta_n) - \
+                    (50.0 * theta_n_k1) + (0.9512 * theta_dot_k1)
                 theta_n_k1 = theta_n
                 theta_dot_k1 = theta_dot
 
                 # transfer function = 50s/(s+50)
                 # z-transform at 1ms = (50z - 50)/(z-0.9512)
                 alpha_n = -alpha
-                alpha_dot = (50.0 * alpha_n) - (50.0 * alpha_n_k1) + (0.9512 * alpha_dot_k1)
+                alpha_dot = (50.0 * alpha_n) - \
+                    (50.0 * alpha_n_k1) + (0.9512 * alpha_dot_k1)
                 alpha_n_k1 = alpha_n
                 alpha_dot_k1 = alpha_dot
 
@@ -72,16 +75,17 @@ def test_py_control():
                 kd_theta = -2.0
                 kp_alpha = -30.0
                 kd_alpha = 2.5
-                motor_voltage = (theta * kp_theta) + (theta_dot * kd_theta) + (alpha * kp_alpha) + (alpha_dot * kd_alpha)
+                motor_voltage = (theta * kp_theta) + (theta_dot * kd_theta) + \
+                    (alpha * kp_alpha) + (alpha_dot * kd_alpha)
 
                 # set the saturation limit to +/- 15V
-                if (motor_voltage > 15.0):
-                  motor_voltage = 15.0
-                elif (motor_voltage < -15.0):
-                  motor_voltage = -15.0
+                if motor_voltage > 15.0:
+                    motor_voltage = 15.0
+                elif motor_voltage < -15.0:
+                    motor_voltage = -15.0
 
                 # invert for positive CCW
-                motor_voltage = -motor_voltage;
+                motor_voltage = -motor_voltage
             else:
                 motor_voltage = 0
             # End of Pendulum Code
