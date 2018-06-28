@@ -192,31 +192,7 @@ def main():
             state = env.reset()
             for step in range(num_steps):
                 action = env.action_space.sample()
-                next_state, reward, done, _ = env.step(action)
-                if done:
-                    break
-                state = next_state
-
-    """
-    # Another way to run the aero enviroment
-    env = AeroPositionEnv()
-
-    num_episodes = 10
-    num_steps = 250
-    try:
-        for episode in range(num_episodes):
-            state = env.reset()
-            for step in range(num_steps):
-                action = env.action_space.sample()
-                next_state, reward, done, _ = env.step(action)
-                if done:
-                    break
-                state = next_state
-    finally:
-        # Note: to set all encoders and motor voltages to 0, you must call 
-        # env.close()
-        env.close()
-    """
+                state, reward, done, _ = env.step(action)
 
 
 if __name__ == '__main__':

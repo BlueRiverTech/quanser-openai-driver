@@ -17,6 +17,7 @@ from control import \
         AeroClassicControl, \
         QubeHoldInvetedClassicControl
 
+
 STATE_KEYS_AERO = [ 
     'PITCH         ',
     'YAW           ',
@@ -64,16 +65,15 @@ def test_env(env_name,
              num_steps=250,
              state_keys=None):
 
-    with gym.make(env_name) as env:
+    with env_name() as env:
         c = controller(env)
         for episode in range(num_episodes):
             state = env.reset()
             for step in range(num_steps):
                 action = c.action(state)
-                next_state, reward, done, _ = env.step(action)
+                state, reward, done, _ = env.step(action)
                 if done:
                     break
-                state = next_state
                 if state_keys is not None:
                     print_info(state_keys, state, action, reward)
 
@@ -85,10 +85,9 @@ def test_env(env_name,
             state = env.reset()
             for step in range(num_steps):
                 action = action_func(state)
-                next_state, reward, done, _ = env.step(action)
+                state, reward, done, _ = env.step(action)
                 if done:
                     break
-                state = next_state
                 if state_keys is not None:
                     print_info(state_keys, state, action, reward)
     finally:
@@ -98,21 +97,17 @@ def test_env(env_name,
     """
 
 
-if __name__ == '__main__':
-    # Enviroment vars
-    state_keys = {
-        'Aero-Position-v0': STATE_KEYS_AERO,
-        'Qube-Inverted-Pendulum-v0': STATE_KEYS_QUBE,
-        'Qube-Inverted-Pendulum-Sparse-v0': STATE_KEYS_QUBE
-    }
-    allowed_envs = list(state_keys.keys())
-
+def main():
     # Parse command line args
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--env',
-        default='Aero-Position-v0',
-        choices=allowed_envs,
+        default='AeroPositionEnv',
+        choices=[
+            'AeroPositionEnv',
+            'QubeInvertedPendulumEnv',
+            'QubeInvertedPendulumSparseRewardEnv'
+        ],
         help='Enviroment to run.')
     parser.add_argument(
         '--control',
@@ -121,12 +116,30 @@ if __name__ == '__main__':
         help='Select what type of action to take.')
     args, _ = parser.parse_known_args()
 
-    # Get action function
+    state_keys = {
+        'AeroPositionEnv': STATE_KEYS_AERO,
+        'QubeInvertedPendulumEnv': STATE_KEYS_QUBE,
+        'QubeInvertedPendulumSparseRewardEnv': STATE_KEYS_QUBE
+    }
+    envs = {
+        'AeroPositionEnv': AeroPositionEnv,
+        'QubeInvertedPendulumEnv': QubeInvertedPendulumEnv,
+        'QubeInvertedPendulumSparseRewardEnv': \
+            QubeInvertedPendulumSparseRewardEnv
+    }
     controllers = {
         'none': NoControl,
         'random': RandomControl,
-        'classic': AeroClassicControl if args.env == 'Aero-Position-v0' else QubeHoldInvetedClassicControl
+        'classic': AeroClassicControl if args.env == 'AeroPositionEnv' else \
+                   QubeHoldInvetedClassicControl
     }
 
     print('Testing {}'.format(args.env))
-    test_env(args.env, controllers[args.control], state_keys=state_keys[args.env])
+    test_env(
+        envs[args.env],
+        controllers[args.control],
+        state_keys=state_keys[args.env])
+
+
+if __name__ == '__main__':
+    main()
