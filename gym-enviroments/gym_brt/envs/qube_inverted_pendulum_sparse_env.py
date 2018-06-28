@@ -50,8 +50,8 @@ class QubeInvertedPendulumSparseReward(object):
 
 
 class QubeInvertedPendulumSparseRewardEnv(QubeInvertedPendulumEnv):
-    def __init__(self):
-        super(QubeInvertedPendulumSparseRewardEnv, self).__init__()
+    def __init__(self, frequency=25):
+        super(QubeInvertedPendulumSparseRewardEnv, self).__init__(frequency)
         self.reward_fn = QubeInvertedPendulumSparseReward()
 
 

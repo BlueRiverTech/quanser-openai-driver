@@ -76,7 +76,7 @@ class QubeInvertedPendulumReward(object):
 
 class QubeInvertedPendulumEnv(gym.Env):
 
-    def __init__(self):
+    def __init__(self, frequency=25):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
@@ -99,7 +99,7 @@ class QubeInvertedPendulumEnv(gym.Env):
         self._prev_t = time.time()
 
         # Open the Qube
-        self.qube = QubeServo2(frequency=25)
+        self.qube = QubeServo2(frequency=frequency)
         self.qube.__enter__()
 
         self.seed()

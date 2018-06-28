@@ -23,7 +23,7 @@ OBSERVATION_HIGH = np.asarray([
 
 OBSERVATION_LOW = -OBSERVATION_HIGH
 
-MAX_MOTOR_VOLTAGE = 15.0
+MAX_MOTOR_VOLTAGE = 20.0
 ACTION_HIGH = np.asarray(
     [MAX_MOTOR_VOLTAGE, MAX_MOTOR_VOLTAGE],
     dtype=np.float64)
@@ -84,7 +84,7 @@ class AeroPositionReward(object):
 
 class AeroPositionEnv(gym.Env):
 
-    def __init__(self):
+    def __init__(self, frequency=25):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
@@ -107,7 +107,7 @@ class AeroPositionEnv(gym.Env):
         self._sense1 = 0
 
         # Open the Aero
-        self.aero = QuanserAero(frequency=25)
+        self.aero = QuanserAero(frequency=frequency)
         self.aero.__enter__()
 
         self.seed()
