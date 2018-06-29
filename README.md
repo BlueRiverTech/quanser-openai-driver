@@ -19,11 +19,11 @@ To compile and run a test
     - For the Aero: `python <installation-directory>/quanser-openai-driver/tests/test_aero.py`
 
 The `hil_sdk_linux_x86_64` directory contains the installation files for the HIL SDK (Copyright (C) Quanser Inc.) <br>
-The `gym-enviroments` directory contains a Python and OpenAI Gym wrapper around the HIL SDK
+The `gym-environments` directory contains a Python and OpenAI Gym wrapper around the HIL SDK
 
 
 # Usage
-Usage is very similar to most OpenAI gym enviroments but **requires** that you close the enviroment when finished.
+Usage is very similar to most OpenAI gym environments but **requires** that you close the environment when finished.
 Without safely closing the Env, bad things may happen. Usually you will not be able to reopen the board.
 
 This can be done with a context manager using a `with` statement
@@ -63,7 +63,7 @@ finally:
 
 
 # Warning
-Forgetting to close the envrioment or incorrectly closing the env leads to several possible issues. The worst including segfaults.
+Forgetting to close the environment or incorrectly closing the env leads to several possible issues. The worst including segfaults.
 
 The most common case when the env was not properly closed: you can not reopen the env and you get:
 ```
