@@ -296,8 +296,8 @@ cdef class QuanserWrapper:
 
 cdef class QuanserAero(QuanserWrapper):
     def __cinit__(self):
-        board_type = "quanser_aero_usb"
-        board_identifier = "0"
+        board_type = b"quanser_aero_usb"
+        board_identifier = b"0"
         result = hil.hil_open(board_type, board_identifier, &self.board)
         print_possible_error(result)
         if result < 0:
@@ -324,8 +324,8 @@ cdef class QuanserAero(QuanserWrapper):
 
 cdef class QubeServo2(QuanserWrapper):
     def __cinit__(self):
-        board_type="qube_servo2_usb"
-        board_identifier="0"
+        board_type = b"qube_servo2_usb"
+        board_identifier = b"0"
         result = hil.hil_open(board_type, board_identifier, &self.board)
         print_possible_error(result)
         if result < 0:
