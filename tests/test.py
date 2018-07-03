@@ -102,7 +102,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--env',
-        default='AeroPositionEnv',
+        default='QubeInvertedPendulumEnv',
         choices=[
             'AeroPositionEnv',
             'QubeInvertedPendulumEnv',
