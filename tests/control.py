@@ -120,18 +120,18 @@ class QubeFlipUpInvetedClassicControl(Control):
     """
     def __init__(self, env, sample_freq=1000, **kwargs):
         super(QubeFlipUpInvetedClassicControl, self).__init__(env)
-        self._theta_n_k1 = 0
-        self._theta_dot_k1 = 0
-        self._alpha_n_k1 = 0
-        self._alpha_dot_k1 = 0
-        self._prev_theta = 0
-        self._prev_alpha = 0
+        self._theta_n_k1 = 0.
+        self._theta_dot_k1 = 0.
+        self._alpha_n_k1 = 0.
+        self._alpha_dot_k1 = 0.
+        self._prev_theta = 0.
+        self._prev_alpha = 0.
         self._sample_freq = sample_freq
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
         # Found analytically
         K = np.array(
-            [-316.22776602, 8273.10540066, -381.19226361, 835.88818799])
+            [3.1622776602, 20.7014465019, 1.9988564038, 2.4570771444])
         state = np.array([alpha, alpha_dot, theta, theta_dot])
         action = np.dot(state, K)
         return action

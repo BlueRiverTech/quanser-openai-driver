@@ -100,24 +100,6 @@ def test_env(env_name,
 
 
 def main():
-    # Parse command line args
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--env',
-        default='QubeInvertedPendulumEnv',
-        choices=[
-            'AeroPositionEnv',
-            'QubeInvertedPendulumEnv',
-            'QubeInvertedPendulumSparseRewardEnv'
-        ],
-        help='Enviroment to run.')
-    parser.add_argument(
-        '--control',
-        default='random',
-        choices=['random', 'none', 'classic'],
-        help='Select what type of action to take.')
-    args, _ = parser.parse_known_args()
-
     state_keys = {
         'AeroPositionEnv': STATE_KEYS_AERO,
         'QubeInvertedPendulumEnv': STATE_KEYS_QUBE,
@@ -132,14 +114,62 @@ def main():
     controllers = {
         'none': NoControl,
         'random': RandomControl,
-        'classic': AeroClassicControl if args.env == 'AeroPositionEnv' else \
-                   QubeFlipUpInvetedClassicControl
+        'classic': QubeFlipUpInvetedClassicControl,
+        'qube-classic': QubeFlipUpInvetedClassicControl,
+        'aero-classic': AeroClassicControl,
+        'flip-up': QubeFlipUpInvetedClassicControl,
+        'flip': QubeFlipUpInvetedClassicControl,
+        'hold': QubeHoldInvetedClassicControl,
     }
 
-    print('Testing {}'.format(args.env))
+
+    # Parse command line args
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-e',
+        '--env',
+        default='QubeInvertedPendulumEnv',
+        choices=list(state_keys.keys()),
+        help='Enviroment to run.')
+    parser.add_argument(
+        '-c',
+        '--control',
+        default='random',
+        choices=list(controllers.keys()),
+        help='Select what type of action to take.')
+    parser.add_argument(
+        '--num-episodes',
+        default='10',
+        type=int,
+        help='Number of episodes to run.',
+        )
+    parser.add_argument(
+        '--num-steps',
+        default='250',
+        type=int,
+        help='Number of step to run per episode.',
+        )
+    parser.add_argument(
+        '-f',
+        '--frequency',
+        '--sample-frequency',
+        default='1000',
+        type=float,
+        help='The frequency of samples on the Quanser hardware.',
+        )
+    args, _ = parser.parse_known_args()
+
+
+    print('Testing Env:  {}'.format(args.env))
+    print('Controller:   {}'.format(args.control))
+    print('{} steps over {} episodes'.format(args.num_steps, args.num_episodes))
+    print('Samples freq: {}'.format(args.frequency))
     test_env(
         envs[args.env],
         controllers[args.control],
+        num_episodes=args.num_episodes,
+        num_steps=args.num_steps,
+        sample_freq=args.frequency,
         state_keys=state_keys[args.env])
 
 
