@@ -1,9 +1,9 @@
 from __future__ import print_function
 from __future__ import division
 
+from gym_brt.envs.QuanserWrapper import QubeServo2
 import numpy as np
 import time
-from gym_brt.envs.QuanserWrapper import QubeServo2
 
 
 def time_func(f, *args, **kwargs):
@@ -26,7 +26,7 @@ def print_state(currents, encoders, others):
 
 
 def test_py_control():
-    M_PI = 3.14159
+    sample_freq = 1000
 
     # global variables for the pendulum balance control
     theta_n_k1 = 0
@@ -34,7 +34,7 @@ def test_py_control():
     alpha_n_k1 = 0
     alpha_dot_k1 = 0
 
-    with QubeServo2(25) as a:
+    with QubeServo2(sample_freq) as a:
         voltages = np.array([0.], dtype=np.float64)
         currents, encoders, others = a.action(voltages)
 
@@ -44,8 +44,8 @@ def test_py_control():
             encoder1 = encoders[1] % 2048
             if (encoder1 < 0):
                 encoder1 = 2048 + encoder1
-            theta = encoder0 * (-2.0 * M_PI / 2048)
-            alpha = encoder1 * (2.0 * M_PI / 2048) - M_PI
+            theta = encoder0 * (-2.0 * np.pi / 2048)
+            alpha = encoder1 * (2.0 * np.pi / 2048) - np.pi
             current_sense = currents[0]
 
             print_state(currents, encoders, others)
@@ -53,20 +53,22 @@ def test_py_control():
             # Start of Custom Code for controller
             # if the pendulum is within +/-30 degrees of upright, enable balance
             # control
-            if np.abs(alpha) <= (30.0 * M_PI / 180.0):
+            if np.abs(alpha) <= (30.0 * np.pi / 180.0):
                 # transfer function = 50s/(s+50)
-                # z-transform at 1ms = (50z - 50)/(z-0.9512)
+                # z-transform at 1ms = (50z - 50)/(z-np.exp(-50 / T)), where T 
+                # is sample period
                 theta_n = -theta
-                theta_dot = (50.0 * theta_n) - \
-                    (50.0 * theta_n_k1) + (0.9512 * theta_dot_k1)
+                theta_dot = (50.0 * theta_n) - (50.0 * theta_n_k1) + \
+                    (np.exp(-50 * sample_freq) * theta_dot_k1)
                 theta_n_k1 = theta_n
                 theta_dot_k1 = theta_dot
 
                 # transfer function = 50s/(s+50)
-                # z-transform at 1ms = (50z - 50)/(z-0.9512)
+                # z-transform at 1ms = (50z - 50)/(z-np.exp(-50 / T)), where T 
+                # is sample period
                 alpha_n = -alpha
-                alpha_dot = (50.0 * alpha_n) - \
-                    (50.0 * alpha_n_k1) + (0.9512 * alpha_dot_k1)
+                alpha_dot = (50.0 * alpha_n) - (50.0 * alpha_n_k1) + \
+                    (np.exp(-50 * sample_freq) * alpha_dot_k1)
                 alpha_n_k1 = alpha_n
                 alpha_dot_k1 = alpha_dot
 
@@ -79,10 +81,10 @@ def test_py_control():
                     (alpha * kp_alpha) + (alpha_dot * kd_alpha)
 
                 # set the saturation limit to +/- 15V
-                if motor_voltage > 15.0:
-                    motor_voltage = 15.0
-                elif motor_voltage < -15.0:
-                    motor_voltage = -15.0
+                if motor_voltage > 10.0:
+                    motor_voltage = 10.0
+                elif motor_voltage < -10.0:
+                    motor_voltage = -10.0
 
                 # invert for positive CCW
                 motor_voltage = -motor_voltage
@@ -91,6 +93,8 @@ def test_py_control():
             # End of Pendulum Code
             voltages = np.array([motor_voltage], dtype=np.float64)
             currents, encoders, others = a.action(voltages)
+
+            print("\nVoltages:", voltages)
 
 
 if __name__ == '__main__':

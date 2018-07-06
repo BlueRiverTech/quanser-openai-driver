@@ -5711,12 +5711,12 @@ static PyObject *__pyx_f_15quanser_wrapper_14QuanserWrapper__run_reader_writer(s
           __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
           goto __pyx_L19_try_end;
           __pyx_L12_error:;
-          __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
           __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+          __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
           __PYX_XDEC_MEMVIEW(&__pyx_t_7, 1);
           /*except:*/ {
             __Pyx_AddTraceback("quanser_wrapper.QuanserWrapper._run_reader_writer", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -6569,10 +6569,10 @@ static PyObject *__pyx_pf_15quanser_wrapper_14QuanserWrapper_14_action(struct __
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
         goto __pyx_L12_try_end;
         __pyx_L7_error:;
-        __PYX_XDEC_MEMVIEW(&__pyx_t_9, 1);
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __PYX_XDEC_MEMVIEW(&__pyx_t_9, 1);
         /*except:*/ {
           __Pyx_AddTraceback("quanser_wrapper.QuanserWrapper._action", __pyx_clineno, __pyx_lineno, __pyx_filename);
           if (__Pyx_GetException(&__pyx_t_2, &__pyx_t_3, &__pyx_t_4) < 0) __PYX_ERR(0, 274, __pyx_L9_except_error)
@@ -7067,13 +7067,13 @@ static PyObject *__pyx_pf_15quanser_wrapper_14QuanserWrapper_14_action(struct __
           __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
           goto __pyx_L33_try_end;
           __pyx_L26_error:;
-          __PYX_XDEC_MEMVIEW(&__pyx_t_9, 1);
           __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
           __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
           __Pyx_XDECREF(__pyx_t_13); __pyx_t_13 = 0;
           __Pyx_XDECREF(__pyx_t_14); __pyx_t_14 = 0;
           __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
           __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+          __PYX_XDEC_MEMVIEW(&__pyx_t_9, 1);
           /*except:*/ {
             __Pyx_AddTraceback("quanser_wrapper.QuanserWrapper._action", __pyx_clineno, __pyx_lineno, __pyx_filename);
             if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_10, &__pyx_t_14) < 0) __PYX_ERR(0, 286, __pyx_L28_except_error)

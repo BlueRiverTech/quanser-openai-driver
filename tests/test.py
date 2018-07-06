@@ -15,7 +15,8 @@ from control import \
         NoControl, \
         RandomControl, \
         AeroClassicControl, \
-        QubeHoldInvetedClassicControl
+        QubeHoldInvetedClassicControl, \
+        QubeFlipUpInvetedClassicControl
 
 
 STATE_KEYS_AERO = [ 
@@ -63,10 +64,11 @@ def test_env(env_name,
              controller,
              num_episodes=10,
              num_steps=250,
+             sample_freq=1000,
              state_keys=None):
 
-    with env_name() as env:
-        ctrl_sys = controller(env)
+    with env_name(sample_freq) as env:
+        ctrl_sys = controller(env, sample_freq=sample_freq)
         for episode in range(num_episodes):
             state = env.reset()
             for step in range(num_steps):
@@ -131,7 +133,7 @@ def main():
         'none': NoControl,
         'random': RandomControl,
         'classic': AeroClassicControl if args.env == 'AeroPositionEnv' else \
-                   QubeHoldInvetedClassicControl
+                   QubeFlipUpInvetedClassicControl
     }
 
     print('Testing {}'.format(args.env))
