@@ -1,7 +1,7 @@
 from setuptools import setup
 
 
-VERSION = 0.01
+VERSION = 0.1
 INSTALL_REQUIRES = ['gym', 'numpy']
 
 setup(name='gym_brt',
