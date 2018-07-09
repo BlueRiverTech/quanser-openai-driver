@@ -25,7 +25,7 @@ MAX_MOTOR_VOLTAGE = 8.0
 ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
 
-WARMUP_STEPS = 100
+WARMUP_STEPS = 10000
 
 
 STATE_KEYS = [
@@ -167,7 +167,8 @@ class QubeInvertedPendulumEnv(gym.Env):
                 action = np.zeros(
                     shape=self.action_space.shape,
                     dtype=self.action_space.dtype)
-                return self._step(action)
+                state = self._step(action)
+            return state
         else:
             action = np.zeros(
                 shape=self.action_space.shape,

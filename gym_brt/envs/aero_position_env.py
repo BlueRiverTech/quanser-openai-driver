@@ -164,7 +164,8 @@ class AeroPositionEnv(gym.Env):
                 action = np.zeros(
                     shape=self.action_space.shape,
                     dtype=self.action_space.dtype)
-                return self._step(action)
+                state = self._step(action)
+            return state
         else:
             action = np.zeros(
                 shape=self.action_space.shape,
