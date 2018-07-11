@@ -114,12 +114,12 @@ class AeroClassicControl(Control):
         return voltages
 
 
-class QubeFlipUpInvetedClassicControl(Control):
+class QubeFlipUpInvertedClassicControl(Control):
     """Classical controller to hold the pendulum upright whenever the angle is
     within 30 degrees, and flips up the pendulum whenever outside 30 degrees.
     """
     def __init__(self, env, sample_freq=1000, **kwargs):
-        super(QubeFlipUpInvetedClassicControl, self).__init__(env)
+        super(QubeFlipUpInvertedClassicControl, self).__init__(env)
         self._theta_n_k1 = 0.
         self._theta_dot_k1 = 0.
         self._alpha_n_k1 = 0.
@@ -194,13 +194,13 @@ class QubeFlipUpInvetedClassicControl(Control):
         return voltages
 
 
-class QubeHoldInvetedClassicControl(QubeFlipUpInvetedClassicControl):
+class QubeHoldInvertedClassicControl(QubeFlipUpInvertedClassicControl):
     """Classical controller to hold the pendulum upright whenever the angle is
-    within 30 degrees. (Same as QubeFlipUpInvetedClassicControl but without a 
+    within 30 degrees. (Same as QubeFlipUpInvertedClassicControl but without a 
     flip up action)
     """
     def __init__(self, env, sample_freq=1000, **kwargs):
-        super(QubeHoldInvetedClassicControl, self).__init__(
+        super(QubeHoldInvertedClassicControl, self).__init__(
             env, sample_freq=sample_freq)
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):

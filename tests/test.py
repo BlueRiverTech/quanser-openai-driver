@@ -15,8 +15,8 @@ from control import \
         NoControl, \
         RandomControl, \
         AeroClassicControl, \
-        QubeHoldInvetedClassicControl, \
-        QubeFlipUpInvetedClassicControl
+        QubeHoldInvertedClassicControl, \
+        QubeFlipUpInvertedClassicControl
 
 
 STATE_KEYS_AERO = [ 
@@ -114,12 +114,12 @@ def main():
     controllers = {
         'none': NoControl,
         'random': RandomControl,
-        'classic': QubeFlipUpInvetedClassicControl,
-        'qube-classic': QubeFlipUpInvetedClassicControl,
+        'classic': QubeFlipUpInvertedClassicControl,
+        'qube-classic': QubeFlipUpInvertedClassicControl,
         'aero-classic': AeroClassicControl,
-        'flip-up': QubeFlipUpInvetedClassicControl,
-        'flip': QubeFlipUpInvetedClassicControl,
-        'hold': QubeHoldInvetedClassicControl,
+        'flip-up': QubeFlipUpInvertedClassicControl,
+        'flip': QubeFlipUpInvertedClassicControl,
+        'hold': QubeHoldInvertedClassicControl,
     }
 
 
