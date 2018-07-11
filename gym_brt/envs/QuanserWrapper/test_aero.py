@@ -42,7 +42,7 @@ def test_aero_control():
     yaw_n_k1 = 0
     yaw_dot_k1 = 0
 
-    with QuanserAero(25) as a:
+    with QuanserAero(1000) as a:
         voltages = np.array([3.0, 3.0], dtype=np.float64)
         currents, encoders, others = a.action(voltages)
 

@@ -84,7 +84,7 @@ class AeroPositionReward(object):
 
 class AeroPositionEnv(gym.Env):
 
-    def __init__(self, frequency=25):
+    def __init__(self, frequency=1000):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
@@ -164,7 +164,8 @@ class AeroPositionEnv(gym.Env):
                 action = np.zeros(
                     shape=self.action_space.shape,
                     dtype=self.action_space.dtype)
-                return self._step(action)
+                state = self._step(action)
+            return state
         else:
             action = np.zeros(
                 shape=self.action_space.shape,

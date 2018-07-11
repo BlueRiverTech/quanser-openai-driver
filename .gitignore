@@ -1,5 +1,5 @@
 *.DS_Store
-**/QuanserWrapper/*.c
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
