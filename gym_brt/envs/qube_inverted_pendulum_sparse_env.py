@@ -33,7 +33,7 @@ class QubeInvertedPendulumSparseReward(object):
         alpha_acceleration = state[7]
 
         theta = np.arctan2(theta_y, theta_x)  # arm
-        alpha = np.arctan2(alpha_y, alpha_x)  # arm
+        alpha = np.arctan2(alpha_y, alpha_x)  # pendulum
 
         cost = 0
 
