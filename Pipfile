@@ -1,0 +1,4 @@
+[packages]
+numpy = "*"
+gym = "*"
+gym-brt = {path = ".", editable = true}

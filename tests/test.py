@@ -9,13 +9,14 @@ import numpy as np
 
 from gym_brt import \
     AeroPositionEnv, \
-    QubeInvertedPendulumEnv, \
-    QubeInvertedPendulumSparseRewardEnv
-from control import \
+    QubeFlipUpEnv, \
+    QubeHoldInvertedEnv
+from gym_brt.control import \
         NoControl, \
         RandomControl, \
         AeroClassicControl, \
-        QubeHoldInvetedClassicControl
+        QubeHoldInvertedClassicControl, \
+        QubeFlipUpInvertedClassicControl
 
 
 STATE_KEYS_AERO = [ 
@@ -63,10 +64,11 @@ def test_env(env_name,
              controller,
              num_episodes=10,
              num_steps=250,
+             sample_freq=1000,
              state_keys=None):
 
-    with env_name() as env:
-        ctrl_sys = controller(env)
+    with env_name(sample_freq) as env:
+        ctrl_sys = controller(env, sample_freq=sample_freq)
         for episode in range(num_episodes):
             state = env.reset()
             for step in range(num_steps):
@@ -98,46 +100,76 @@ def test_env(env_name,
 
 
 def main():
-    # Parse command line args
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--env',
-        default='AeroPositionEnv',
-        choices=[
-            'AeroPositionEnv',
-            'QubeInvertedPendulumEnv',
-            'QubeInvertedPendulumSparseRewardEnv'
-        ],
-        help='Enviroment to run.')
-    parser.add_argument(
-        '--control',
-        default='random',
-        choices=['random', 'none', 'classic'],
-        help='Select what type of action to take.')
-    args, _ = parser.parse_known_args()
-
     state_keys = {
         'AeroPositionEnv': STATE_KEYS_AERO,
-        'QubeInvertedPendulumEnv': STATE_KEYS_QUBE,
-        'QubeInvertedPendulumSparseRewardEnv': STATE_KEYS_QUBE
+        'QubeFlipUpEnv': STATE_KEYS_QUBE,
+        'QubeHoldInvertedEnv': STATE_KEYS_QUBE
     }
     envs = {
         'AeroPositionEnv': AeroPositionEnv,
-        'QubeInvertedPendulumEnv': QubeInvertedPendulumEnv,
-        'QubeInvertedPendulumSparseRewardEnv': \
-            QubeInvertedPendulumSparseRewardEnv
+        'QubeFlipUpEnv': QubeFlipUpEnv,
+        'QubeHoldInvertedEnv': \
+            QubeHoldInvertedEnv
     }
     controllers = {
         'none': NoControl,
         'random': RandomControl,
-        'classic': AeroClassicControl if args.env == 'AeroPositionEnv' else \
-                   QubeHoldInvetedClassicControl
+        'classic': QubeFlipUpInvertedClassicControl,
+        'qube-classic': QubeFlipUpInvertedClassicControl,
+        'aero-classic': AeroClassicControl,
+        'flip-up': QubeFlipUpInvertedClassicControl,
+        'flip': QubeFlipUpInvertedClassicControl,
+        'hold': QubeHoldInvertedClassicControl,
     }
 
-    print('Testing {}'.format(args.env))
+
+    # Parse command line args
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-e',
+        '--env',
+        default='QubeFlipUpEnv',
+        choices=list(state_keys.keys()),
+        help='Enviroment to run.')
+    parser.add_argument(
+        '-c',
+        '--control',
+        default='random',
+        choices=list(controllers.keys()),
+        help='Select what type of action to take.')
+    parser.add_argument(
+        '--num-episodes',
+        default='10',
+        type=int,
+        help='Number of episodes to run.',
+        )
+    parser.add_argument(
+        '--num-steps',
+        default='250',
+        type=int,
+        help='Number of step to run per episode.',
+        )
+    parser.add_argument(
+        '-f',
+        '--frequency',
+        '--sample-frequency',
+        default='1000',
+        type=float,
+        help='The frequency of samples on the Quanser hardware.',
+        )
+    args, _ = parser.parse_known_args()
+
+
+    print('Testing Env:  {}'.format(args.env))
+    print('Controller:   {}'.format(args.control))
+    print('{} steps over {} episodes'.format(args.num_steps, args.num_episodes))
+    print('Samples freq: {}'.format(args.frequency))
     test_env(
         envs[args.env],
         controllers[args.control],
+        num_episodes=args.num_episodes,
+        num_steps=args.num_steps,
+        sample_freq=args.frequency,
         state_keys=state_keys[args.env])
 
 
