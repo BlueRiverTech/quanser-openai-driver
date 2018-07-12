@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import time
 import numpy as np
 from gym import spaces
 from gym_brt.envs.qube_base_env import \
@@ -11,6 +12,7 @@ from gym_brt.envs.qube_base_env import \
     ACTION_HIGH, \
     ACTION_LOW, \
     WARMUP_TIME
+from gym_brt.envs.QuanserWrapper import QubeServo2
 from gym_brt.control import QubeFlipUpInvertedClassicControl
 
 # Time given to the classical control system to flip up before quitting
@@ -77,7 +79,7 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
         # back into the the original frequency
 
         # Close the current connection then open a new one with freq = 1000
-        self.__close__()
+        self.qube.__exit__(None, None, None)
         self.qube = QubeServo2(frequency=1000)
         self.qube.__enter__()
 
@@ -94,7 +96,7 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
             state, _, _, _ = self.step(action)
 
             # Break if timed out
-            if i > time_out_samples:
+            if total_samples > time_out_samples:
                 print('Warning: flip-up control in reset timed out.')
                 break
 
@@ -105,14 +107,17 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
                 samples_upright += 1
             else:
                 samples_upright = 0
-            i += 1
+            total_samples += 1
 
+        print("done")
         # Open a connection with the original frequency
-        self.__close__()
-        self.qube = QubeServo2(frequency=self.frequency)
+        self.qube.__exit__(None, None, None)
+        self.qube = QubeServo2(frequency=self._frequency)
         self.qube.__enter__()
 
-    def _done():
+        return state
+
+    def _done(self):
         # The episode ends whenever the angle alpha is outside the tolerance
         return self._alpha > self._alpha_tolerance
 
