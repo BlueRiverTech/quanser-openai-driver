@@ -11,7 +11,7 @@ from gym_brt import \
     AeroPositionEnv, \
     QubeInvertedPendulumEnv, \
     QubeInvertedPendulumSparseRewardEnv
-from control import \
+from gym_brt.control import \
         NoControl, \
         RandomControl, \
         AeroClassicControl, \

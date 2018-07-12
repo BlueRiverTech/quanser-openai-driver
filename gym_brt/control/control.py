@@ -12,8 +12,13 @@ QUBE_MAX_VOLTAGE = 5.0
 
 class Control(object):
     # TODO: better name
-    def __init__(self, env, *args, **kwargs):
-        self.action_shape = env.action_space.sample().shape
+    def __init__(self, env=None, action_shape=None, *args, **kwargs):
+        if env:
+            self.action_shape = env.action_space.sample().shape
+        elif action_shape:
+            self.action_shape = action_shape
+        else:
+            raise ValueError('Either env or action_shape must be passed.')
 
     def action(self, state):
         raise NotImplementedError
@@ -118,8 +123,8 @@ class QubeFlipUpInvertedClassicControl(Control):
     """Classical controller to hold the pendulum upright whenever the angle is
     within 30 degrees, and flips up the pendulum whenever outside 30 degrees.
     """
-    def __init__(self, env, sample_freq=1000, **kwargs):
-        super(QubeFlipUpInvertedClassicControl, self).__init__(env)
+    def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
+        super(QubeFlipUpInvertedClassicControl, self).__init__(env=env)
         self._theta_n_k1 = 0.
         self._theta_dot_k1 = 0.
         self._alpha_n_k1 = 0.
