@@ -25,8 +25,7 @@ MAX_MOTOR_VOLTAGE = 8.0
 ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
 
-WARMUP_STEPS = 100
-
+WARMUP_TIME = 2 # 2 seconds
 
 STATE_KEYS = [
     'COS_THETA',
@@ -46,36 +45,17 @@ def normalize_angle(theta):
     return ((theta + np.pi) % (2 * np.pi)) - np.pi
 
 
-class QubeInvertedPendulumReward(object):
-
+class QubeBaseReward(object):
     def __init__(self):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
             high=ACTION_HIGH, dtype=np.float32)
 
     def __call__(self, state, action):
-        theta_x = state[0]
-        theta_y = state[1]
-        alpha_x = state[2]
-        alpha_y = state[3]
-        theta_velocity = state[4]
-        alpha_velocity = state[5]
-        theta_acceleration = state[6]
-        alpha_acceleration = state[7]
-
-        theta = np.arctan2(theta_y, theta_x)  # arm
-        alpha = np.arctan2(alpha_y, alpha_x)  # pole
-
-        cost = normalize_angle(theta)**4 + \
-            normalize_angle(alpha)**2 + \
-            0.1 * alpha_velocity**2
-
-        reward = -cost
-        return reward
+        raise NotImplementedError
 
 
-class QubeInvertedPendulumEnv(gym.Env):
-
+class QubeBaseEnv(gym.Env):
     def __init__(self, frequency=1000):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
@@ -85,7 +65,7 @@ class QubeInvertedPendulumEnv(gym.Env):
             ACTION_LOW, ACTION_HIGH,
             dtype=np.float32)
 
-        self.reward_fn = QubeInvertedPendulumReward()
+        self.reward_fn = QubeBaseReward()
 
         self._theta = 0
         self._alpha = 0
@@ -96,6 +76,7 @@ class QubeInvertedPendulumEnv(gym.Env):
         self._motor_voltage = 0
         self._tach0 = 0
         self._sense = 0
+        self._frequency = frequency
         self._prev_t = time.time()
 
         # Open the Qube
@@ -161,9 +142,11 @@ class QubeInvertedPendulumEnv(gym.Env):
         return state
 
     def reset(self):
-        # step once with no action to init state
-        if WARMUP_STEPS > 0:
-            for i in range(WARMUP_STEPS):
+        # Start the pendulum stationary at the bottom (stable point)
+        # 2 seconds is usually enough to stabilize
+        if WARMUP_TIME > 0:
+            start_time = time.time()
+            while (time.time() - start_time) < WARMUP_TIME:
                 action = np.zeros(
                     shape=self.action_space.shape,
                     dtype=self.action_space.dtype)
@@ -179,25 +162,13 @@ class QubeInvertedPendulumEnv(gym.Env):
         state = self._step(action)
         reward = self.reward_fn(state, action)
         done = False
-        info = {}
+
+        info = {k: v for (k, v) in zip(STATE_KEYS, self._get_state())}
+        info['alpha'] = self._alpha
+        info['theta'] = self._theta
+
         return state, reward, done, info
 
     def close(self):
         # Safely close the Qube
         self.qube.__exit__(None, None, None)
-
-
-def main():
-    num_episodes = 10
-    num_steps = 250
-
-    with QubeInvertedPendulumEnv() as env:
-        for episode in range(num_episodes):
-            state = env.reset()
-            for step in range(num_steps):
-                action = env.action_space.sample()
-                state, reward, done, _ = env.step(action)
-
-
-if __name__ == '__main__':
-    main()
