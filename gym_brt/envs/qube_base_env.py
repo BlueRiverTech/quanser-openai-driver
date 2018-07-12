@@ -163,7 +163,7 @@ class QubeBaseEnv(gym.Env):
         reward = self.reward_fn(state, action)
         done = False
 
-        info = {for k: v in (k, v) in zip(STATE_KEYS, self._get_state())}
+        info = {k: v for (k, v) in zip(STATE_KEYS, self._get_state())}
         info['alpha'] = self._alpha
         info['theta'] = self._theta
 

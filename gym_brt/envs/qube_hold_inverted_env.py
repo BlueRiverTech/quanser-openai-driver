@@ -11,7 +11,7 @@ from gym_brt.envs.qube_base_env import \
     ACTION_HIGH, \
     ACTION_LOW, \
     WARMUP_TIME
-from gym_brt.controls import QubeFlipUpInvertedClassicControl
+from gym_brt.control import QubeFlipUpInvertedClassicControl
 
 # Time given to the classical control system to flip up before quitting
 FLIP_UP_TIME_OUT = np.inf
@@ -51,7 +51,7 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
     def __init__(self, frequency=1000, alpha_tolerance=None):
         super(QubeHoldInvertedEnv, self).__init__(frequency=frequency)
         self.reward_fn = QubeHoldInvertedReward()
-        self._alpha_tolerance = alpha_tolerance if alpha_tolerance is not None
+        self._alpha_tolerance = alpha_tolerance if alpha_tolerance is not None \
                                                 else ALPHA_TOLERANCE
 
     def reset(self):
