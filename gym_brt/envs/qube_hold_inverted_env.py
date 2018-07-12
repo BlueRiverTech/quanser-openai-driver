@@ -12,8 +12,8 @@ from gym_brt.envs.qube_base_env import \
     ACTION_HIGH, \
     ACTION_LOW, \
     WARMUP_TIME
-from gym_brt.envs.QuanserWrapper import QubeServo2
 from gym_brt.control import QubeFlipUpInvertedClassicControl
+
 
 # Time given to the classical control system to flip up before quitting
 FLIP_UP_TIME_OUT = np.inf
@@ -21,6 +21,7 @@ FLIP_UP_TIME_OUT = np.inf
 MIN_INVERTED_HOLD_TIME = 1
 # Angle from perfectly inverted that counts as 'upright' (in radians)
 ALPHA_TOLERANCE = 10 * np.pi / 180
+
 
 class QubeHoldInvertedReward(object):
     def __init__(self):
@@ -71,23 +72,12 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
                 dtype=self.action_space.dtype)
             state = self._step(action)
 
-        # Trick to make the flip up quicker.
-        # Close the connection to the Qube, set the frequency to the highest
-        # available frequency, use a classic control system to flip-up, then 
-        # switch back to the original frequency. A classical control system with
-        # a higher frequency will make it easier to flip upright then switch
-        # back into the the original frequency
-
-        # Close the current connection then open a new one with freq = 1000
-        self.qube.__exit__(None, None, None)
-        self.qube = QubeServo2(frequency=1000)
-        self.qube.__enter__()
-
         # Run classic control for flip-up until the pendulum is inverted for a
         # set amount of time
-        control = QubeFlipUpInvertedClassicControl(self, sample_freq=1000)
-        time_out_samples = FLIP_UP_TIME_OUT * 1000
-        time_hold_samples = MIN_INVERTED_HOLD_TIME * 1000
+        control = QubeFlipUpInvertedClassicControl(self,
+            sample_freq=self._frequency)
+        time_out_samples = FLIP_UP_TIME_OUT * self._frequency
+        time_hold_samples = MIN_INVERTED_HOLD_TIME * self._frequency
 
         total_samples = 0 # Number of samples since control system started
         samples_upright = 0 # Consecutive samples that the pendulum has been inverted 
@@ -108,12 +98,6 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
             else:
                 samples_upright = 0
             total_samples += 1
-
-        print("done")
-        # Open a connection with the original frequency
-        self.qube.__exit__(None, None, None)
-        self.qube = QubeServo2(frequency=self._frequency)
-        self.qube.__enter__()
 
         return state
 
