@@ -9,14 +9,14 @@ import numpy as np
 
 from gym_brt import \
     AeroPositionEnv, \
-    QubeInvertedPendulumEnv, \
-    QubeInvertedPendulumSparseRewardEnv
-from control import \
+    QubeFlipUpEnv, \
+    QubeHoldInvertedEnv
+from gym_brt.control import \
         NoControl, \
         RandomControl, \
         AeroClassicControl, \
-        QubeHoldInvetedClassicControl, \
-        QubeFlipUpInvetedClassicControl
+        QubeHoldInvertedClassicControl, \
+        QubeFlipUpInvertedClassicControl
 
 
 STATE_KEYS_AERO = [ 
@@ -102,24 +102,24 @@ def test_env(env_name,
 def main():
     state_keys = {
         'AeroPositionEnv': STATE_KEYS_AERO,
-        'QubeInvertedPendulumEnv': STATE_KEYS_QUBE,
-        'QubeInvertedPendulumSparseRewardEnv': STATE_KEYS_QUBE
+        'QubeFlipUpEnv': STATE_KEYS_QUBE,
+        'QubeHoldInvertedEnv': STATE_KEYS_QUBE
     }
     envs = {
         'AeroPositionEnv': AeroPositionEnv,
-        'QubeInvertedPendulumEnv': QubeInvertedPendulumEnv,
-        'QubeInvertedPendulumSparseRewardEnv': \
-            QubeInvertedPendulumSparseRewardEnv
+        'QubeFlipUpEnv': QubeFlipUpEnv,
+        'QubeHoldInvertedEnv': \
+            QubeHoldInvertedEnv
     }
     controllers = {
         'none': NoControl,
         'random': RandomControl,
-        'classic': QubeFlipUpInvetedClassicControl,
-        'qube-classic': QubeFlipUpInvetedClassicControl,
+        'classic': QubeFlipUpInvertedClassicControl,
+        'qube-classic': QubeFlipUpInvertedClassicControl,
         'aero-classic': AeroClassicControl,
-        'flip-up': QubeFlipUpInvetedClassicControl,
-        'flip': QubeFlipUpInvetedClassicControl,
-        'hold': QubeHoldInvetedClassicControl,
+        'flip-up': QubeFlipUpInvertedClassicControl,
+        'flip': QubeFlipUpInvertedClassicControl,
+        'hold': QubeHoldInvertedClassicControl,
     }
 
 
@@ -128,7 +128,7 @@ def main():
     parser.add_argument(
         '-e',
         '--env',
-        default='QubeInvertedPendulumEnv',
+        default='QubeFlipUpEnv',
         choices=list(state_keys.keys()),
         help='Enviroment to run.')
     parser.add_argument(

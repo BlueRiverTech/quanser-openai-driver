@@ -53,7 +53,6 @@ def normalize_angle(theta):
 
 
 class AeroPositionReward(object):
-
     def __init__(self):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
@@ -83,7 +82,6 @@ class AeroPositionReward(object):
 
 
 class AeroPositionEnv(gym.Env):
-
     def __init__(self, frequency=1000):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
