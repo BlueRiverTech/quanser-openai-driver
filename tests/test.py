@@ -123,7 +123,6 @@ def main():
         'hold': QubeHoldInvertedClassicControl,
     }
 
-
     # Parse command line args
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -157,7 +156,6 @@ def main():
         help='The frequency of samples on the Quanser hardware.')
     parser.add_argument('-v', '--verbose', action='store_true')
     args, _ = parser.parse_known_args()
-
 
     print('Testing Env:  {}'.format(args.env))
     print('Controller:   {}'.format(args.control))
