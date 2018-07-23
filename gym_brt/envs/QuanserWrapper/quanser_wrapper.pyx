@@ -12,35 +12,34 @@ import time
 
 
 cdef class QuanserWrapper:
-    cdef hil.t_card  board
-    cdef hil.t_error result
-    cdef hil.t_task  task
+    cdef hil.t_card _board
+    cdef hil.t_task _task
 
-    cdef qt.t_uint32[::] analog_r_channels
-    cdef qt.t_uint32 num_analog_r_channels
-    cdef qt.t_double[::] currents_r
+    cdef qt.t_uint32[::] _analog_r_channels
+    cdef qt.t_uint32 _num_analog_r_channels
+    cdef qt.t_double[::] _currents_r
 
-    cdef qt.t_uint32[::] analog_w_channels
-    cdef qt.t_uint32 num_analog_w_channels
-    cdef qt.t_double[::] voltages_w
-    
-    cdef qt.t_uint32[::] digital_w_channels
-    cdef qt.t_uint32 num_digital_w_channels
-    cdef qt.t_boolean[::] enables_r
-    
-    cdef qt.t_uint32[::] encoder_r_channels
-    cdef qt.t_uint32 num_encoder_r_channels
-    cdef qt.t_int32[::] encoder_r_buffer
-    
-    cdef qt.t_uint32[::] other_r_channels
-    cdef qt.t_uint32 num_other_r_channels
-    cdef qt.t_double[::] other_r_buffer
-    
-    cdef qt.t_uint32[::] led_w_channels
-    cdef qt.t_uint32 num_led_w_channels
-    cdef qt.t_double[::] led_w_buffer
+    cdef qt.t_uint32[::] _analog_w_channels
+    cdef qt.t_uint32 _num_analog_w_channels
+    cdef qt.t_double[::] _voltages_w
 
-    cdef qt.t_double frequency, period
+    cdef qt.t_uint32[::] _digital_w_channels
+    cdef qt.t_uint32 _num_digital_w_channels
+    cdef qt.t_boolean[::] _enables_r
+
+    cdef qt.t_uint32[::] _encoder_r_channels
+    cdef qt.t_uint32 _num_encoder_r_channels
+    cdef qt.t_int32[::] _encoder_r_buffer
+
+    cdef qt.t_uint32[::] _other_r_channels
+    cdef qt.t_uint32 _num_other_r_channels
+    cdef qt.t_double[::] _other_r_buffer
+
+    cdef qt.t_uint32[::] _led_w_channels
+    cdef qt.t_uint32 _num_led_w_channels
+    cdef qt.t_double[::] _led_w_buffer
+
+    cdef qt.t_double _frequency, _safe_operating_voltage
 
     cdef float _last_read_time
     cdef bint _task_started, _new_state_read
@@ -48,6 +47,7 @@ cdef class QuanserWrapper:
     cdef int _num_samples_read_since_action
 
     def __init__(self,
+                 safe_operating_voltage,
                  analog_r_channels,
                  analog_w_channels,
                  digital_w_channels,
@@ -57,34 +57,40 @@ cdef class QuanserWrapper:
                  frequency=1000):
         """
         Args:
-            - analog_r_channels : [INPUT]  a list of analog channels to use for commumication
-            - analog_w_channels : [OUTPUT] a list of analog channels to use for commumication
-            - digital_w_channels: [INPUT]  a list of digital channels to use for commumication
-            - encoder_r_channels: [INPUT]  a list of encoder channels to use for commumication
-            - other_r_channels  : [INPUT]  a list of other channels to use for commumication
-            - led_w_channels    : [OUTPUT] a list of led channels to use for commumication
-            - board_type        : the name of the board (to find the board_type goto 
-                                  file:///opt/quanser/hil_sdk/help/quarc_supported_quanser_cards.html
-                                  and find you card)
-            - Frequency         : Frequency of the reading/writing task (in Hz)
+            - safe_operating_voltage: The largest allowed voltage as an output
+                (motor voltage)
+            - analog_r_channels: [INPUT] a list of analog channels to use for
+                commumication
+            - analog_w_channels: [OUTPUT] a list of analog channels to use for
+                commumication
+            - digital_w_channels: [INPUT] a list of digital channels to use for
+                commumication
+            - encoder_r_channels: [INPUT] a list of encoder channels to use for
+                commumication
+            - other_r_channels: [INPUT] a list of other channels to use for
+                commumication
+            - led_w_channels: [OUTPUT] a list of led channels to use for
+                commumication
+            - Frequency: Frequency of the reading/writing task (in Hz)
         """
+        self._safe_operating_voltage = safe_operating_voltage
         # Convert the channels into numpy arrays which are then stored in 
         # memoryviews (to pass C buffers to the HIL API)
-        self.num_analog_r_channels = len(analog_r_channels)
-        self.num_analog_w_channels = len(analog_w_channels)
-        self.num_digital_w_channels = len(digital_w_channels)
-        self.num_encoder_r_channels = len(encoder_r_channels)
-        self.num_other_r_channels = len(other_r_channels)
-        self.num_led_w_channels = len(led_w_channels)
-        self.analog_r_channels = np.array(analog_r_channels, dtype=np.uint32)
-        self.analog_w_channels = np.array(analog_w_channels, dtype=np.uint32)
-        self.digital_w_channels = np.array(digital_w_channels, dtype=np.uint32)
-        self.encoder_r_channels = np.array(encoder_r_channels, dtype=np.uint32)
-        self.other_r_channels = np.array(other_r_channels, dtype=np.uint32)
-        self.led_w_channels = np.array(led_w_channels, dtype=np.uint32)
+        self._num_analog_r_channels = len(analog_r_channels)
+        self._num_analog_w_channels = len(analog_w_channels)
+        self._num_digital_w_channels = len(digital_w_channels)
+        self._num_encoder_r_channels = len(encoder_r_channels)
+        self._num_other_r_channels = len(other_r_channels)
+        self._num_led_w_channels = len(led_w_channels)
+        self._analog_r_channels = np.array(analog_r_channels, dtype=np.uint32)
+        self._analog_w_channels = np.array(analog_w_channels, dtype=np.uint32)
+        self._digital_w_channels = np.array(digital_w_channels, dtype=np.uint32)
+        self._encoder_r_channels = np.array(encoder_r_channels, dtype=np.uint32)
+        self._other_r_channels = np.array(other_r_channels, dtype=np.uint32)
+        self._led_w_channels = np.array(led_w_channels, dtype=np.uint32)
 
         self._lock = Lock()
-        self.frequency = frequency
+        self._frequency = frequency
         self._task_started = False
         self._new_state_read = False
         self._num_samples_read_since_action = 0
@@ -97,45 +103,45 @@ cdef class QuanserWrapper:
         at 0)
         """
         # Create a memoryview for currents
-        self.currents_r = np.zeros(
-            self.num_analog_r_channels, dtype=np.float64)  # t_double is 64 bits
+        self._currents_r = np.zeros(
+            self._num_analog_r_channels, dtype=np.float64)  # t_double is 64 bits
 
         # Create a memoryview for -ometers
-        self.other_r_buffer = np.zeros(
-            self.num_other_r_channels, dtype=np.float64)  # t_double is 64 bits
+        self._other_r_buffer = np.zeros(
+            self._num_other_r_channels, dtype=np.float64)  # t_double is 64 bits
 
         # Create a memoryview for leds
-        self.led_w_buffer = np.zeros(
-            self.num_led_w_channels, dtype=np.float64)  # t_double is 64 bits
+        self._led_w_buffer = np.zeros(
+            self._num_led_w_channels, dtype=np.float64)  # t_double is 64 bits
 
         # Set all motor voltages_w to 0
-        self.voltages_w = np.zeros(
-            self.num_analog_w_channels, dtype=np.float64)  # t_double is 64 bits
+        self._voltages_w = np.zeros(
+            self._num_analog_w_channels, dtype=np.float64)  # t_double is 64 bits
         result = hil.hil_write_analog(
-            self.board,
-            &self.analog_w_channels[0],
-            self.num_analog_w_channels,
-            &self.voltages_w[0])
+            self._board,
+            &self._analog_w_channels[0],
+            self._num_analog_w_channels,
+            &self._voltages_w[0])
         print_possible_error(result)
 
         # Set the encoder encoder_r_buffer to 0
-        self.encoder_r_buffer = np.zeros(
-            self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
+        self._encoder_r_buffer = np.zeros(
+            self._num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
         result = hil.hil_set_encoder_counts(
-            self.board,
-            &self.encoder_r_channels[0],
-            self.num_encoder_r_channels,
-            &self.encoder_r_buffer[0])
+            self._board,
+            &self._encoder_r_channels[0],
+            self._num_encoder_r_channels,
+            &self._encoder_r_buffer[0])
         print_possible_error(result)
 
         # Enables_r all the motors
-        self.enables_r = np.ones(
-            self.num_digital_w_channels, dtype=np.int8)  # t_bool is char 8 bits
+        self._enables_r = np.ones(
+            self._num_digital_w_channels, dtype=np.int8)  # t_bool is char 8 bits
         result = hil.hil_write_digital(
-            self.board,
-            &self.digital_w_channels[0],
-            self.num_digital_w_channels,
-            &self.enables_r[0])
+            self._board,
+            &self._digital_w_channels[0],
+            self._num_digital_w_channels,
+            &self._enables_r[0])
         print_possible_error(result)
 
         return self
@@ -145,44 +151,44 @@ cdef class QuanserWrapper:
         self._stop_task()
 
         # Set the motor voltages_w to 0
-        self.voltages_w = np.zeros(
-            self.num_analog_w_channels, dtype=np.float64)  # t_double is 64 bits
+        self._voltages_w = np.zeros(
+            self._num_analog_w_channels, dtype=np.float64)  # t_double is 64 bits
         hil.hil_write_analog(
-            self.board,
-            &self.analog_w_channels[0],
-            self.num_analog_w_channels,
-            &self.voltages_w[0])
+            self._board,
+            &self._analog_w_channels[0],
+            self._num_analog_w_channels,
+            &self._voltages_w[0])
 
         # Disable all the motors
-        self.enables_r = np.zeros(
-            self.num_digital_w_channels, dtype=np.int8)  # t_bool is char 8 bits
+        self._enables_r = np.zeros(
+            self._num_digital_w_channels, dtype=np.int8)  # t_bool is char 8 bits
         hil.hil_write_digital(
-            self.board,
-            &self.digital_w_channels[0],
-            self.num_digital_w_channels,
-            &self.enables_r[0])
+            self._board,
+            &self._digital_w_channels[0],
+            self._num_digital_w_channels,
+            &self._enables_r[0])
 
-        hil.hil_close(self.board)  # Safely close the board
+        hil.hil_close(self._board)  # Safely close the board
 
     def _create_task(self):
         """Start a task reads and writes at fixed intervals"""
         result =  hil.hil_task_create_reader(
-            self.board,
+            self._board,
             1,  # The size of the internal buffer (making this >> 1 
                 # prevents error 111 but may also occasionally miss a read
                 # of state)
-            &self.analog_r_channels[0], self.num_analog_r_channels,
-            &self.encoder_r_channels[0], self.num_encoder_r_channels,
+            &self._analog_r_channels[0], self._num_analog_r_channels,
+            &self._encoder_r_channels[0], self._num_encoder_r_channels,
             NULL, 0,
-            &self.other_r_channels[0], self.num_other_r_channels,
-            &self.task)
+            &self._other_r_channels[0], self._num_other_r_channels,
+            &self._task)
         print_possible_error(result)
 
         # Start the task
         result = hil.hil_task_start(
-            self.task,
+            self._task,
             hil.HARDWARE_CLOCK_0,
-            self.frequency,
+            self._frequency,
             -1) # Read continuously 
         print_possible_error(result)
         if result < 0:
@@ -195,9 +201,9 @@ cdef class QuanserWrapper:
         if self._task_started:
             self._task_started = False
             self._bg_thread.join()
-            hil.hil_task_flush(self.task)
-            hil.hil_task_stop(self.task)
-            hil.hil_task_delete(self.task)
+            hil.hil_task_flush(self._task)
+            hil.hil_task_stop(self._task)
+            hil.hil_task_delete(self._task)
 
     def run_reader_writer(self):
         """Helper function to pass as a python callable to `Thread`"""
@@ -209,16 +215,16 @@ cdef class QuanserWrapper:
         the current action buffer to the board.
         """
         cdef hil.t_error samples_read, result_write
-        cdef qt.t_double[::] temp_currents_r = np.empty_like(self.currents_r)
+        cdef qt.t_double[::] temp_currents_r = np.empty_like(self._currents_r)
         cdef qt.t_int32[::] temp_encoder_r_buffer = np.empty_like(
-            self.encoder_r_buffer)
+            self._encoder_r_buffer)
         cdef qt.t_double[::] temp_other_r_buffer = np.empty_like(
-            self.other_r_buffer)
+            self._other_r_buffer)
 
         while self._task_started:
             # First read using task_read (blocking call that enforces timing)
             samples_read = hil.hil_task_read(
-                self.task,
+                self._task,
                 1, # Number of samples to read
                 &temp_currents_r[0],
                 &temp_encoder_r_buffer[0],
@@ -229,23 +235,23 @@ cdef class QuanserWrapper:
 
             with self._lock:
                 # Copy the temp state buffers into the quanser wrapper buffers
-                self.currents_r = temp_currents_r
-                self.encoder_r_buffer = temp_encoder_r_buffer
-                self.other_r_buffer = temp_other_r_buffer
+                self._currents_r = temp_currents_r
+                self._encoder_r_buffer = temp_encoder_r_buffer
+                self._other_r_buffer = temp_other_r_buffer
 
                 # Then write voltages_w calculated for previous time step
                 result_write = hil.hil_write_analog(
-                    self.board,
-                    &self.analog_w_channels[0],
-                    self.num_analog_w_channels,
-                    &self.voltages_w[0])
+                    self._board,
+                    &self._analog_w_channels[0],
+                    self._num_analog_w_channels,
+                    &self._voltages_w[0])
                 if result_write < 0:
                     print_possible_error(result_write)
 
                 self._new_state_read = True
                 self._num_samples_read_since_action += 1
 
-            time.sleep(0.1 / self.frequency)
+            time.sleep(0.1 / self._frequency)
 
     def action(self, voltages_w):
         """Make sure you get safe data!"""    
@@ -257,10 +263,11 @@ cdef class QuanserWrapper:
         if isinstance(voltages_w, list):
             voltages_w = np.array(voltages_w, dtype=np.float64)
         assert isinstance(voltages_w, np.ndarray)
-        assert voltages_w.shape == (self.num_analog_w_channels,)
+        assert voltages_w.shape == (self._num_analog_w_channels,)
         assert voltages_w.dtype == np.float64
-        for i in range(self.num_analog_w_channels):
-            assert -25.0 <= voltages_w[i] <= 25.0 # Operating range
+        for i in range(self._num_analog_w_channels):
+            assert -self._safe_operating_voltage <= voltages_w[i] <= \
+                    self._safe_operating_voltage
 
         self._action(voltages_w)
         self._action(voltages_w)
@@ -278,16 +285,16 @@ cdef class QuanserWrapper:
                       "samples have been missed since last env step")
 
             # Update the action in the quanser wrapper buffer
-            self.voltages_w = voltages_w.copy()
+            self._voltages_w = voltages_w.copy()
 
         while True:
             # Make sure to get the most recent state from the background reader
-            time.sleep(0.1 / self.frequency)
+            time.sleep(0.1 / self._frequency)
             with self._lock:
                 if self._new_state_read:
-                    currents_r = np.asarray(self.currents_r).copy()
-                    encoder_r_buffer = np.asarray(self.encoder_r_buffer).copy()
-                    other_r_buffer = np.asarray(self.other_r_buffer).copy()
+                    currents_r = np.asarray(self._currents_r).copy()
+                    encoder_r_buffer = np.asarray(self._encoder_r_buffer).copy()
+                    other_r_buffer = np.asarray(self._other_r_buffer).copy()
                     self._num_samples_read_since_action = 0
                     self._new_state_read = False
                     break
@@ -298,7 +305,7 @@ cdef class QuanserAero(QuanserWrapper):
     def __cinit__(self):
         board_type = b"quanser_aero_usb"
         board_identifier = b"0"
-        result = hil.hil_open(board_type, board_identifier, &self.board)
+        result = hil.hil_open(board_type, board_identifier, &self._board)
         print_possible_error(result)
         if result < 0:
             raise IOError("Board could not be opened.")
@@ -313,6 +320,7 @@ cdef class QuanserAero(QuanserWrapper):
         led_w_channels = [11000, 11001, 11002]
 
         super(QuanserAero, self).__init__(
+            safe_operating_voltage=18.0,
             analog_r_channels=analog_r_channels,
             analog_w_channels=analog_w_channels,
             digital_w_channels=digital_w_channels,
@@ -326,7 +334,7 @@ cdef class QubeServo2(QuanserWrapper):
     def __cinit__(self):
         board_type = b"qube_servo2_usb"
         board_identifier = b"0"
-        result = hil.hil_open(board_type, board_identifier, &self.board)
+        result = hil.hil_open(board_type, board_identifier, &self._board)
         print_possible_error(result)
         if result < 0:
             raise IOError("Board could not be opened.")
@@ -340,6 +348,7 @@ cdef class QubeServo2(QuanserWrapper):
         led_w_channels = [11000, 11001, 11002]
 
         super(QubeServo2, self).__init__(
+            safe_operating_voltage=18.0,
             analog_r_channels=analog_r_channels,
             analog_w_channels=analog_w_channels,
             digital_w_channels=digital_w_channels,
