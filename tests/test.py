@@ -65,7 +65,8 @@ def test_env(env_name,
              num_episodes=10,
              num_steps=250,
              sample_freq=1000,
-             state_keys=None):
+             state_keys=None,
+             verbose=False):
 
     with env_name(sample_freq) as env:
         ctrl_sys = controller(env, sample_freq=sample_freq)
@@ -76,7 +77,7 @@ def test_env(env_name,
                 state, reward, done, _ = env.step(action)
                 if done:
                     break
-                if state_keys is not None:
+                if verbose and state_keys is not None:
                     print_info(state_keys, state, action, reward)
 
     """
@@ -141,22 +142,20 @@ def main():
         '--num-episodes',
         default='10',
         type=int,
-        help='Number of episodes to run.',
-        )
+        help='Number of episodes to run.')
     parser.add_argument(
         '--num-steps',
-        default='250',
+        default='10000',
         type=int,
-        help='Number of step to run per episode.',
-        )
+        help='Number of step to run per episode.')
     parser.add_argument(
         '-f',
         '--frequency',
         '--sample-frequency',
         default='1000',
         type=float,
-        help='The frequency of samples on the Quanser hardware.',
-        )
+        help='The frequency of samples on the Quanser hardware.')
+    parser.add_argument('-v', '--verbose', action='store_true')
     args, _ = parser.parse_known_args()
 
 
@@ -170,7 +169,8 @@ def main():
         num_episodes=args.num_episodes,
         num_steps=args.num_steps,
         sample_freq=args.frequency,
-        state_keys=state_keys[args.env])
+        state_keys=state_keys[args.env],
+        verbose=args.verbose)
 
 
 if __name__ == '__main__':
