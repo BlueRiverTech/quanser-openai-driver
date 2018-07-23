@@ -1,6 +1,7 @@
 # Notes:
 # pretty fast! ('Average time of reading state is:   ', 1.05e-06)
 #              ('Average time of writing voltage is: ', 1.40e-06)
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
