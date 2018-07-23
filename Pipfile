@@ -2,3 +2,6 @@
 numpy = "*"
 gym = "*"
 gym-brt = {path = ".", editable = true}
+
+[dev-packages]
+cython = "*"
