@@ -1,30 +1,34 @@
 # Quanser OpenAI Driver
 Has an OpenAI Gym wrapper for the Quanser Qube Servo 2 and Quanser Aero
 
-- [Installation](#installation)
+- [Setup](#setup)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
     - [Recompiling Cython](#recompiling-cython-code)
 - [Basic Usage](#usage)
 - [Warning](#warning)
     - [Quick fix](#the-fastest-solution-no-restart-required-is-to-remove-the-semaphore-of-the-board)
     - [(Slighly) easier fix](#the-easiest-solution-is-to-restart-note-the-order)
 
-# Installation
-This was _ONLY_ tested on Ubuntu 16.04 LTS and Ubunbtu 18.04 LTS using Python 2.7. <br>
-To compile the Cython wrapper, you need a to have the Cython package installed. <br>
-We recommend using pipenv for package managment <br>
 
-To compile and run a test
-1. Install the HIL SDK from the [HIL SDK REPO](https://github.com/BlueRiverTech/hil_sdk_linux_x86_64)
-1. Install gym_qube
-    - `pip install -e .`
-    - OR `pipenv install`
-1. Run the random agent test
-    - For the Qube: `python tests/test.py --env AeroPositionEnv --control aero-classic`
-    - For the Aero: `python tests/test.py --env QubeFlipUpEnv --control flip-up`
+# Setup
+We have tested on Ubuntu 16.04 LTS and Ubunbtu 18.04 LTS using Python 2.7. Should also work with Python 3.x<br>
 
-The `gym-environments` directory contains a Python and OpenAI Gym wrapper around the HIL SDK
+### Prerequisites
+Install the HIL SDK from Quanser. A mirror is available at https://github.com/BlueRiverTech/hil_sdk_linux_x86_64
 
-#### Recompiling Cython code:
+### Installation
+We recommend using [Pipenv](https://docs.pipenv.org/). Install dependencies found in the [Pipfile](./Pipfile) by running:<br>
+```bash
+    pipenv install # install the dependencies
+    pipenv shell # activate the virtual environment
+```
+
+Once you have that setup: Run the classical control baseline<br>
+- For the Qube: `python tests/test.py --env env QubeFlipUpEnv --control flip-up`
+- For the Aero: `python tests/test.py --env AeroPositionEnv --control aero-classic`
+
+### Recompiling Cython code:
 This installs the Quanser wrapper by using the pre-compiled C code.
 If you wish to modify the Quanser wrapper (the Cython code) you will need to `cd gym_brt/envs/QuanserWrapper` and then `make` to compile the changed Cython code.
 You will need Cython installed to do this.
@@ -92,5 +96,4 @@ Error 1073: QERR_BOARD_ALREADY_OPEN: The HIL board is already opened by another 
 1. Replug USB into the Qube/Aero
 Once you restarted, you can try running the program again (with proper closing).
 
-![Qube Standing Up](/QUBE-Servo_2_angled_pendulum.jpg)
-
+![Qube Standing Up](./QUBE-Servo_2_angled_pendulum.jpg)
