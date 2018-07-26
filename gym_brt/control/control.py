@@ -136,7 +136,7 @@ class QubeFlipUpInvertedClassicControl(Control):
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
         # Found analytically
         K = np.array(
-            [3.1622776602, 20.7014465019, 1.9988564038, 2.4570771444])
+             [547.722557505, 59.8250246777, 312.897951988, 4.64209502521])
         state = np.array([alpha, alpha_dot, theta, theta_dot])
         action = np.dot(state, K)
         return action
