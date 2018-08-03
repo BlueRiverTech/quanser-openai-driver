@@ -2,54 +2,44 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-import numpy as np
+
+from gym_brt.envs.QuanserSimulator.rotary_pendulum import \
+    RotaryPendulumNonLinearApproximation, RotaryPendulumLinearApproximation
+
+import pyximport; pyximport.install()
+from c_rotary_pedulum import CythonRotaryPendulumNonLinearApproximation
 
 
-class QuanserQubeSimulator:
-    def __init__(self, frequency=1000):
-        """
-        Args:
-            - Frequency: Frequency of the reading/writing task (in Hz)
-        """
-        self._frequency = frequency
+pendulums = {
+    'RotaryPendulumNonLinearApproximation': RotaryPendulumNonLinearApproximation,
+    'RotaryPendulumLinearApproximation': RotaryPendulumLinearApproximation,
+    'CythonRotaryPendulumNonLinearApproximation': CythonRotaryPendulumNonLinearApproximation,
+}
 
-        self._theta = 0
-        self._alpha = np
+class QuanserSimulation(object):
 
-        length_arm = 0.00  # Lr
-        length_pendulum = 0.00  # Lp
+    def __init__(self, pendulum='RotaryPendulumNonLinearApproximation',
+                 safe_operating_voltage=18.0, euler_steps=1, frequency=1000):
+        # Pendulum simulation
+        p = pendulums[pendulum]
+        def pendulum(state, action, time_step=1/frequency, euler_steps=euler_steps):
+            p(state, action, time_step=time_step, euler_steps=euler_steps)
+        self.pendulum = pendulum
 
-        terminal_resistance = 8.4  # Rm Terminal resistance 8.4Ω
-        torque_const = 0.042  # kt = Torque constant 0.042 N.m/A
-        motor_backemf = 0.042  # km Motor back-emf constant 0.042 V/(rad/s)
-        rotor_inertia = 4.0e-6  # Jm Rotor inertia 4.0 × 10 −6 kg.m 2
-        rotor_inductance = 1.16  # Lm Rotor inductance 1.16 mH
-        0.0106  # mh Load hub mass 0.0106 kg
-        0.0111  # rh Load hub mass 0.0111 m
-        0.6e-6  # Jh Load hub inertia 0.6 × 10 −6 kg.m 2
-        0.053  # md Mass of disk load 0.053 kg
-        0.0248  # rd Radius of disk load 0.0248 m
+        # Inital state
+        self.state = np.array([0., 0., 0., 0.], dtype=np.float64)
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
         pass
+ 
+    def action(self, action):
+        self.state = self.pendulum(self.state, action)
+        theta, alpha = self.state[:2]
+        encoders = [theta, alpha]
+        currents = [action / 8.4]  # 8.4 is resistance
+        others = [0.] #[tach0, other_stuff]
 
-    def action(self, voltages_w):
-        return currents_r, encoder_r_buffer, other_r_buffer
-
-
-    def _step(state, action, time_interval=None):
-        pass
-
-
-    # Equations
-    def moment_of_inertia_motor_shaft(motor_backemf, current_motor)
-        # tau_m = km * im(t)
-        return motor_backemf * current
-
-    def current_motor(voltage_motor_input, motor_backemf, motor_speed, terminal_resistance):
-        # im(t) = (vm(t) − km * omega_m(t)) / Rm
-        return (voltage_motor_input - motor_backemf * motor_speed) / terminal_resistance
-        
+        return currents, encoders, others
