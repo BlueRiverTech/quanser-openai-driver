@@ -1,9 +1,10 @@
+            frequency=frequency)
+            frequency=frequency)
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
 cimport quanser_types as qt
-cimport quanser_timer
 cimport numpy as np
 cimport hil
 
@@ -45,7 +46,9 @@ cdef class QuanserWrapper:
     cdef qt.t_double _frequency, _safe_operating_voltage
 
     cdef float _last_read_time
-    cdef bint _timer_running
+    cdef bint _task_started, _new_state_read
+    cdef object _bg_thread, _lock
+    cdef int _num_samples_read_since_action
 
     def __init__(self,
                  safe_operating_voltage,
@@ -74,6 +77,7 @@ cdef class QuanserWrapper:
                 commumication
             - Frequency: Frequency of the reading/writing task (in Hz)
         """
+        self._safe_operating_voltage = safe_operating_voltage
         # Convert the channels into numpy arrays which are then stored in 
         # memoryviews (to pass C buffers to the HIL API)
         self._num_analog_r_channels = len(analog_r_channels)
@@ -89,9 +93,12 @@ cdef class QuanserWrapper:
         self._other_r_channels = np.array(other_r_channels, dtype=np.uint32)
         self._led_w_channels = np.array(led_w_channels, dtype=np.uint32)
 
-        self._safe_operating_voltage = safe_operating_voltage
-        self._timer_running = False
+        self._lock = Lock()
         self._frequency = frequency
+        self._task_started = False
+        self._new_state_read = False
+        self._num_samples_read_since_action = 0
+        self._bg_thread = Thread(target=self.run_reader_writer, args=())
         self._last_read_time = 0
 
     def __enter__(self):
@@ -145,6 +152,8 @@ cdef class QuanserWrapper:
 
     def __exit__(self, type, value, traceback):
         """Make sure hardware turns off safely"""
+        self._stop_task()
+
         # Set the motor voltages_w to 0
         self._voltages_w = np.zeros(
             self._num_analog_w_channels, dtype=np.float64)  # t_double is 64 bits
@@ -164,12 +173,96 @@ cdef class QuanserWrapper:
             &self._enables_r[0])
 
         hil.hil_close(self._board)  # Safely close the board
- 
+
+    def _create_task(self):
+        """Start a task reads and writes at fixed intervals"""
+        result =  hil.hil_task_create_reader(
+            self._board,
+            1,  # The size of the internal buffer (making this >> 1 
+                # prevents error 111 but may also occasionally miss a read
+                # of state)
+            &self._analog_r_channels[0], self._num_analog_r_channels,
+            &self._encoder_r_channels[0], self._num_encoder_r_channels,
+            NULL, 0,
+            &self._other_r_channels[0], self._num_other_r_channels,
+            &self._task)
+        print_possible_error(result)
+
+        # Start the task
+        result = hil.hil_task_start(
+            self._task,
+            hil.HARDWARE_CLOCK_0,
+            self._frequency,
+            -1) # Read continuously 
+        print_possible_error(result)
+        if result < 0:
+            raise ValueError("Could not start hil task")
+
+        self._task_started = True
+        self._bg_thread.start()
+
+    def _stop_task(self):
+        if self._task_started:
+            self._task_started = False
+            self._bg_thread.join()
+            hil.hil_task_flush(self._task)
+            hil.hil_task_stop(self._task)
+            hil.hil_task_delete(self._task)
+
+    def run_reader_writer(self):
+        """Helper function to pass as a python callable to `Thread`"""
+        self._run_reader_writer()
+
+    cdef _run_reader_writer(self):
+        """Run background thread that continously updates QuanserWrapper's
+        internal buffers with the newest state at a sample instant, and writes
+        the current action buffer to the board.
+        """
+        cdef hil.t_error samples_read, result_write
+        cdef qt.t_double[::] temp_currents_r = np.empty_like(self._currents_r)
+        cdef qt.t_int32[::] temp_encoder_r_buffer = np.empty_like(
+            self._encoder_r_buffer)
+        cdef qt.t_double[::] temp_other_r_buffer = np.empty_like(
+            self._other_r_buffer)
+
+        while self._task_started:
+            # First read using task_read (blocking call that enforces timing)
+            samples_read = hil.hil_task_read(
+                self._task,
+                1, # Number of samples to read
+                &temp_currents_r[0],
+                &temp_encoder_r_buffer[0],
+                NULL,
+                &temp_other_r_buffer[0])
+            if samples_read < 0:
+                print_possible_error(samples_read)
+
+            with self._lock:
+                # Copy the temp state buffers into the quanser wrapper buffers
+                self._currents_r = temp_currents_r
+                self._encoder_r_buffer = temp_encoder_r_buffer
+                self._other_r_buffer = temp_other_r_buffer
+
+                # Then write voltages_w calculated for previous time step
+                result_write = hil.hil_write_analog(
+                    self._board,
+                    &self._analog_w_channels[0],
+                    self._num_analog_w_channels,
+                    &self._voltages_w[0])
+                if result_write < 0:
+                    print_possible_error(result_write)
+
+                self._new_state_read = True
+                self._num_samples_read_since_action += 1
+
+            time.sleep(0.1 / self._frequency)
+
     def action(self, voltages_w):
-        """Make sure you get safe data!"""
-        # If it's the first time running action, then start the timer
+        """Make sure you get safe data!"""    
+        # If it's the first time running action, then start the background r/w 
+        # task
         if not self._task_started:
-            self._create_timer()
+            self._create_task()
 
         if isinstance(voltages_w, list):
             voltages_w = np.array(voltages_w, dtype=np.float64)
@@ -180,34 +273,36 @@ cdef class QuanserWrapper:
             assert -self._safe_operating_voltage <= voltages_w[i] <= \
                     self._safe_operating_voltage
 
+        self._action(voltages_w)
+        self._action(voltages_w)
+        self._action(voltages_w)
         return self._action(voltages_w)
 
     def _action(self,
                 np.ndarray[qt.t_double, ndim=1, mode="c"] voltages_w not None):
         """Perform actions on the device (voltages_w must always be ndarray!)"""
-        # First read using task_read (blocking call that enforces timing)
-        samples_read = hil.hil_task_read(
-            self._task,
-            1,  # Number of samples to read
-            &temp_currents_r[0],
-            &temp_encoder_r_buffer[0],
-            NULL,
-            &temp_other_r_buffer[0])
-        if samples_read < 0:
-            print_possible_error(samples_read)
 
-        # Then write voltages_w calculated for previous time step
-        result_write = hil.hil_write_analog(
-            self._board,
-            &self._analog_w_channels[0],
-            self._num_analog_w_channels,
-            &self._voltages_w[0])
-        if result_write < 0:
-            print_possible_error(result_write)
+        with self._lock:
+            # Print warning if buffer read has been missed
+            if self._num_samples_read_since_action > 1:
+                print("Warning:", self._num_samples_read_since_action - 1,
+                      "samples have been missed since last env step")
 
-        return np.asarray(self._currents_r), \
-            np.asarray(self._encoder_r_buffer), \
-            np.asarray(self._other_r_buffer)
+            # Update the action in the quanser wrapper buffer
+            self._voltages_w = voltages_w.copy()
+
+        while True:
+            # Make sure to get the most recent state from the background reader
+            time.sleep(0.1 / self._frequency)
+            with self._lock:
+                if self._new_state_read:
+                    currents_r = np.asarray(self._currents_r).copy()
+                    encoder_r_buffer = np.asarray(self._encoder_r_buffer).copy()
+                    other_r_buffer = np.asarray(self._other_r_buffer).copy()
+                    self._num_samples_read_since_action = 0
+                    self._new_state_read = False
+                    break
+        return currents_r, encoder_r_buffer, other_r_buffer
 
 
 cdef class QuanserAero(QuanserWrapper):
