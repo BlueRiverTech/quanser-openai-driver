@@ -41,7 +41,7 @@ class RotaryPendulumNonLinearApproximation(object):
         # Enviroment params
         self.g = 9.81  # Gravity Constant
 
-    def __call__(self, state, input_voltage, time_step, euler_steps=1):
+    def __call__(self, state, action, time_step, euler_steps=1):
         theta, alpha, theta_dot, alpha_dot = state
 
         time_step = time_step / euler_steps
@@ -84,7 +84,7 @@ class RotaryPendulumNonLinearApproximation(object):
                     [alpha_dot**2]
                 ]).reshape(5,1)
             u = np.array([
-                    [(self.km / self.rm) * (input_voltage - self.km * theta_dot) - self.b1 * theta_dot],
+                    [(self.km / self.rm) * (action - self.km * theta_dot) - self.b1 * theta_dot],
                     [-self.b2 * alpha_dot],
                     [self.g]
                 ]).reshape(3,1)
@@ -141,10 +141,10 @@ class RotaryPendulumLinearApproximation(object):
         self.A[2,2] = self.A[2,2] - kt*kt/Rm*self.B[2]
         self.A[3,2] = self.A[3,2] - kt*kt/Rm*self.B[3]
         
-    def __call__(self, state, input_voltage, time_step, euler_steps=None):
+    def __call__(self, state, action, time_step, euler_steps=None):
         # Euler steps are ignored
         state = state.reshape(4, 1)
-        state_dot = self.A.dot(state) + self.B * input_voltage
+        state_dot = self.A.dot(state) + self.B * action
         state_delta = state_dot * time_step
         state += state_delta
         return state.reshape(4,)

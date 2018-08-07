@@ -66,10 +66,11 @@ def test_env(env_name,
              num_steps=250,
              sample_freq=1000,
              state_keys=None,
+             env_base='QubeServo2',
              verbose=False,
              render=False):
 
-    with env_name(frequency=sample_freq) as env:
+    with env_name(env_base=env_base, frequency=sample_freq) as env:
         ctrl_sys = controller(env, sample_freq=sample_freq)
         for episode in range(num_episodes):
             state = env.reset()
@@ -124,6 +125,13 @@ def main():
         'flip': QubeFlipUpInvertedClassicControl,
         'hold': QubeHoldInvertedClassicControl,
     }
+    # Determines whether to use hardware or one of the simulators
+    base = [
+        'QubeServo2',
+        'QubeSimLinear',
+        'QubeSimNonLinear',
+        'QubeSimNonLinearCython',
+    ]
 
     # Parse command line args
     parser = argparse.ArgumentParser()
@@ -156,6 +164,14 @@ def main():
         default='1000',
         type=float,
         help='The frequency of samples on the Quanser hardware.')
+    parser.add_argument(
+        '-s',
+        '--env-base',
+        '--hardware',
+        '--simulator',
+        default='QubeServo2',
+        choices=base,
+        help='Select either hardware or one of several simulator options for the Qube.')
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-r', '--render', action='store_true')
     args, _ = parser.parse_known_args()
@@ -171,6 +187,7 @@ def main():
         num_steps=args.num_steps,
         sample_freq=args.frequency,
         state_keys=state_keys[args.env],
+        env_base=args.env_base,
         verbose=args.verbose,
         render=args.render)
 

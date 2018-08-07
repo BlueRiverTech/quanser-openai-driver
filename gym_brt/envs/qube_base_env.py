@@ -71,7 +71,7 @@ class QubeBaseEnv(gym.Env):
         'video.frames_per_second' : 50
     }
 
-    def __init__(self, qube_type='QubeServo2', frequency=1000):
+    def __init__(self, env_base='QubeServo2', frequency=1000):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
@@ -95,7 +95,7 @@ class QubeBaseEnv(gym.Env):
         self._prev_t = time.time()
 
         # Open the Qube
-        self.qube = QUBES[qube_type](frequency=frequency)
+        self.qube = QUBES[env_base](frequency=frequency)
         self.qube.__enter__()
 
         self.seed()
