@@ -41,8 +41,8 @@ class QubeFlipUpReward(object):
 
 
 class QubeFlipUpEnv(QubeBaseEnv):
-    def __init__(self, frequency=1000):
-        super(QubeFlipUpEnv, self).__init__(frequency=frequency)
+    def __init__(self, qube_type='QubeServo2', frequency=1000):
+        super(QubeFlipUpEnv, self).__init__(qube_type=qube_type, frequency=frequency)
         self.reward_fn = QubeFlipUpReward()
 
 

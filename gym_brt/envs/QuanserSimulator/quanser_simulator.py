@@ -7,7 +7,8 @@ from gym_brt.envs.QuanserSimulator.rotary_pendulum import \
     RotaryPendulumNonLinearApproximation, RotaryPendulumLinearApproximation
 
 import pyximport; pyximport.install()
-from c_rotary_pedulum import CythonRotaryPendulumNonLinearApproximation
+from gym_brt.envs.QuanserSimulator.c_rotary_pedulum import \
+    CythonRotaryPendulumNonLinearApproximation
 
 
 pendulums = {
@@ -16,8 +17,7 @@ pendulums = {
     'CythonRotaryPendulumNonLinearApproximation': CythonRotaryPendulumNonLinearApproximation,
 }
 
-class QuanserSimulation(object):
-
+class QuanserSimulator(object):
     def __init__(self, pendulum='RotaryPendulumNonLinearApproximation',
                  safe_operating_voltage=18.0, euler_steps=1, frequency=1000):
         # Pendulum simulation

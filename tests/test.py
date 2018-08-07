@@ -66,9 +66,10 @@ def test_env(env_name,
              num_steps=250,
              sample_freq=1000,
              state_keys=None,
-             verbose=False):
+             verbose=False,
+             render=False):
 
-    with env_name(sample_freq) as env:
+    with env_name(frequency=sample_freq) as env:
         ctrl_sys = controller(env, sample_freq=sample_freq)
         for episode in range(num_episodes):
             state = env.reset()
@@ -79,6 +80,8 @@ def test_env(env_name,
                     break
                 if verbose and state_keys is not None:
                     print_info(state_keys, state, action, reward)
+                if render:
+                   env.render()
 
     """
     # Another way to run the Qube enviroment
@@ -109,8 +112,7 @@ def main():
     envs = {
         'AeroPositionEnv': AeroPositionEnv,
         'QubeFlipUpEnv': QubeFlipUpEnv,
-        'QubeHoldInvertedEnv': \
-            QubeHoldInvertedEnv
+        'QubeHoldInvertedEnv': QubeHoldInvertedEnv
     }
     controllers = {
         'none': NoControl,
@@ -155,6 +157,7 @@ def main():
         type=float,
         help='The frequency of samples on the Quanser hardware.')
     parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-r', '--render', action='store_true')
     args, _ = parser.parse_known_args()
 
     print('Testing Env:  {}'.format(args.env))
@@ -168,7 +171,8 @@ def main():
         num_steps=args.num_steps,
         sample_freq=args.frequency,
         state_keys=state_keys[args.env],
-        verbose=args.verbose)
+        verbose=args.verbose,
+        render=args.render)
 
 
 if __name__ == '__main__':

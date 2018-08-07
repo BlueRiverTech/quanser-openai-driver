@@ -51,8 +51,8 @@ class QubeHoldInvertedReward(object):
 
 
 class QubeHoldInvertedEnv(QubeBaseEnv):
-    def __init__(self, frequency=1000, alpha_tolerance=None):
-        super(QubeHoldInvertedEnv, self).__init__(frequency=frequency)
+    def __init__(self, qube_type='QubeServo2', frequency=1000, alpha_tolerance=None):
+        super(QubeHoldInvertedEnv, self).__init__(qube_type=qube_type, frequency=frequency)
         self.reward_fn = QubeHoldInvertedReward()
         self._alpha_tolerance = alpha_tolerance if alpha_tolerance is not None \
                                                 else ALPHA_TOLERANCE
