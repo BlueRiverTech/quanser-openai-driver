@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-
 import gym
 import time
 import math
@@ -12,6 +11,8 @@ from gym import spaces
 from gym.utils import seeding
 from gym_brt.envs.QuanserWrapper import QubeServo2
 from gym_brt.envs.QuanserSimulator.quanser_simulator import QuanserSimulator
+
+from gym_brt.control import QubeFlipUpInvertedClassicControl
 
 
 # theta, alpha: positions, velocities, accelerations
@@ -28,7 +29,7 @@ MAX_MOTOR_VOLTAGE = 8.0
 ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
 
-WARMUP_TIME = 2 # 2 seconds
+WARMUP_TIME = 5 # in seconds
 
 STATE_KEYS = [
     'COS_THETA',
@@ -71,7 +72,7 @@ class QubeBaseEnv(gym.Env):
         'video.frames_per_second' : 50
     }
 
-    def __init__(self, env_base='QubeServo2', frequency=1000):
+    def __init__(self, env_base='QubeServo2', frequency=1000, alpha_tolerance=(10 * np.pi / 180)):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
@@ -79,6 +80,8 @@ class QubeBaseEnv(gym.Env):
         self.action_space = spaces.Box(
             ACTION_LOW, ACTION_HIGH,
             dtype=np.float32)
+
+        self._alpha_tolerance = alpha_tolerance
 
         self.reward_fn = QubeBaseReward()
 
@@ -157,9 +160,49 @@ class QubeBaseEnv(gym.Env):
         ], dtype=np.float32)
         return state
 
-    def reset(self):
-        # Start the pendulum stationary at the bottom (stable point)
-        # 2 seconds is usually enough to stabilize
+    def _flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
+        """Run classic control for flip-up until the pendulum is inverted for a
+        set amount of time. Assumes that initial state is stationary downwards.
+
+        Args:
+            early_quit: Quit if flip up doesn't succeed after set amount of time
+            time_out: Time given to the classical control system to flip up 
+                before quitting (in seconds)
+            min_hold_time: Time to hold the pendulum upright within a tolerance
+                (in seconds)
+            alpha_tolerance: Angle from perfectly inverted that counts as
+                'upright' (in radians)
+        """
+        control = QubeFlipUpInvertedClassicControl(env=self, sample_freq=self._frequency)
+        time_out = time_out * self._frequency
+        time_hold = min_hold_time * self._frequency
+        sample = 0 # Samples since control system started
+        samples_upright = 0 # Consecutive samples pendulum is upright
+
+        state = self._get_state()
+        while True:
+            action = control.action(state)
+            state, _, _, _ = self.step(action)
+
+            # Break or reset to down if timed out
+            if sample > time_out:
+                if early_quit:
+                    break
+                else:
+                    self.dampen_down()
+
+            # Break if pendulum is inverted
+            if self._alpha < self._alpha_tolerance:
+                if samples_upright > time_hold:
+                    break
+                samples_upright += 1
+            else:
+                samples_upright = 0
+            sample += 1
+
+        return state
+
+    def _dampen_down(self):
         if WARMUP_TIME > 0:
             start_time = time.time()
             while (time.time() - start_time) < WARMUP_TIME:
@@ -167,12 +210,33 @@ class QubeBaseEnv(gym.Env):
                     shape=self.action_space.shape,
                     dtype=self.action_space.dtype)
                 state = self._step(action)
-            return state
         else:
             action = np.zeros(
                 shape=self.action_space.shape,
                 dtype=self.action_space.dtype)
-            return self._step(action)
+            state = self._step(action)
+        return state
+
+    def _center(self):
+        return self._get_state()
+
+    def flip_up(self, early_quit=False, time_out=np.inf, min_hold_time=1):
+        self.dampen_down()
+        return self._flip_up(
+            early_quit=early_quit,
+            time_out=time_out,
+            min_hold_time=min_hold_time)
+
+    def dampen_down(self):
+        self.center()
+        return self._dampen_down()
+
+    def center(self):
+        return self._center()
+
+    def reset(self):
+        # Start the pendulum stationary at the bottom (stable point)
+        return self._dampen_down()
 
     def step(self, action):
         state = self._step(action)

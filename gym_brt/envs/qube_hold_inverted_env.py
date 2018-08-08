@@ -12,15 +12,6 @@ from gym_brt.envs.qube_base_env import \
     ACTION_HIGH, \
     ACTION_LOW, \
     WARMUP_TIME
-from gym_brt.control import QubeFlipUpInvertedClassicControl
-
-
-# Time given to the classical control system to flip up before quitting
-FLIP_UP_TIME_OUT = np.inf
-# Time in seconds to hold the pendulum upright within a tolerance
-MIN_INVERTED_HOLD_TIME = 1
-# Angle from perfectly inverted that counts as 'upright' (in radians)
-ALPHA_TOLERANCE = 10 * np.pi / 180
 
 
 class QubeHoldInvertedReward(object):
@@ -54,8 +45,6 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
     def __init__(self, env_base='QubeServo2', frequency=1000, alpha_tolerance=None):
         super(QubeHoldInvertedEnv, self).__init__(env_base=env_base, frequency=frequency)
         self.reward_fn = QubeHoldInvertedReward()
-        self._alpha_tolerance = alpha_tolerance if alpha_tolerance is not None \
-                                                else ALPHA_TOLERANCE
 
     def reset(self):
         # Start the pendulum stationary at the bottom (stable point)
@@ -72,32 +61,7 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
                 dtype=self.action_space.dtype)
             state = self._step(action)
 
-        # Run classic control for flip-up until the pendulum is inverted for a
-        # set amount of time
-        control = QubeFlipUpInvertedClassicControl(self,
-            sample_freq=self._frequency)
-        time_out_samples = FLIP_UP_TIME_OUT * self._frequency
-        time_hold_samples = MIN_INVERTED_HOLD_TIME * self._frequency
-
-        total_samples = 0 # Number of samples since control system started
-        samples_upright = 0 # Consecutive samples that the pendulum has been inverted 
-        while True:
-            action = control.action(state)
-            state, _, _, _ = self.step(action)
-
-            # Break if timed out
-            if total_samples > time_out_samples:
-                print('Warning: flip-up control in reset timed out.')
-                break
-
-            # Break if pendulum is inverted
-            if self._alpha < self._alpha_tolerance:
-                if samples_upright > time_hold_samples:
-                    break
-                samples_upright += 1
-            else:
-                samples_upright = 0
-            total_samples += 1
+        self.flip_up()
 
         return state
 
