@@ -53,7 +53,7 @@ def normalize_angle(theta):
 
 
 class AeroPositionReward(object):
-    def __init__(self):
+    def __init__(self, *args):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
             high=ACTION_HIGH, dtype=np.float32)

@@ -27,6 +27,7 @@ cdef extern from "/opt/quanser/hil_sdk/include/quanser_types.h":
     ctypedef signed int     t_int     # must always be 32 bits
     ctypedef unsigned int   t_uint    # must always be 32 bits
     ctypedef double         t_double  # must always be 8 bytes (64 bits)
+    ctypedef double         t_long    # must always be 64 bits
 
     ctypedef t_byte         t_int8
     ctypedef t_ubyte        t_uint8
