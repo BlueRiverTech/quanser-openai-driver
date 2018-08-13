@@ -189,6 +189,8 @@ class QubeBaseEnv(gym.Env):
                 if early_quit:
                     break
                 else:
+                    sample = 0
+                    samples_upright = 0
                     self.dampen_down()
 
             # Break if pendulum is inverted
@@ -202,20 +204,27 @@ class QubeBaseEnv(gym.Env):
 
         return state
 
-    def _dampen_down(self):
-        if WARMUP_TIME > 0:
-            start_time = time.time()
-            while (time.time() - start_time) < WARMUP_TIME:
-                action = np.zeros(
-                    shape=self.action_space.shape,
-                    dtype=self.action_space.dtype)
-                state = self._step(action)
-        else:
-            action = np.zeros(
-                shape=self.action_space.shape,
-                dtype=self.action_space.dtype)
-            state = self._step(action)
-        return state
+    def _dampen_down(self, min_hold_time=0.5):
+        action = np.zeros(
+            shape=self.action_space.shape,
+            dtype=self.action_space.dtype)
+
+        time_hold = min_hold_time * self._frequency
+        samples_downwards = 0 # Consecutive samples pendulum is downwards
+
+        while True:
+            state, _, _, _ = self.step(action)
+            # Break if pendulum is stationary
+            ref_state = [0.0, 0.0, 0.0, 0.0]
+            if np.allclose(state[4:8], ref_state, rtol=1e-02, atol=1e-03):
+                if samples_downwards > time_hold:
+                    # self.state_offsets[4:] = state[4:]
+                    break
+                samples_downwards += 1
+            else:
+                samples_downwards = 0
+
+        return self._get_state()
 
     def _center(self):
         return self._get_state()
@@ -236,7 +245,12 @@ class QubeBaseEnv(gym.Env):
 
     def reset(self):
         # Start the pendulum stationary at the bottom (stable point)
-        return self._dampen_down()
+        state = self._dampen_down()
+        self.qube.reset_encoders()
+        action = np.zeros(
+            shape=self.action_space.shape,
+            dtype=self.action_space.dtype)
+        return self.step(action)[0]
 
     def step(self, action):
         state = self._step(action)

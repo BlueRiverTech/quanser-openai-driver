@@ -199,6 +199,17 @@ cdef class QuanserWrapper:
             hil.hil_task_stop(self._task)
             hil.hil_task_delete(self._task)
 
+    def reset_encoders(self):
+        # Set the encoder encoder_r_buffer to 0
+        self._encoder_r_buffer = np.zeros(
+            self._num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
+        result = hil.hil_set_encoder_counts(
+            self._board,
+            &self._encoder_r_channels[0],
+            self._num_encoder_r_channels,
+            &self._encoder_r_buffer[0])
+        print_possible_error(result)
+
     def action(self, voltages_w):
         """Make sure you get safe data!"""    
         # If it's the first time running action, then start the background r/w 
@@ -232,8 +243,8 @@ cdef class QuanserWrapper:
             print_possible_error(samples_read)
 
         samples_overflowed = hil.hil_task_get_buffer_overflows(self._task)
-        if (samples_overflowed - self.samples_overflowed) > 0:
-            print('Missed {} samples'.format(samples_overflowed))
+        if samples_overflowed > self.samples_overflowed:
+            print('Missed {} samples'.format(samples_overflowed - self.samples_overflowed))
             self.samples_overflowed = samples_overflowed
 
         # Then write voltages_w calculated for previous time step
