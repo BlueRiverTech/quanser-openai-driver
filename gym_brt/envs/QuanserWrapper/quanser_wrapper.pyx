@@ -42,6 +42,7 @@ cdef class QuanserWrapper:
     cdef qt.t_double[::] _led_w_buffer
 
     cdef qt.t_double _frequency, _safe_operating_voltage
+    cdef qt.t_int samples_overflowed
     cdef bint _task_started
 
     def __init__(self,
@@ -229,6 +230,11 @@ cdef class QuanserWrapper:
             &self._other_r_buffer[0])
         if samples_read < 0:
             print_possible_error(samples_read)
+
+        samples_overflowed = hil.hil_task_get_buffer_overflows(self._task)
+        if (samples_overflowed - self.samples_overflowed) > 0:
+            print('Missed {} samples'.format(samples_overflowed))
+            self.samples_overflowed = samples_overflowed
 
         # Then write voltages_w calculated for previous time step
         self._voltages_w = voltages_w
