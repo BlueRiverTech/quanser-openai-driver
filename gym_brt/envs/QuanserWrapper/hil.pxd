@@ -25,21 +25,21 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
         pass
     ctypedef struct t_monitor:
         pass
-    cdef enum t_clock: # The original c code also defines tag_clock here
-        SYSTEM_CLOCK_4    = -4
-        SYSTEM_CLOCK_3    = -3
-        SYSTEM_CLOCK_2    = -2
-        SYSTEM_CLOCK_1    = -1
-        HARDWARE_CLOCK_0  = 0
-        HARDWARE_CLOCK_1  = 1
-        HARDWARE_CLOCK_2  = 2
-        HARDWARE_CLOCK_3  = 3
-        HARDWARE_CLOCK_4  = 4
-        HARDWARE_CLOCK_5  = 5
-        HARDWARE_CLOCK_6  = 6
-        HARDWARE_CLOCK_7  = 7
-        HARDWARE_CLOCK_8  = 8
-        HARDWARE_CLOCK_9  = 9
+    cdef enum t_clock:
+        SYSTEM_CLOCK_4 = -4
+        SYSTEM_CLOCK_3 = -3
+        SYSTEM_CLOCK_2 = -2
+        SYSTEM_CLOCK_1 = -1
+        HARDWARE_CLOCK_0 = 0
+        HARDWARE_CLOCK_1 = 1
+        HARDWARE_CLOCK_2 = 2
+        HARDWARE_CLOCK_3 = 3
+        HARDWARE_CLOCK_4 = 4
+        HARDWARE_CLOCK_5 = 5
+        HARDWARE_CLOCK_6 = 6
+        HARDWARE_CLOCK_7 = 7
+        HARDWARE_CLOCK_8 = 8
+        HARDWARE_CLOCK_9 = 9
         HARDWARE_CLOCK_10 = 10
         HARDWARE_CLOCK_11 = 11
         HARDWARE_CLOCK_12 = 12
@@ -50,6 +50,10 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
         HARDWARE_CLOCK_17 = 17
         HARDWARE_CLOCK_18 = 18
         HARDWARE_CLOCK_19 = 19
+    cdef enum t_buffer_overflow_mode:
+        BUFFER_MODE_ERROR_ON_OVERFLOW,  # return an error on buffer overflow (default).
+        BUFFER_MODE_OVERWRITE_ON_OVERFLOW,  # overwrite old samples on buffer overflow.
+        BUFFER_MODE_DISCARD_ON_OVERFLOW  # discard new samples on buffer overflow.
 
     t_error hil_open(
         const char * card_type,
@@ -178,3 +182,9 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
         t_int32 encoder_buffer[],
         t_boolean digital_buffer[],
         t_double other_buffer[])
+
+    # Allow buffer overflow
+    t_error hil_task_set_buffer_overflow_mode(
+        t_task task,
+        t_buffer_overflow_mode mode)
+    t_int hil_task_get_buffer_overflows(t_task task)
