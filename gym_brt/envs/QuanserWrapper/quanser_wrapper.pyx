@@ -225,10 +225,6 @@ cdef class QuanserWrapper:
         for i in range(self._num_analog_w_channels):
             assert -self._safe_operating_voltage <= voltages_w[i] <= \
                     self._safe_operating_voltage
-
-        self._action(voltages_w)
-        self._action(voltages_w)
-        self._action(voltages_w)
         return self._action(voltages_w)
 
     def _action(self, np.ndarray[qt.t_double, ndim=1, mode="c"] voltages_w not None):
