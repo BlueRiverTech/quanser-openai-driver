@@ -2,15 +2,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-cimport quanser_types as qt
+cimport gym_brt.quanser.quanser_wrapper.quanser_types as qt
+cimport gym_brt.quanser.quanser_wrapper.hil as hil
 cimport numpy as np
-cimport hil
 
-from gym_brt.envs.QuanserWrapper.helpers.error_codes import print_possible_error
+from gym_brt.quanser.quanser_wrapper.error_codes import print_possible_error
 
-from threading import Thread, Lock
 import numpy as np
-import time
 
 
 cdef class QuanserWrapper:
@@ -27,7 +25,7 @@ cdef class QuanserWrapper:
 
     cdef qt.t_uint32[::] _digital_w_channels
     cdef qt.t_uint32 _num_digital_w_channels
-    cdef qt.t_boolean[::] _enables_r
+    cdef qt.t_boolean[::] _enables_w
 
     cdef qt.t_uint32[::] _encoder_r_channels
     cdef qt.t_uint32 _num_encoder_r_channels
@@ -129,13 +127,13 @@ cdef class QuanserWrapper:
         print_possible_error(result)
 
         # Enables_r all the motors
-        self._enables_r = np.ones(
+        self._enables_w = np.ones(
             self._num_digital_w_channels, dtype=np.int8)  # t_bool is char 8 bits
         result = hil.hil_write_digital(
             self._board,
             &self._digital_w_channels[0],
             self._num_digital_w_channels,
-            &self._enables_r[0])
+            &self._enables_w[0])
         print_possible_error(result)
 
         return self
@@ -154,13 +152,13 @@ cdef class QuanserWrapper:
             &self._voltages_w[0])
 
         # Disable all the motors
-        self._enables_r = np.zeros(
+        self._enables_w = np.zeros(
             self._num_digital_w_channels, dtype=np.int8)  # t_bool is char 8 bits
         hil.hil_write_digital(
             self._board,
             &self._digital_w_channels[0],
             self._num_digital_w_channels,
-            &self._enables_r[0])
+            &self._enables_w[0])
 
         hil.hil_close(self._board)  # Safely close the board
 
@@ -272,8 +270,8 @@ cdef class QuanserAero(QuanserWrapper):
         analog_w_channels = [0, 1]
         digital_w_channels = [0, 1]
         encoder_r_channels = [0, 1, 2, 3]
-        other_r_channels = [3000, 3001, 3002, 4000, 4001, 4002, 14000, 14001, \
-                             14002, 14003]
+        other_r_channels = [3000, 3001, 3002, 4000, 4001, 4002, 14000, \
+            14001, 14002, 14003]
         led_w_channels = [11000, 11001, 11002]
 
         super(QuanserAero, self).__init__(

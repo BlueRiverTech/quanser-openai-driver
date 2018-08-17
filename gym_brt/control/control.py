@@ -7,11 +7,10 @@ import numpy as np
 
 # Set the motor saturation limits for the Aero and Qube
 AERO_MAX_VOLTAGE = 15.0
-QUBE_MAX_VOLTAGE = 5.0
+QUBE_MAX_VOLTAGE = 8.0
 
 
 class Control(object):
-    # TODO: better name
     def __init__(self, env=None, action_shape=None, *args, **kwargs):
         if env:
             self.action_shape = env.action_space.sample().shape
@@ -44,12 +43,12 @@ class RandomControl(Control):
         return self._action_space.sample()
 
 
-class AeroClassicControl(Control):
+class AeroControl(Control):
     """Classical controller to set the Quanser Aero back to its original 
     position.
     """
     def __init__(self, env, *args, **kwargs):
-        super(AeroClassicControl, self).__init__(env)
+        super(AeroControl, self).__init__(env)
         self._desired = np.array([0, 0, 0, 0])
         self._error = np.array([0, 0, 0, 0])
         self._state_x = np.array([0, 0, 0, 0])  # [pitch, yaw, pitch_dot, yaw_dot]
@@ -119,18 +118,16 @@ class AeroClassicControl(Control):
         return voltages
 
 
-class QubeFlipUpInvertedClassicControl(Control):
+class QubeFlipUpControl(Control):
     """Classical controller to hold the pendulum upright whenever the angle is
     within 30 degrees, and flips up the pendulum whenever outside 30 degrees.
     """
     def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
-        super(QubeFlipUpInvertedClassicControl, self).__init__(env=env)
-        self._theta_n_k1 = 0.
-        self._theta_dot_k1 = 0.
-        self._alpha_n_k1 = 0.
-        self._alpha_dot_k1 = 0.
-        self._prev_theta = 0.
-        self._prev_alpha = 0.
+        super(QubeFlipUpControl, self).__init__(env=env)
+        self.theta_dot_filtered = 0.
+        self.alpha_dot_filtered = 0.
+        self.theta = 0.
+        self.alpha = 0.
         self._sample_freq = sample_freq
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
@@ -142,29 +139,21 @@ class QubeFlipUpInvertedClassicControl(Control):
         return action
 
     def _action_hold(self, theta, alpha):
-        # transfer function = 50s / (s + 50)
-        # z-transform = (50z - 50)/(z-exp(-50 * T)), where T is sample time
-        theta_n = -theta
-        theta_dot = (50.0 * theta_n) - (50.0 * self._theta_n_k1) + \
-            (np.exp(-50 * self._sample_freq) * self._theta_dot_k1)
-        self._theta_n_k1 = theta_n
-        self._theta_dot_k1 = theta_dot
+        self.theta_dot_filtered = self.theta * 50.0 - theta * 50.0 + \
+            np.exp(-50.0 * self._sample_freq) * self.theta_dot_filtered
 
-        # transfer function = 50s / (s + 50)
-        # z-transform = (50z - 50)/(z-exp(-50 * T)), where T is sample time
-        alpha_n = -alpha
-        alpha_dot = (50.0 * alpha_n) - (50.0 * self._alpha_n_k1) + \
-            (np.exp(-50 * self._sample_freq) * self._alpha_dot_k1)
-        self._alpha_n_k1 = alpha_n
-        self._alpha_dot_k1 = alpha_dot
+        self.alpha_dot_filtered = self.alpha * 50.0 - alpha * 50.0 + \
+            np.exp(-50.0 * self._sample_freq) * self.alpha_dot_filtered
 
         # multiply by proportional and derivative gains
         kp_theta = 2.0
         kd_theta = -2.0
         kp_alpha = -30.0
         kd_alpha = 2.5
-        motor_voltage = (theta * kp_theta) + (theta_dot * kd_theta) + \
-            (alpha * kp_alpha) + (alpha_dot * kd_alpha)
+        motor_voltage = self.theta * kp_theta + \
+            self.theta_dot_filtered * kd_theta + \
+            self.alpha * kp_alpha + \
+            self.alpha_dot_filtered * kd_alpha
 
         # Invert for positive CCW
         motor_voltage = -motor_voltage
@@ -178,17 +167,17 @@ class QubeFlipUpInvertedClassicControl(Control):
         alpha_y = state[3]
         theta = np.arctan2(theta_y, theta_x)
         alpha = np.arctan2(alpha_y, alpha_x)
-        theta_dot = (theta - self._prev_theta) * self._sample_freq
-        alpha_dot = (alpha - self._prev_alpha) * self._sample_freq
+        theta_dot = (theta - self.theta) * self._sample_freq
+        alpha_dot = (alpha - self.alpha) * self._sample_freq
 
-        # If pendulum is within +/-10 degrees of upright, enable balance control
-        if np.abs(alpha) <= (10.0 * np.pi / 180.0):
+        # If pendulum is within 20 degrees of upright, enable balance control
+        if np.abs(alpha) <= (20.0 * np.pi / 180.0):
             motor_voltage = self._action_hold(theta, alpha)
         else:
             motor_voltage = self._flip_up(theta, alpha, theta_dot, alpha_dot)
 
-        self._prev_alpha = alpha
-        self._prev_theta = theta
+        self.alpha = alpha
+        self.theta = theta
 
         voltages = np.array([motor_voltage], dtype=np.float64)
         
@@ -199,13 +188,13 @@ class QubeFlipUpInvertedClassicControl(Control):
         return voltages
 
 
-class QubeHoldInvertedClassicControl(QubeFlipUpInvertedClassicControl):
+class QubeHoldControl(QubeFlipUpControl):
     """Classical controller to hold the pendulum upright whenever the angle is
-    within 30 degrees. (Same as QubeFlipUpInvertedClassicControl but without a 
+    within 30 degrees. (Same as QubeFlipUpControl but without a 
     flip up action)
     """
     def __init__(self, env, sample_freq=1000, **kwargs):
-        super(QubeHoldInvertedClassicControl, self).__init__(
+        super(QubeHoldControl, self).__init__(
             env, sample_freq=sample_freq)
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):

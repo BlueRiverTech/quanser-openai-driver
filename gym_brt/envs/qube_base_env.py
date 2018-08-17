@@ -9,10 +9,8 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from gym_brt.envs.QuanserWrapper import QubeServo2
-from gym_brt.envs.QuanserSimulator.quanser_simulator import QuanserSimulator
-
-from gym_brt.control import QubeFlipUpInvertedClassicControl
+from gym_brt.quanser import QubeServo2, QubeServo2Simulator
+from gym_brt.control import QubeFlipUpControl
 
 
 # theta, alpha: positions, velocities, accelerations
@@ -25,11 +23,11 @@ OBSERVATION_HIGH = np.asarray([
 ], dtype=np.float64)
 OBSERVATION_LOW = -OBSERVATION_HIGH
 
+
 MAX_MOTOR_VOLTAGE = 8.0
 ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
 
-WARMUP_TIME = 5 # in seconds
 
 STATE_KEYS = [
     'COS_THETA',
@@ -43,13 +41,6 @@ STATE_KEYS = [
     'TACH0',
     'SENSE'
 ]
-
-QUBES = {
-    'QubeServo2': QubeServo2,
-    'QubeSimLinear': lambda frequency: QuanserSimulator(pendulum='RotaryPendulumLinearApproximation', safe_operating_voltage=18.0, euler_steps=1, frequency=frequency),
-    'QubeSimNonLinear': lambda frequency: QuanserSimulator(pendulum='RotaryPendulumNonLinearApproximation', safe_operating_voltage=18.0, euler_steps=1, frequency=frequency),
-    'QubeSimNonLinearCython': lambda frequency: QuanserSimulator(pendulum='CythonRotaryPendulumNonLinearApproximation', safe_operating_voltage=18.0, euler_steps=1, frequency=frequency),
-}
 
 
 def normalize_angle(theta):
@@ -72,17 +63,18 @@ class QubeBaseEnv(gym.Env):
         'video.frames_per_second' : 50
     }
 
-    def __init__(self, env_base='QubeServo2', frequency=1000, alpha_tolerance=(10 * np.pi / 180)):
+    def __init__(self,
+                 frequency=1000,
+                 use_simulator=False,
+                 alpha_tolerance=(10 * np.pi / 180)):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
-
         self.action_space = spaces.Box(
             ACTION_LOW, ACTION_HIGH,
             dtype=np.float32)
 
         self._alpha_tolerance = alpha_tolerance
-
         self.reward_fn = QubeBaseReward()
 
         self._theta = 0
@@ -95,14 +87,19 @@ class QubeBaseEnv(gym.Env):
         self._tach0 = 0
         self._sense = 0
         self._frequency = frequency
-        self._prev_t = time.time()
 
         # Open the Qube
-        self.qube = QUBES[env_base](frequency=frequency)
+        if use_simulator:
+            self.qube = QubeServo2Simulator(
+                euler_steps=1,
+                frequency=frequency)
+        else:
+            self.qube = QubeServo2(frequency=frequency)
         self.qube.__enter__()
 
         self.seed()
         self.viewer = None
+        self.use_simulator = use_simulator
 
     def __enter__(self):
         return self
@@ -161,19 +158,22 @@ class QubeBaseEnv(gym.Env):
         return state
 
     def _flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
-        """Run classic control for flip-up until the pendulum is inverted for a
-        set amount of time. Assumes that initial state is stationary downwards.
+        """Run classic control for flip-up until the pendulum is inverted for
+        a set amount of time. Assumes that initial state is stationary
+        downwards.
 
         Args:
-            early_quit: Quit if flip up doesn't succeed after set amount of time
+            early_quit: Quit if flip up doesn't succeed after set amount of
+                time
             time_out: Time given to the classical control system to flip up 
                 before quitting (in seconds)
-            min_hold_time: Time to hold the pendulum upright within a tolerance
-                (in seconds)
+            min_hold_time: Time to hold the pendulum upright within a 
+                tolerance (in seconds)
             alpha_tolerance: Angle from perfectly inverted that counts as
                 'upright' (in radians)
         """
-        control = QubeFlipUpInvertedClassicControl(env=self, sample_freq=self._frequency)
+        control = QubeFlipUpControl(
+            env=self, sample_freq=self._frequency)
         time_out = time_out * self._frequency
         time_hold = min_hold_time * self._frequency
         sample = 0 # Samples since control system started
@@ -191,7 +191,11 @@ class QubeBaseEnv(gym.Env):
                 else:
                     sample = 0
                     samples_upright = 0
-                    self.dampen_down()
+                    state = self._dampen_down()
+                    self.qube.reset_encoders()
+                    action = np.zeros(
+                        shape=self.action_space.shape,
+                        dtype=self.action_space.dtype)
 
             # Break if pendulum is inverted
             if self._alpha < self._alpha_tolerance:
@@ -218,7 +222,6 @@ class QubeBaseEnv(gym.Env):
             ref_state = [0.0, 0.0, 0.0, 0.0]
             if np.allclose(state[4:8], ref_state, rtol=1e-02, atol=1e-03):
                 if samples_downwards > time_hold:
-                    # self.state_offsets[4:] = state[4:]
                     break
                 samples_downwards += 1
             else:
@@ -229,7 +232,7 @@ class QubeBaseEnv(gym.Env):
     def _center(self):
         return self._get_state()
 
-    def flip_up(self, early_quit=False, time_out=np.inf, min_hold_time=1):
+    def flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
         self.dampen_down()
         return self._flip_up(
             early_quit=early_quit,
@@ -278,7 +281,7 @@ class QubeBaseEnv(gym.Env):
         pen_len = 40 * scale
         pen_width = 2.0 * scale
 
-        def pen_origin(theta, origin=origin, len=arm_len,):
+        def pen_origin(theta, origin=origin, len=arm_len):
             x = origin[0] - len * math.sin(theta)
             y = origin[1] + len * math.cos(theta)
             return x, y
@@ -290,7 +293,7 @@ class QubeBaseEnv(gym.Env):
             # draw qube base
             l,r,t,b = qubewidth/2, -qubewidth/2, -qubeheight/2, qubeheight/2
             qube = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
-            qube.set_color(0., 0., 0.)
+            qube.set_color(0.0, 0.0, 0.0)
             qubetrans = rendering.Transform(translation=origin)
             qube.add_attr(qubetrans)
             self.viewer.add_geom(qube)
@@ -298,14 +301,14 @@ class QubeBaseEnv(gym.Env):
             # draw qube arm
             l,r,t,b = arm_width/2, -arm_width/2, 0, arm_len
             arm = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
-            arm.set_color(.5,.5,.5)
+            arm.set_color(0.5, 0.5, 0.5)
             self.armtrans = rendering.Transform(translation=origin)
             arm.add_attr(self.armtrans)
             self.viewer.add_geom(arm)
 
             arm_trace = rendering.make_circle(radius=arm_len, filled=False)
             armtracetrans = rendering.Transform(translation=origin)
-            arm_trace.set_color(.5,.5,.5) 
+            arm_trace.set_color(0.5, 0.5, 0.5) 
             arm_trace.add_attr(armtracetrans)
             self.viewer.add_geom(arm_trace)
 
@@ -313,7 +316,7 @@ class QubeBaseEnv(gym.Env):
             pen_orgin = (origin[0], origin[1] + arm_len)
             l,r,t,b = pen_width/2, -pen_width/2, 0, pen_len
             pen = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
-            pen.set_color(1., 0., 0.)
+            pen.set_color(1.0, 0.0, 0.0)
             self.pentrans = rendering.Transform(translation=pen_orgin, rotation=math.pi/10)
             pen.add_attr(self.pentrans)
             self.viewer.add_geom(pen)
@@ -322,10 +325,9 @@ class QubeBaseEnv(gym.Env):
         self.pentrans.set_translation(*pen_origin(np.pi+self._theta))
         self.pentrans.set_rotation(self._alpha)
 
-        self.viewer.render(return_rgb_array = 'human'=='rgb_array')
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
-    def close(self):
+    def close(self, type=None, value=None, traceback=None):
         # Safely close the Qube
-        self.qube.__exit__(None, None, None)
+        self.qube.__exit__(type=type, value=value, traceback=traceback)
         if self.viewer: self.viewer.close()

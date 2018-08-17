@@ -1,23 +1,5 @@
 include "quanser_types.pxd"
 
-# Needed functions:
-    #hil_open
-    #hil_set_encoder_counts
-    #hil_task_create_encoder_reader
-    #hil_task_start
-    #hil_task_read_encoder
-    #hil_write_analog
-    #hil_task_stop
-    #hil_task_delete
-    #hil_close
-
-# From the following header files:
-    #include "hil.h"
-    #include "quanser_signal.h"
-    #include "quanser_messages.h"
-    #include "quanser_thread.h"
-
-
 cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
     ctypedef struct t_card:
         pass

@@ -2,19 +2,16 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-import time
 import numpy as np
 from gym import spaces
 from gym_brt.envs.qube_base_env import \
     QubeBaseEnv, \
     normalize_angle, \
-    MAX_MOTOR_VOLTAGE, \
     ACTION_HIGH, \
-    ACTION_LOW, \
-    WARMUP_TIME
+    ACTION_LOW
 
 
-class QubeHoldInvertedReward(object):
+class QubeBeginUprightReward(object):
     def __init__(self):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
@@ -41,28 +38,21 @@ class QubeHoldInvertedReward(object):
         return reward
 
 
-class QubeHoldInvertedEnv(QubeBaseEnv):
-    def __init__(self, env_base='QubeServo2', frequency=1000, alpha_tolerance=None):
-        super(QubeHoldInvertedEnv, self).__init__(env_base=env_base, frequency=frequency)
-        self.reward_fn = QubeHoldInvertedReward()
+class QubeBeginUprightEnv(QubeBaseEnv):
+    def __init__(self,
+                 frequency=1000,
+                 use_simulator=False,
+                 alpha_tolerance=10 * np.pi / 180):
+        super(QubeBeginUprightEnv, self).__init__(
+            frequency=frequency,
+            use_simulator=use_simulator,
+            alpha_tolerance=alpha_tolerance)
+        self.reward_fn = QubeBeginUprightReward()
 
     def reset(self):
-        # Start the pendulum stationary at the bottom (stable point)
-        if WARMUP_TIME > 0:
-            start_time = time.time()
-            while (time.time() - start_time) < WARMUP_TIME:
-                action = np.zeros(
-                    shape=self.action_space.shape,
-                    dtype=self.action_space.dtype)
-                state = self._step(action)
-        else:
-            action = np.zeros(
-                shape=self.action_space.shape,
-                dtype=self.action_space.dtype)
-            state = self._step(action)
-
-        self.flip_up()
-
+        # Start the pendulum stationary at the top (stable point)
+        state = self.flip_up()
+        self.qube.reset_encoders()
         return state
 
     def _done(self):
@@ -70,17 +60,16 @@ class QubeHoldInvertedEnv(QubeBaseEnv):
         return self._alpha > self._alpha_tolerance
 
     def step(self, action):
-        state, reward, _, info = super(QubeHoldInvertedEnv, self).step(action)
+        state, reward, _, info = super(QubeBeginUprightEnv, self).step(action)
         done = self._done()
         return state, reward, done, info
-
 
 
 def main():
     num_episodes = 10
     num_steps = 250
 
-    with QubeHoldInvertedEnv() as env:
+    with QubeBeginUprightEnv() as env:
         for episode in range(num_episodes):
             state = env.reset()
             for step in range(num_steps):

@@ -25,8 +25,7 @@ We recommend using [Pipenv](https://docs.pipenv.org/). Install dependencies foun
 ```
 
 Once you have that setup: Run the classical control baseline<br>
-- For the Qube: `python tests/test.py --env env QubeFlipUpEnv --control flip-up`
-- For the Aero: `python tests/test.py --env AeroPositionEnv --control aero-classic`
+- For the Qube: `python tests/test.py --env QubeFlipUpEnv --control flip-up`
 
 ### Recompiling Cython code:
 This installs the Quanser wrapper by using the pre-compiled C code.
