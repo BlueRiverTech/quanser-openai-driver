@@ -7,7 +7,7 @@ import numpy as np
 
 # Set the motor saturation limits for the Aero and Qube
 AERO_MAX_VOLTAGE = 15.0
-QUBE_MAX_VOLTAGE = 8.0
+QUBE_MAX_VOLTAGE = 5.0
 
 
 class Control(object):
@@ -24,7 +24,7 @@ class Control(object):
 
 
 class NoControl(Control):
-    """Output motor voltages of 0."""
+    '''Output motor voltages of 0'''
     def __init__(self, env, *args, **kwargs):
         super(NoControl, self).__init__(env)
         self._action_space = env.action_space
@@ -34,7 +34,8 @@ class NoControl(Control):
 
 
 class RandomControl(Control):
-    """Output motor voltages smapling from the action space (from env)."""
+    '''Output motor voltages smapling from the action space (from env).
+    '''
     def __init__(self, env, *args, **kwargs):
         super(RandomControl, self).__init__(env)
         self._action_space = env.action_space
@@ -44,14 +45,14 @@ class RandomControl(Control):
 
 
 class AeroControl(Control):
-    """Classical controller to set the Quanser Aero back to its original 
+    '''Classical controller to set the Quanser Aero back to its original
     position.
-    """
+    '''
     def __init__(self, env, *args, **kwargs):
         super(AeroControl, self).__init__(env)
         self._desired = np.array([0, 0, 0, 0])
         self._error = np.array([0, 0, 0, 0])
-        self._state_x = np.array([0, 0, 0, 0])  # [pitch, yaw, pitch_dot, yaw_dot]
+        self._state_x = np.array([0, 0, 0, 0])
         self._gain_p = np.array([98.2088, -103.0645, 32.2643, -29.075])
         self._gain_y = np.array([156.3469, 66.1643, 45.5122, 17.1068])
         self._v_motors = np.array([0, 0])
@@ -119,9 +120,10 @@ class AeroControl(Control):
 
 
 class QubeFlipUpControl(Control):
-    """Classical controller to hold the pendulum upright whenever the angle is
-    within 30 degrees, and flips up the pendulum whenever outside 30 degrees.
-    """
+    '''Classical controller to hold the pendulum upright whenever the
+    angle is within 30 degrees, and flips up the pendulum whenever
+    outside 30 degrees.
+    '''
     def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
         super(QubeFlipUpControl, self).__init__(env=env)
         self.theta_dot_filtered = 0.
@@ -133,7 +135,7 @@ class QubeFlipUpControl(Control):
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
         # Found analytically
         K = np.array(
-             [547.722557505, 59.8250246777, 312.897951988, 4.64209502521])
+            [3.1622776602, 20.7014465019, 1.9988564038, 2.4570771444])
         state = np.array([alpha, alpha_dot, theta, theta_dot])
         action = np.dot(state, K)
         return action
@@ -180,7 +182,7 @@ class QubeFlipUpControl(Control):
         self.theta = theta
 
         voltages = np.array([motor_voltage], dtype=np.float64)
-        
+
         # set the saturation limit to +/- the Qube saturation voltage
         np.clip(voltages, -QUBE_MAX_VOLTAGE, QUBE_MAX_VOLTAGE, out=voltages)
 
@@ -189,10 +191,10 @@ class QubeFlipUpControl(Control):
 
 
 class QubeHoldControl(QubeFlipUpControl):
-    """Classical controller to hold the pendulum upright whenever the angle is
-    within 30 degrees. (Same as QubeFlipUpControl but without a 
+    '''Classical controller to hold the pendulum upright whenever the
+    angle is within 30 degrees. (Same as QubeFlipUpControl but without a
     flip up action)
-    """
+    '''
     def __init__(self, env, sample_freq=1000, **kwargs):
         super(QubeHoldControl, self).__init__(
             env, sample_freq=sample_freq)
