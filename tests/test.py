@@ -19,7 +19,7 @@ from gym_brt.control import \
     QubeHoldControl
 
 
-STATE_KEYS_AERO = [ 
+STATE_KEYS_AERO = [
     'PITCH         ',
     'YAW           ',
     'VELOCITY_X    ',
@@ -35,7 +35,7 @@ STATE_KEYS_AERO = [
 ]
 
 
-STATE_KEYS_QUBE = [ 
+STATE_KEYS_QUBE = [
     'COS_THETA         ',
     'SIN_THETA         ',
     'COS_ALPHA         ',
@@ -79,7 +79,7 @@ def test_env(env_name,
                 action = ctrl_sys.action(state)
                 state, reward, done, _ = env.step(action)
                 if done:
-                    return
+                    break
                 if verbose and state_keys is not None:
                     print_info(state_keys, state, action, reward)
                 if render:
@@ -95,7 +95,7 @@ def test_env(env_name,
                 action = action_func(state)
                 state, reward, done, _ = env.step(action)
                 if done:
-                    return
+                    break
                 if state_keys is not None:
                     print_info(state_keys, state, action, reward)
     finally:
@@ -128,7 +128,7 @@ def main():
         'flip': QubeFlipUpControl,
         'qube': QubeFlipUpControl
     }
- 
+
     # Parse command line args
     parser = argparse.ArgumentParser()
     parser.add_argument(
