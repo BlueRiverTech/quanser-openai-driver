@@ -16,7 +16,11 @@ Has an OpenAI Gym wrapper for the Quanser Qube Servo 2 and Quanser Aero
 We have tested on Ubuntu 16.04 LTS and Ubuntu 18.04 LTS using Python 2.7 and Python 3.6.5<br>
 
 ### Prerequisites
-Install the HIL SDK from Quanser. A mirror is available at https://github.com/BlueRiverTech/hil_sdk_linux_x86_64
+Install the HIL SDK from Quanser.<br>
+A mirror is available at https://github.com/BlueRiverTech/hil_sdk_linux_x86_64.<br>
+
+**Note:** this requires a version of the HIL SDK that supports buffer overwrite on overflow (circular buffers).<br>
+(The mirror posted above supports buffer overflow.)<br>
 
 ### Installation
 We recommend using [Pipenv](https://docs.pipenv.org/). Install dependencies found in the [Pipfile](./Pipfile) by running:<br>
