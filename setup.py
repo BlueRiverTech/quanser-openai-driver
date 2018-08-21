@@ -1,38 +1,43 @@
 from setuptools import setup, Extension
-import argparse
-
-try:
-    import numpy as np
-except ImportError:  # Numpy is not installed
-    build_requires = ['numpy']
+from setuptools.command.build_ext import build_ext as _build_ext
 
 
-VERSION = 0.1
-INSTALL_REQUIRES = ['numpy', 'gym']
+class build_ext(_build_ext):
+    '''Allows the use of `numpy.get_include()` without having nmupy installed
+    before before running the setup script.
+    '''
+    def finalize_options(self):
+        _build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        __builtins__.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
+
 
 extensions = [
-    Extension('gym_brt.quanser.quanser_wrapper.quanser_wrapper',
-        ['gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx'],
-        include_dirs=['/opt/quanser/hil_sdk/include', np.get_include()],
-        libraries=['hil', 'quanser_runtime', 'quanser_common', 'rt', 'pthread', 'dl', 'm', 'c'],
-        library_dirs=['/opt/quanser/hil_sdk/lib'])
+Extension(
+    'gym_brt.quanser.quanser_wrapper.quanser_wrapper',
+    ['gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx'],
+    include_dirs=['/opt/quanser/hil_sdk/include'],
+    libraries=[
+        'hil', 'quanser_runtime', 'quanser_common', 'rt', 'pthread',
+        'dl', 'm', 'c'],
+    library_dirs=['/opt/quanser/hil_sdk/lib'])
 ]
-
-parser = argparse.ArgumentParser()
-parser.add_argument('-c', '--compile', action='store_true', help='Recompile the Cython code (Cython is required for this).')
-args, _ = parser.parse_known_args()
 
 
 try:
     from Cython.Build import cythonize
-    # Recompile
-    extensions=cythonize(extensions)
-except ImportError:  # Cython is not installed
-    pass  # Just use the precompiled extension
+    extensions=cythonize(extensions)  # Recompile
+except:
+    raise ImportError('Cython must be installed to compile from source.')
+
 
 setup(name='gym_brt',
-      version=VERSION,
-      install_requires=INSTALL_REQUIRES,
+      version=0.1,
+      cmdclass={'build_ext':build_ext},
+      install_requires=['numpy', 'gym'],
+      setup_requires=['numpy'],
       ext_modules=extensions,
       description='Blue River\'s OpenAI Gym wrapper around Quanser hardware.',
       url='https://github.com/BlueRiverTech/quanser-openai-driver/',
