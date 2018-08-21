@@ -121,8 +121,8 @@ class AeroControl(Control):
 
 class QubeFlipUpControl(Control):
     '''Classical controller to hold the pendulum upright whenever the
-    angle is within 30 degrees, and flips up the pendulum whenever
-    outside 30 degrees.
+    angle is within 20 degrees, and flips up the pendulum whenever
+    outside 20 degrees.
     '''
     def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
         super(QubeFlipUpControl, self).__init__(env=env)
@@ -192,7 +192,7 @@ class QubeFlipUpControl(Control):
 
 class QubeHoldControl(QubeFlipUpControl):
     '''Classical controller to hold the pendulum upright whenever the
-    angle is within 30 degrees. (Same as QubeFlipUpControl but without a
+    angle is within 20 degrees. (Same as QubeFlipUpControl but without a
     flip up action)
     '''
     def __init__(self, env, sample_freq=1000, **kwargs):
