@@ -1,7 +1,16 @@
-[packages]
-numpy = "*"
-gym = "*"
-gym-brt = {path = ".", editable = true}
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
 
 [dev-packages]
 cython = "*"
+
+[packages]
+numpy = "*"
+gym = "*"
+numba = "*"
+gym-brt = {path = ".", editable = true}
+
+[requires]
+python_version = "3.6"

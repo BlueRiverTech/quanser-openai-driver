@@ -7,13 +7,11 @@ from gym import spaces
 from gym_brt.envs.qube_base_env import \
     QubeBaseEnv, \
     normalize_angle, \
-    MAX_MOTOR_VOLTAGE, \
     ACTION_HIGH, \
-    ACTION_LOW, \
-    WARMUP_TIME
+    ACTION_LOW
 
 
-class QubeFlipUpReward(object):
+class QubeBeginDownReward(object):
     def __init__(self):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
@@ -40,17 +38,19 @@ class QubeFlipUpReward(object):
         return reward
 
 
-class QubeFlipUpEnv(QubeBaseEnv):
-    def __init__(self, env_base='QubeServo2', frequency=1000):
-        super(QubeFlipUpEnv, self).__init__(env_base=env_base, frequency=frequency)
-        self.reward_fn = QubeFlipUpReward()
+class QubeBeginDownEnv(QubeBaseEnv):
+    def __init__(self, frequency=1000, use_simulator=False):
+        super(QubeBeginDownEnv, self).__init__(
+            frequency=frequency,
+            use_simulator=use_simulator)
+        self.reward_fn = QubeBeginDownReward()
 
 
 def main():
     num_episodes = 10
     num_steps = 250
 
-    with QubeFlipUpEnv() as env:
+    with QubeBeginDownEnv() as env:
         for episode in range(num_episodes):
             state = env.reset()
             for step in range(num_steps):
