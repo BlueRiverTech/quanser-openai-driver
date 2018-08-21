@@ -7,19 +7,19 @@ import time
 import argparse
 import numpy as np
 
-from gym_brt import \
-    AeroPositionEnv, \
-    QubeFlipUpEnv, \
-    QubeHoldInvertedEnv
+from gym_brt.envs import \
+    AeroEnv, \
+    QubeBeginDownEnv, \
+    QubeBeginUprightEnv
 from gym_brt.control import \
-        NoControl, \
-        RandomControl, \
-        AeroClassicControl, \
-        QubeHoldInvertedClassicControl, \
-        QubeFlipUpInvertedClassicControl
+    NoControl, \
+    RandomControl, \
+    AeroControl, \
+    QubeFlipUpControl, \
+    QubeHoldControl
 
 
-STATE_KEYS_AERO = [ 
+STATE_KEYS_AERO = [
     'PITCH         ',
     'YAW           ',
     'VELOCITY_X    ',
@@ -35,7 +35,7 @@ STATE_KEYS_AERO = [
 ]
 
 
-STATE_KEYS_QUBE = [ 
+STATE_KEYS_QUBE = [
     'COS_THETA         ',
     'SIN_THETA         ',
     'COS_ALPHA         ',
@@ -64,14 +64,17 @@ def test_env(env_name,
              controller,
              num_episodes=10,
              num_steps=250,
-             sample_freq=1000,
+             frequency=1000,
              state_keys=None,
-             verbose=False):
+             use_simulator=False,
+             verbose=False,
+             render=False):
 
-    with env_name(sample_freq) as env:
-        ctrl_sys = controller(env, sample_freq=sample_freq)
+    with env_name(use_simulator=use_simulator, frequency=frequency) as env:
+        ctrl_sys = controller(env, frequency=frequency)
         for episode in range(num_episodes):
             state = env.reset()
+            print('Started episode {}'.format(episode))
             for step in range(num_steps):
                 action = ctrl_sys.action(state)
                 state, reward, done, _ = env.step(action)
@@ -79,10 +82,12 @@ def test_env(env_name,
                     break
                 if verbose and state_keys is not None:
                     print_info(state_keys, state, action, reward)
+                if render:
+                   env.render()
 
     """
     # Another way to run the Qube enviroment
-    env = gym.make(env_name)
+    env = env_name(use_simulator=use_simulator, frequency=frequency)
     try:
         for episode in range(num_episodes):
             state = env.reset()
@@ -102,25 +107,26 @@ def test_env(env_name,
 
 def main():
     state_keys = {
-        'AeroPositionEnv': STATE_KEYS_AERO,
-        'QubeFlipUpEnv': STATE_KEYS_QUBE,
-        'QubeHoldInvertedEnv': STATE_KEYS_QUBE
+        'aero': STATE_KEYS_AERO,
+        'AeroEnv': STATE_KEYS_AERO,
+        'qube': STATE_KEYS_QUBE,
+        'QubeBeginDownEnv': STATE_KEYS_QUBE,
+        'QubeBeginUprightEnv': STATE_KEYS_QUBE
     }
     envs = {
-        'AeroPositionEnv': AeroPositionEnv,
-        'QubeFlipUpEnv': QubeFlipUpEnv,
-        'QubeHoldInvertedEnv': \
-            QubeHoldInvertedEnv
+        'aero': AeroEnv,
+        'AeroEnv': AeroEnv,
+        'qube': QubeBeginDownEnv,
+        'QubeBeginDownEnv': QubeBeginDownEnv,
+        'QubeBeginUprightEnv': QubeBeginUprightEnv
     }
     controllers = {
         'none': NoControl,
         'random': RandomControl,
-        'classic': QubeFlipUpInvertedClassicControl,
-        'qube-classic': QubeFlipUpInvertedClassicControl,
-        'aero-classic': AeroClassicControl,
-        'flip-up': QubeFlipUpInvertedClassicControl,
-        'flip': QubeFlipUpInvertedClassicControl,
-        'hold': QubeHoldInvertedClassicControl,
+        'aero': AeroControl,
+        'hold': QubeHoldControl,
+        'flip': QubeFlipUpControl,
+        'qube': QubeFlipUpControl
     }
 
     # Parse command line args
@@ -128,7 +134,7 @@ def main():
     parser.add_argument(
         '-e',
         '--env',
-        default='QubeFlipUpEnv',
+        default='QubeBeginDownEnv',
         choices=list(state_keys.keys()),
         help='Enviroment to run.')
     parser.add_argument(
@@ -154,7 +160,10 @@ def main():
         default='1000',
         type=float,
         help='The frequency of samples on the Quanser hardware.')
+    parser.add_argument('-s', '--simulator', action='store_true',
+        help='Use the simulator instead of hardware.')
     parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-r', '--render', action='store_true')
     args, _ = parser.parse_known_args()
 
     print('Testing Env:  {}'.format(args.env))
@@ -166,9 +175,11 @@ def main():
         controllers[args.control],
         num_episodes=args.num_episodes,
         num_steps=args.num_steps,
-        sample_freq=args.frequency,
+        frequency=args.frequency,
         state_keys=state_keys[args.env],
-        verbose=args.verbose)
+        use_simulator=args.simulator,
+        verbose=args.verbose,
+        render=args.render)
 
 
 if __name__ == '__main__':

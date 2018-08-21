@@ -1175,12 +1175,3 @@ error_codes = {
     1173: "Error 1173: QERR_MAGNETOMETER_NOT_RESPONDING: The magnetometer is not responding. The device may have been damaged.",
     1174: "Error 1174: QERR_CONFLICTING_DIGITAL_MODES: The specified digital IO is a generic IO (e.g. DIO, PWM, Encoder, SPI, I2C, UARC), but have conflicting mode setting. Refer to the device documentation for limitations",
 }
-
-
-def print_possible_error(result):
-    """
-    If there is an error, print the error code. 
-    TODO: get error codes from HIL API
-    """
-    if result < 0:
-        print(error_codes[-result])

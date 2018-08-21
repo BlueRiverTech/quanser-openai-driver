@@ -2,13 +2,12 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-
 import gym
 import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from gym_brt.envs.QuanserWrapper import QuanserAero
+from gym_brt.quanser import QuanserAero
 
 
 # pitch, yaw, gyro, acceleration, current sense
@@ -19,7 +18,7 @@ OBSERVATION_HIGH = np.asarray([
     np.pi / 4, np.pi / 4, np.pi / 4,  # acceleration (x,y,z)
     4100,  # tach for pitch
     4100,  # tach for yaw
-    2., 2.,  # peak current
+    2.0, 2.0,  # peak current
 ], dtype=np.float64)
 
 OBSERVATION_LOW = -OBSERVATION_HIGH
@@ -53,8 +52,8 @@ def normalize_angle(theta):
     return ((theta + np.pi) % (2 * np.pi)) - np.pi
 
 
-class AeroPositionReward(object):
-    def __init__(self):
+class AeroReward(object):
+    def __init__(self, *args, **kwargs):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
             high=ACTION_HIGH, dtype=np.float32)
@@ -82,8 +81,8 @@ class AeroPositionReward(object):
         return reward
 
 
-class AeroPositionEnv(gym.Env):
-    def __init__(self, frequency=1000):
+class AeroEnv(gym.Env):
+    def __init__(self, frequency=1000, **kwargs):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
@@ -92,7 +91,7 @@ class AeroPositionEnv(gym.Env):
             ACTION_LOW, ACTION_HIGH,
             dtype=np.float32)
 
-        self.reward_fn = AeroPositionReward()
+        self.reward_fn = AeroReward()
 
         self._pitch = 0
         self._yaw = 0
@@ -187,7 +186,7 @@ def main():
     num_episodes = 10
     num_steps = 250
 
-    with AeroPositionEnv() as env:
+    with AeroEnv() as env:
         for episode in range(num_episodes):
             state = env.reset()
             for step in range(num_steps):
