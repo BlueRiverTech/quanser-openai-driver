@@ -87,6 +87,7 @@ class QubeBaseEnv(gym.Env):
         self._tach0 = 0
         self._sense = 0
         self._frequency = frequency
+        self._theta_offset = 0
 
         # Open the Qube
         if use_simulator:
@@ -122,6 +123,7 @@ class QubeBaseEnv(gym.Env):
             encoder1 = 2048 + encoder1
 
         theta_next = encoder0 * (-2.0 * np.pi / 2048)
+        theta_next -= self._theta_offset
         alpha_next = encoder1 * (2.0 * np.pi / 2048) - np.pi
         self._sense = currents[0]
         self._tach0 = others[0]
@@ -165,9 +167,9 @@ class QubeBaseEnv(gym.Env):
         Args:
             early_quit: Quit if flip up doesn't succeed after set amount of
                 time
-            time_out: Time given to the classical control system to flip up 
+            time_out: Time given to the classical control system to flip up
                 before quitting (in seconds)
-            min_hold_time: Time to hold the pendulum upright within a 
+            min_hold_time: Time to hold the pendulum upright within a
                 tolerance (in seconds)
             alpha_tolerance: Angle from perfectly inverted that counts as
                 'upright' (in radians)
@@ -192,7 +194,7 @@ class QubeBaseEnv(gym.Env):
                     sample = 0
                     samples_upright = 0
                     state = self._dampen_down()
-                    self.qube.reset_encoders()
+                    self.center()
                     action = np.zeros(
                         shape=self.action_space.shape,
                         dtype=self.action_space.dtype)
@@ -214,7 +216,7 @@ class QubeBaseEnv(gym.Env):
             dtype=self.action_space.dtype)
 
         time_hold = min_hold_time * self._frequency
-        samples_downwards = 0 # Consecutive samples pendulum is downwards
+        samples_downwards = 0  # Consecutive samples pendulum is stationary
 
         while True:
             state, _, _, _ = self.step(action)
@@ -229,7 +231,41 @@ class QubeBaseEnv(gym.Env):
 
         return self._get_state()
 
-    def _center(self):
+    def _center(self, min_hold_time=0.5):
+        time_hold = min_hold_time * self._frequency
+        action = np.array([1.5], dtype=np.float64)  # Enough to push arm to the edge
+
+        # Get minimum theta
+        samples_downwards = 0  # Consecutive samples pendulum is stationary
+        while True:
+            state = self._step(action)
+            # Break if arm (theta) velocity is close to zero
+            if np.allclose(state[4], [0.0], rtol=1e-02, atol=1e-03):
+                if samples_downwards > time_hold:
+                    min_theta = self._theta
+                    break
+                samples_downwards += 1
+            else:
+                samples_downwards = 0
+        samples_downwards = 0
+
+        # Get maximum theta
+        samples_downwards = 0  # Consecutive samples pendulum is stationary
+        while True:
+            state = self._step(-action)
+            # Break if arm (theta) velocity is close to zero
+            if np.allclose(state[4], [0.0], rtol=1e-02, atol=1e-03):
+                if samples_downwards > time_hold:
+                    max_theta = self._theta
+                    break
+                samples_downwards += 1
+            else:
+                samples_downwards = 0
+        samples_downwards = 0
+
+        print('Min theta = {}, Max theta = {}'.format(min_theta, max_theta))
+        self._theta_offset = (min_theta + max_theta) / 2
+        print('_theta_offset', self._theta_offset)
         return self._get_state()
 
     def flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
@@ -248,7 +284,7 @@ class QubeBaseEnv(gym.Env):
 
     def reset(self):
         # Start the pendulum stationary at the bottom (stable point)
-        state = self._dampen_down()
+        self.dampen_down()
         self.qube.reset_encoders()
         action = np.zeros(
             shape=self.action_space.shape,
@@ -308,7 +344,7 @@ class QubeBaseEnv(gym.Env):
 
             arm_trace = rendering.make_circle(radius=arm_len, filled=False)
             armtracetrans = rendering.Transform(translation=origin)
-            arm_trace.set_color(0.5, 0.5, 0.5) 
+            arm_trace.set_color(0.5, 0.5, 0.5)
             arm_trace.add_attr(armtracetrans)
             self.viewer.add_geom(arm_trace)
 
@@ -317,7 +353,9 @@ class QubeBaseEnv(gym.Env):
             l,r,t,b = pen_width/2, -pen_width/2, 0, pen_len
             pen = rendering.FilledPolygon([(l,b), (l,t), (r,t), (r,b)])
             pen.set_color(1.0, 0.0, 0.0)
-            self.pentrans = rendering.Transform(translation=pen_orgin, rotation=math.pi/10)
+            self.pentrans = rendering.Transform(
+                translation=pen_orgin,
+                rotation=math.pi/10)
             pen.add_attr(self.pentrans)
             self.viewer.add_geom(pen)
 
