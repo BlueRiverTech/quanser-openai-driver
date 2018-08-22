@@ -9,8 +9,6 @@ Has an OpenAI Gym wrapper for the Quanser Qube Servo 2 and Quanser Aero
 - [Basic Usage](#usage)
 - [Warning](#warning)
     - [Quick fix](#the-fastest-solution-no-restart-required-is-to-remove-the-semaphore-of-the-board)
-    - [(Slightly) easier fix](#the-easiest-solution-is-to-restart-note-the-order)
-
 
 # Setup
 We have tested on Ubuntu 16.04 LTS and Ubuntu 18.04 LTS using Python 2.7 and Python 3.6.5<br>
@@ -66,7 +64,13 @@ Or can be closed manually by using `env.close()`. You can see an [example here](
 
 
 # Environments
-Information about various environments can be found in [docs/environments](docs/evironments.md)
+Information about various environments can be found in [docs/envs](docs/envs.md).
+
+# Control
+Information about baselines can be found in [docs/control](docs/control.md).
+
+# Hardware Wrapper
+Information about the Python wrapper for Quanser hardware and Qube Servo 2 simulator can be found in [docs/quanser](docs/quanser.md).
 
 
 # Warning
