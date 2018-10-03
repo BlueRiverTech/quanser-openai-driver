@@ -7,7 +7,7 @@ import numpy as np
 
 # Set the motor saturation limits for the Aero and Qube
 AERO_MAX_VOLTAGE = 15.0
-QUBE_MAX_VOLTAGE = 5.0
+QUBE_MAX_VOLTAGE = 6.0
 
 
 class Control(object):
@@ -119,6 +119,10 @@ class AeroControl(Control):
         return voltages
 
 
+def unbias(theta):
+    return ((theta + np.pi) % (2 * np.pi))
+
+
 class QubeFlipUpControl(Control):
     '''Classical controller to hold the pendulum upright whenever the
     angle is within 20 degrees, and flips up the pendulum whenever
@@ -126,66 +130,75 @@ class QubeFlipUpControl(Control):
     '''
     def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
         super(QubeFlipUpControl, self).__init__(env=env)
-        self.theta_dot_filtered = 0.
-        self.alpha_dot_filtered = 0.
-        self.theta = 0.
-        self.alpha = 0.
-        self._sample_freq = sample_freq
+        self.theta_dot = 0.
+        self.alpha_dot = 0.
+        self.sample_freq = sample_freq
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
-        # Found analytically
-        K = np.array(
-            [3.1622776602, 20.7014465019, 1.9988564038, 2.4570771444])
-        state = np.array([alpha, alpha_dot, theta, theta_dot])
-        action = np.dot(state, K)
+        '''Implements a energy based swing-up controller'''
+        mu = 50.0 # in m/s/J
+        ref_energy = 30.0 / 1000.0 # Er in joules
+        max_u = 6.0 # Max action is 6m/s^2
+
+        # System parameters
+        jp = 3.3282e-5
+        lp = 0.129
+        lr = 0.085
+        mp = 0.024
+        mr = 0.095
+        rm = 8.4
+        g = 9.81
+        kt = 0.042
+
+        pend_torque = (1 / 2) * mp * g * lp * (1 + np.cos(alpha));
+        energy = (pend_torque + (jp / 2.0) * alpha_dot * alpha_dot);
+
+        # u = sat_u_max(mu * (E - Er) * sign(alpha_dot * cos(alpha)))
+        u = mu * (energy - ref_energy) * np.sign(-1 * np.cos(alpha) * alpha_dot)
+        u = np.clip(u, -max_u, max_u)
+
+        torque = (mr * lr) * u
+        voltage = (rm / kt) * torque
+        return -voltage
+
+    def _action_hold(self, theta, alpha, theta_dot, alpha_dot):
+        # multiply by proportional and derivative gains
+        kp_theta = -2.0
+        kp_alpha = 35.0
+        kd_theta = -1.5
+        kd_alpha = 3.0
+        action = \
+            theta * kp_theta + \
+            alpha * kp_alpha + \
+            theta_dot * kd_theta + \
+            alpha_dot * kd_alpha
         return action
 
-    def _action_hold(self, theta, alpha):
-        self.theta_dot_filtered = self.theta * 50.0 - theta * 50.0 + \
-            np.exp(-50.0 * self._sample_freq) * self.theta_dot_filtered
-
-        self.alpha_dot_filtered = self.alpha * 50.0 - alpha * 50.0 + \
-            np.exp(-50.0 * self._sample_freq) * self.alpha_dot_filtered
-
-        # multiply by proportional and derivative gains
-        kp_theta = 2.0
-        kd_theta = -2.0
-        kp_alpha = -30.0
-        kd_alpha = 2.5
-        motor_voltage = self.theta * kp_theta + \
-            self.theta_dot_filtered * kd_theta + \
-            self.alpha * kp_alpha + \
-            self.alpha_dot_filtered * kd_alpha
-
-        # Invert for positive CCW
-        motor_voltage = -motor_voltage
-
-        return motor_voltage
-
     def action(self, state):
+        # Get the angles
         theta_x = state[0]
         theta_y = state[1]
         alpha_x = state[2]
         alpha_y = state[3]
         theta = np.arctan2(theta_y, theta_x)
         alpha = np.arctan2(alpha_y, alpha_x)
-        theta_dot = (theta - self.theta) * self._sample_freq
-        alpha_dot = (alpha - self.alpha) * self._sample_freq
+
+        # Calculate the velocities
+        theta_dot = -2500 * self.theta_dot + 50 * theta
+        alpha_dot = -2500 * self.alpha_dot + 50 * alpha
 
         # If pendulum is within 20 degrees of upright, enable balance control
         if np.abs(alpha) <= (20.0 * np.pi / 180.0):
-            motor_voltage = self._action_hold(theta, alpha)
+            action = self._action_hold(theta, alpha, theta_dot, alpha_dot)
         else:
-            motor_voltage = self._flip_up(theta, alpha, theta_dot, alpha_dot)
+            action = self._flip_up(theta, alpha, theta_dot, alpha_dot)
 
-        self.alpha = alpha
-        self.theta = theta
+        self.theta_dot += (-50 * self.theta_dot + theta) / self.sample_freq
+        self.alpha_dot += (-50 * self.alpha_dot + alpha) / self.sample_freq
 
-        voltages = np.array([motor_voltage], dtype=np.float64)
-
+        voltages = np.array([action], dtype=np.float64)
         # set the saturation limit to +/- the Qube saturation voltage
         np.clip(voltages, -QUBE_MAX_VOLTAGE, QUBE_MAX_VOLTAGE, out=voltages)
-
         assert voltages.shape == self.action_shape
         return voltages
 
