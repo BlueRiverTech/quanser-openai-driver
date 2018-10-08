@@ -47,14 +47,6 @@ def normalize_angle(theta):
     return ((theta + np.pi) % (2 * np.pi)) - np.pi
 
 
-def vel(theta, theta_velocity):
-    return -2500 * theta_velocity + 50 * theta
-
-
-def update_continuous_state(theta, theta_velocity, frequency):
-    return (-50 * theta_velocity + theta) / frequency
-
-
 class QubeBaseReward(object):
     def __init__(self):
         self.target_space = spaces.Box(
