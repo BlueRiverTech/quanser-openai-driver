@@ -47,6 +47,14 @@ def normalize_angle(theta):
     return ((theta + np.pi) % (2 * np.pi)) - np.pi
 
 
+def vel(theta, theta_velocity):
+    return -2500 * theta_velocity + 50 * theta
+
+
+def update_continuous_state(theta, theta_velocity, frequency):
+    return (-50 * theta_velocity + theta) / frequency
+
+
 class QubeBaseReward(object):
     def __init__(self):
         self.target_space = spaces.Box(
@@ -65,29 +73,20 @@ class QubeBaseEnv(gym.Env):
 
     def __init__(self,
                  frequency=1000,
-                 use_simulator=False,
-                 alpha_tolerance=(10 * np.pi / 180)):
+                 use_simulator=False):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
         self.action_space = spaces.Box(
             ACTION_LOW, ACTION_HIGH,
             dtype=np.float32)
-
-        self._alpha_tolerance = alpha_tolerance
         self.reward_fn = QubeBaseReward()
 
-        self._theta = 0
-        self._alpha = 0
+        self._theta_velocity_cstate = 0
+        self._alpha_velocity_cstate = 0
         self._theta_velocity = 0
         self._alpha_velocity = 0
-        self._theta_acceleration = 0
-        self._alpha_acceleration = 0
-        self._motor_voltage = 0
-        self._tach0 = 0
-        self._sense = 0
         self._frequency = frequency
-        self._theta_offset = 0
 
         # Open the Qube
         if use_simulator:
@@ -113,34 +112,29 @@ class QubeBaseEnv(gym.Env):
         return [seed]
 
     def _step(self, action):
-        motor_voltages = np.clip(np.array([action[0]], dtype=np.float64),
-                                 ACTION_LOW, ACTION_HIGH)
+        motor_voltages = np.clip(np.array(
+            [action[0]], dtype=np.float64), ACTION_LOW, ACTION_HIGH)
         currents, encoders, others = self.qube.action(motor_voltages)
 
-        encoder0 = encoders[0]
-        encoder1 = encoders[1] % 2048
-        if encoder1 < 0:
-            encoder1 = 2048 + encoder1
-
-        theta_next = encoder0 * (-2.0 * np.pi / 2048)
-        theta_next -= self._theta_offset
-        alpha_next = encoder1 * (2.0 * np.pi / 2048) - np.pi
         self._sense = currents[0]
         self._tach0 = others[0]
 
-        theta_velocity_next = normalize_angle(theta_next - self._theta)
-        alpha_velocity_next = normalize_angle(alpha_next - self._alpha)
+        # Calculate alpha, theta, alpha_velocity, and theta_velocity
+        self._theta = encoders[0] * (-2.0 * np.pi / 2048)
+        alpha_un = encoders[1] * (2.0 * np.pi / 2048)  # Alpha without normalizing
+        self._alpha = (alpha_un % (2.0 * np.pi)) - np.pi  # Normalized and shifted alpha
 
-        self._theta_acceleration = normalize_angle(
-            theta_velocity_next - self._theta_velocity)
-        self._alpha_acceleration = normalize_angle(
-            alpha_velocity_next - self._alpha_velocity)
+        theta_velocity = -2500 * self._theta_velocity_cstate + 50 * self._theta
+        alpha_velocity = -2500 * self._alpha_velocity_cstate + 50 * alpha_un
+        self._theta_velocity_cstate += (-50 * self._theta_velocity_cstate + self._theta) / self._frequency
+        self._alpha_velocity_cstate += (-50 * self._alpha_velocity_cstate + alpha_un) / self._frequency
 
-        self._theta_velocity = theta_velocity_next
-        self._alpha_velocity = alpha_velocity_next
+        # TODO: update using the transfer function
+        self._theta_acceleration = (theta_velocity - self._theta_velocity) * self._frequency
+        self._alpha_acceleration = (alpha_velocity - self._alpha_velocity) * self._frequency
 
-        self._theta = theta_next
-        self._alpha = alpha_next
+        self._theta_velocity = theta_velocity
+        self._alpha_velocity = alpha_velocity
 
         return self._get_state()
 
@@ -159,7 +153,7 @@ class QubeBaseEnv(gym.Env):
         ], dtype=np.float32)
         return state
 
-    def _flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
+    def _flip_up(self, early_quit=False):
         """Run classic control for flip-up until the pendulum is inverted for
         a set amount of time. Assumes that initial state is stationary
         downwards.
@@ -167,40 +161,19 @@ class QubeBaseEnv(gym.Env):
         Args:
             early_quit: Quit if flip up doesn't succeed after set amount of
                 time
-            time_out: Time given to the classical control system to flip up
-                before quitting (in seconds)
-            min_hold_time: Time to hold the pendulum upright within a
-                tolerance (in seconds)
-            alpha_tolerance: Angle from perfectly inverted that counts as
-                'upright' (in radians)
         """
-        control = QubeFlipUpControl(
-            env=self, sample_freq=self._frequency)
-        time_out = time_out * self._frequency
-        time_hold = min_hold_time * self._frequency
+        control = QubeFlipUpControl(env=self, sample_freq=self._frequency)
+        time_hold = 1.0 * self._frequency # Number of samples to hold upright
         sample = 0 # Samples since control system started
         samples_upright = 0 # Consecutive samples pendulum is upright
 
-        state = self._get_state()
+        action = self.action_space.sample()
+        state, _, _, _ = self.step([1.0])
         while True:
             action = control.action(state)
             state, _, _, _ = self.step(action)
-
-            # Break or reset to down if timed out
-            if sample > time_out:
-                if early_quit:
-                    break
-                else:
-                    sample = 0
-                    samples_upright = 0
-                    state = self._dampen_down()
-                    self.center()
-                    action = np.zeros(
-                        shape=self.action_space.shape,
-                        dtype=self.action_space.dtype)
-
             # Break if pendulum is inverted
-            if self._alpha < self._alpha_tolerance:
+            if self._alpha < (10 * np.pi / 180):
                 if samples_upright > time_hold:
                     break
                 samples_upright += 1
@@ -221,7 +194,7 @@ class QubeBaseEnv(gym.Env):
         while True:
             state, _, _, _ = self.step(action)
             # Break if pendulum is stationary
-            ref_state = [0.0, 0.0, 0.0, 0.0]
+            ref_state = [0., 0., 0., 0.]
             if np.allclose(state[4:8], ref_state, rtol=1e-02, atol=1e-03):
                 if samples_downwards > time_hold:
                     break
@@ -231,61 +204,16 @@ class QubeBaseEnv(gym.Env):
 
         return self._get_state()
 
-    def _center(self, min_hold_time=0.5):
-        time_hold = min_hold_time * self._frequency
-        action = np.array([1.5], dtype=np.float64)  # Enough to push arm to the edge
-
-        # Get minimum theta
-        samples_downwards = 0  # Consecutive samples pendulum is stationary
-        while True:
-            state = self._step(action)
-            # Break if arm (theta) velocity is close to zero
-            if np.allclose(state[4], [0.0], rtol=1e-02, atol=1e-03):
-                if samples_downwards > time_hold:
-                    min_theta = self._theta
-                    break
-                samples_downwards += 1
-            else:
-                samples_downwards = 0
-        samples_downwards = 0
-
-        # Get maximum theta
-        samples_downwards = 0  # Consecutive samples pendulum is stationary
-        while True:
-            state = self._step(-action)
-            # Break if arm (theta) velocity is close to zero
-            if np.allclose(state[4], [0.0], rtol=1e-02, atol=1e-03):
-                if samples_downwards > time_hold:
-                    max_theta = self._theta
-                    break
-                samples_downwards += 1
-            else:
-                samples_downwards = 0
-        samples_downwards = 0
-
-        print('Min theta = {}, Max theta = {}'.format(min_theta, max_theta))
-        self._theta_offset = (min_theta + max_theta) / 2
-        print('_theta_offset', self._theta_offset)
-        return self._get_state()
-
     def flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
         self.dampen_down()
-        return self._flip_up(
-            early_quit=early_quit,
-            time_out=time_out,
-            min_hold_time=min_hold_time)
+        return self._flip_up(early_quit=early_quit)
 
     def dampen_down(self):
-        self.center()
         return self._dampen_down()
-
-    def center(self):
-        return self._center()
 
     def reset(self):
         # Start the pendulum stationary at the bottom (stable point)
         self.dampen_down()
-        self.qube.reset_encoders()
         action = np.zeros(
             shape=self.action_space.shape,
             dtype=self.action_space.dtype)
@@ -295,11 +223,7 @@ class QubeBaseEnv(gym.Env):
         state = self._step(action)
         reward = self.reward_fn(state, action)
         done = False
-
-        info = {k: v for (k, v) in zip(STATE_KEYS, self._get_state())}
-        info['alpha'] = self._alpha
-        info['theta'] = self._theta
-
+        info = {}
         return state, reward, done, info
 
     def render(self, mode='human'):

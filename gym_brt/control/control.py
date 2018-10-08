@@ -119,10 +119,6 @@ class AeroControl(Control):
         return voltages
 
 
-def unbias(theta):
-    return ((theta + np.pi) % (2 * np.pi))
-
-
 class QubeFlipUpControl(Control):
     '''Classical controller to hold the pendulum upright whenever the
     angle is within 20 degrees, and flips up the pendulum whenever
@@ -130,8 +126,6 @@ class QubeFlipUpControl(Control):
     '''
     def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
         super(QubeFlipUpControl, self).__init__(env=env)
-        self.theta_dot = 0.
-        self.alpha_dot = 0.
         self.sample_freq = sample_freq
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
@@ -182,19 +176,14 @@ class QubeFlipUpControl(Control):
         alpha_y = state[3]
         theta = np.arctan2(theta_y, theta_x)
         alpha = np.arctan2(alpha_y, alpha_x)
-
-        # Calculate the velocities
-        theta_dot = -2500 * self.theta_dot + 50 * theta
-        alpha_dot = -2500 * self.alpha_dot + 50 * alpha
+        theta_dot = state[4]
+        alpha_dot = state[5]
 
         # If pendulum is within 20 degrees of upright, enable balance control
         if np.abs(alpha) <= (20.0 * np.pi / 180.0):
             action = self._action_hold(theta, alpha, theta_dot, alpha_dot)
         else:
             action = self._flip_up(theta, alpha, theta_dot, alpha_dot)
-
-        self.theta_dot += (-50 * self.theta_dot + theta) / self.sample_freq
-        self.alpha_dot += (-50 * self.alpha_dot + alpha) / self.sample_freq
 
         voltages = np.array([action], dtype=np.float64)
         # set the saturation limit to +/- the Qube saturation voltage
