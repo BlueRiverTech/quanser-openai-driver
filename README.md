@@ -10,35 +10,45 @@ Has an OpenAI Gym wrapper for the Quanser Qube Servo 2 and Quanser Aero
 - [Warning](#warning)
     - [Quick fix](#the-fastest-solution-no-restart-required-is-to-remove-the-semaphore-of-the-board)
 
+
 # Setup
 We have tested on Ubuntu 16.04 LTS and Ubuntu 18.04 LTS using Python 2.7 and Python 3.6.5<br>
+
 
 ### Prerequisites
 Install the HIL SDK from Quanser.<br>
 A mirror is available at https://github.com/BlueRiverTech/hil_sdk_linux_x86_64.<br>
 
+You can install the driver by:
+```bash
+    git clone https://github.com/BlueRiverTech/hil_sdk_linux_x86_64.git
+    ./hil_sdk_linux_x86_64/setup_hil_sdk
+```
+
+You also must have pip installed:
+```bash
+    sudo apt-get install python3-pip
+```
+
 **Note:** this requires a version of the HIL SDK that supports buffer overwrite on overflow (circular buffers).<br>
 (The mirror posted above supports buffer overflow.)<br>
 
+
 ### Installation
-We recommend using [Pipenv](https://docs.pipenv.org/). Install dependencies found in the [Pipfile](./Pipfile) by running:<br>
+We recommend that you use a virtual environment such as [virtualenv](https://virtualenv.pypa.io/en/stable/), [conda](https://conda.io/docs/user-guide/getting-started.html), or [Pipenv](https://pipenv.readthedocs.io/en/latest/)
+
+You can install the driver by cloning and pip-installing:
 ```bash
-    pipenv install # install the dependencies
-    pipenv shell # activate the virtual environment
+    git clone https://github.com/BlueRiverTech/quanser-openai-driver.git
+    cd quanser-openai-driver
+    pip3 install -e .
 ```
 
-Alternatively you can install using the [pip instructions](docs/alternatives.md#installation)
-
-Once you have that setup: Run the classical control baseline<br>
-- For the Qube: `python tests/test.py --env QubeFlipUpEnv --control flip-up`
-
-### Recompiling Cython code:
-If you wish to make changes to the Python wrapper (under `gym_brt/quanser`) simply install Cython by running:<br>
+Once you have that setup: Run the classical control baseline (ensure the Qube is connected to your computer)<br>
 ```bash
-    pipenv install --dev # install all user and developer dependencies
+python tests/test.py --env QubeFlipUpEnv --control flip-up
 ```
 
-[Pip alternative](docs/alternatives.md#installation)
 
 # Usage
 Usage is very similar to most OpenAI gym environments but **requires** that you close the environment when finished.
@@ -66,8 +76,10 @@ Or can be closed manually by using `env.close()`. You can see an [example here](
 # Environments
 Information about various environments can be found in [docs/envs](docs/envs.md).
 
+
 # Control
 Information about baselines can be found in [docs/control](docs/control.md).
+
 
 # Hardware Wrapper
 Information about the Python wrapper for Quanser hardware and Qube Servo 2 simulator can be found in [docs/quanser](docs/quanser.md).
