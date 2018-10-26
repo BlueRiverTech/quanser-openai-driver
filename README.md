@@ -3,8 +3,7 @@ Has an OpenAI Gym wrapper for the Quanser Qube Servo 2 and Quanser Aero
 
 - [Setup](#setup)
     - [Prerequisites](#prerequisites)
-    - [Installation using pipenv](#installation)
-        - [pip alternative](docs/alternatives.md#installation)
+    - [Installation](#installation)
     - [Recompiling Cython](#recompiling-cython-code)
 - [Basic Usage](#usage)
 - [Warning](#warning)
@@ -22,7 +21,7 @@ A mirror is available at https://github.com/BlueRiverTech/hil_sdk_linux_x86_64.<
 You can install the driver by:
 ```bash
     git clone https://github.com/BlueRiverTech/hil_sdk_linux_x86_64.git
-    ./hil_sdk_linux_x86_64/setup_hil_sdk
+    sudo ./hil_sdk_linux_x86_64/setup_hil_sdk
 ```
 
 You also must have pip installed:
