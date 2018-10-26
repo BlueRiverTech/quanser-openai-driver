@@ -76,6 +76,7 @@ def test_env(env_name,
             state = env.reset()
             print('Started episode {}'.format(episode))
             for step in range(num_steps):
+                print('step {}.{}'.format(episode, step))
                 action = ctrl_sys.action(state)
                 state, reward, done, _ = env.step(action)
                 if done:
