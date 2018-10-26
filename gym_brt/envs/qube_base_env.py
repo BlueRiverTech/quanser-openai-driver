@@ -197,7 +197,6 @@ class QubeBaseEnv(gym.Env):
         return self._get_state()
 
     def flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
-        self.dampen_down()
         return self._flip_up(early_quit=early_quit)
 
     def dampen_down(self):
