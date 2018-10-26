@@ -186,8 +186,8 @@ class QubeBaseEnv(gym.Env):
         while True:
             state, _, _, _ = self.step(action)
             # Break if pendulum is stationary
-            ref_state = [0., 0., 0., 0.]
-            if np.allclose(state[4:8], ref_state, rtol=1e-02, atol=1e-03):
+            ref_state = [0., 0.]
+            if np.allclose(state[2:4], ref_state, rtol=1e-02, atol=1e-03):
                 if samples_downwards > time_hold:
                     break
                 samples_downwards += 1
@@ -197,6 +197,7 @@ class QubeBaseEnv(gym.Env):
         return self._get_state()
 
     def flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
+        self.dampen_down()
         return self._flip_up(early_quit=early_quit)
 
     def dampen_down(self):
