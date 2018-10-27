@@ -74,7 +74,6 @@ class QubeBeginUprightEnv(QubeBaseEnv):
 
     Episode Termination:
         Pendulum Angle (alpha) is more than ±10° from upright
-        Arm Angle (theta) is more than ±30° from start point
     """
     def __init__(self, frequency=1000, use_simulator=False):
         super(QubeBeginUprightEnv, self).__init__(
