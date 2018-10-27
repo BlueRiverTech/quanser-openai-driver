@@ -59,7 +59,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--num_steps', '-n',
-        default=1e4,
+        default=0,
         help='Total number of steps to run.')
     parser.add_argument(
         '--frequency', '-f',

@@ -25,8 +25,16 @@ class QubeBeginUprightReward(object):
             high=ACTION_HIGH, dtype=np.float32)
 
     def __call__(self, state, action):
-        reward = 1
-        return reward
+        # reward = 1
+        theta = state[0]
+        alpha = state[1]
+        theta_dot = state[2]
+        alpha_dot = state[3]
+
+        cost = 5 * abs(theta) > (20 * np.pi / 180) + \
+            5 * abs(theta_dot) > 5
+
+        return 1 - cost
 
 
 class QubeBeginUprightEnv(QubeBaseEnv):
@@ -66,8 +74,7 @@ class QubeBeginUprightEnv(QubeBaseEnv):
 
     Episode Termination:
         Pendulum Angle (alpha) is more than ±10° from upright
-        Arm Angle (theta) is more than ±90° from start point
-        Episode length is greater than 2000
+        Arm Angle (theta) is more than ±30° from start point
     """
     def __init__(self, frequency=1000, use_simulator=False):
         super(QubeBeginUprightEnv, self).__init__(
@@ -89,9 +96,8 @@ class QubeBeginUprightEnv(QubeBaseEnv):
 
     def _done(self):
         # The episode ends whenever the angle alpha is outside the tolerance
-        return abs(self._alpha) > (10 * np.pi / 180) \
-            or abs(self._theta) > (90 * np.pi / 180) \
-            or self._total_steps > 2000
+        done = abs(self._alpha) > (20 * np.pi / 180)
+        return done
 
     def step(self, action):
         self._total_steps += 1
