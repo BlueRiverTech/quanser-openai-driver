@@ -81,7 +81,7 @@ class QubeBeginDownEnv(QubeBaseEnv):
         return super(QubeBeginDownEnv, self).reset()
 
     def _done(self):
-        done = self._episode_steps > (self.frequency * 5) # Greater than 5s
+        done = self._episode_steps > (self._frequency * 5) # Greater than 5s
         return done
 
     def step(self, action):

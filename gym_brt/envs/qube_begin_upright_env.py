@@ -91,7 +91,7 @@ class QubeBeginUprightEnv(QubeBaseEnv):
     def _done(self):
         # The episode ends whenever the angle alpha is outside the tolerance
         done = abs(self._alpha) > (20 * np.pi / 180)
-        done |= self._episode_steps > (self.frequency * 5) # Greater than 5s
+        done |= self._episode_steps > (self._frequency * 5) # Greater than 5s
         return done
 
     def step(self, action):
