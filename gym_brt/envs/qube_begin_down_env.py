@@ -18,32 +18,79 @@ class QubeBeginDownReward(object):
             high=ACTION_HIGH, dtype=np.float32)
 
     def __call__(self, state, action):
-        theta_x = state[0]
-        theta_y = state[1]
-        alpha_x = state[2]
-        alpha_y = state[3]
-        theta_velocity = state[4]
-        alpha_velocity = state[5]
-        theta_acceleration = state[6]
-        alpha_acceleration = state[7]
+        alpha_x, alpha_y = state[2], state[3]
+        alpha = np.arctan2(alpha_y, alpha_x)
 
-        theta = np.arctan2(theta_y, theta_x)  # arm
-        alpha = np.arctan2(alpha_y, alpha_x)  # pole
-
-        cost = normalize_angle(theta)**4 + \
-            normalize_angle(alpha)**2 + \
-            0.1 * alpha_velocity**2
-
-        reward = -cost
+        reward = (abs(alpha) < (20 * np.pi / 180))
         return reward
 
 
 class QubeBeginDownEnv(QubeBaseEnv):
-    def __init__(self, frequency=1000, use_simulator=False):
+    """
+    Description:
+        A pendulum is attached to an un-actuated joint to a horizontal arm,
+        which is actuated by a rotary motor. The pendulum begins
+        downwards and the goal is flip the pendulum up and then to keep it from
+        falling by applying a voltage on the motor which causes a torque on the
+        horizontal arm.
+
+    Source:
+        This is modified for the Quanser Qube Servo2-USB from the Cart Pole
+        problem described by Barto, Sutton, and Anderson, and implemented in
+        OpenAI Gym: https://github.com/openai/gym/blob/master/gym/envs/classic_control/cartpole.py
+        This description is also modified from the description by the OpenAI
+        team.
+
+    Observation:
+        Type: Box(4)
+        Num Observation                   Min         Max
+        0   Cos Arm angle (theta)        -1.0         1.0
+        1   Sin Arm angle (theta)        -1.0         1.0
+        2   Cos Pendulum angle (theta)   -1.0         1.0
+        3   Sin Pendulum angle (theta)   -1.0         1.0
+        4   Cart Velocity                -Inf         Inf
+        5   Pole Velocity                -Inf         Inf
+        Note: the velocities are limited by the physical system.
+
+    Actions:
+        Type: Real number (1-D Continuous) (voltage applied to motor)
+
+    Reward:
+        Reward is 0 for when the pendulum is not upright (alpha is greater than
+        ±20°) and the reward is 1 for every step taken where the pendulum is
+        upright (alpha is smaller in magnitude than ±20°)
+
+    Starting State:
+        Use a classical controller to get the pendulum into it's initial
+        inverted state. This has inherent randomness.
+
+    Episode Termination:
+        After 5 seconds.
+    """
+    def __init__(self, frequency=300, use_simulator=False):
         super(QubeBeginDownEnv, self).__init__(
             frequency=frequency,
             use_simulator=use_simulator)
         self.reward_fn = QubeBeginDownReward()
+
+        self._episode_steps = 0
+
+    def reset(self):
+        # Start the pendulum stationary at the top (stable point)
+        self._episode_steps = 0
+        return super(QubeBeginDownEnv, self).reset()
+
+    def _done(self):
+        done = self._episode_steps > (self.frequency * 5) # Greater than 5s
+        return done
+
+    def step(self, action):
+        state, reward, _, info = super(QubeBeginDownEnv, self).step(action)
+        # Make the state simpler/closer to cartpole
+        state = state[:6]
+        done = self._done()
+        self._episode_steps += 1
+        return state, reward, done, info
 
 
 def main():

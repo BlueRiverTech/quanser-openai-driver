@@ -12,7 +12,7 @@ from gym_brt.envs.qube_base_env import \
 
 
 OBSERVATION_HIGH = np.asarray([
-    (10 * np.pi / 180), (90 * np.pi / 180),  # angles
+    1, 1, 1, 1,  # cos/sin of angles
     np.inf, np.inf,  # velocities
 ], dtype=np.float64)
 OBSERVATION_LOW = -OBSERVATION_HIGH
@@ -25,16 +25,10 @@ class QubeBeginUprightReward(object):
             high=ACTION_HIGH, dtype=np.float32)
 
     def __call__(self, state, action):
-        # reward = 1
-        theta = state[0]
-        alpha = state[1]
-        theta_dot = state[2]
-        alpha_dot = state[3]
-
-        cost = 5 * abs(theta) > (20 * np.pi / 180) + \
-            5 * abs(theta_dot) > 5
-
-        return 1 - cost
+        # Reward of 1 every timestep the pendulum is upright
+        # The same as QubeBeginDownEnv
+        # reward = (abs(alpha) < (20 * np.pi / 180))
+        return 1
 
 
 class QubeBeginUprightEnv(QubeBaseEnv):
@@ -54,16 +48,17 @@ class QubeBeginUprightEnv(QubeBaseEnv):
 
     Observation:
         Type: Box(4)
-        Num Observation                 Min         Max
-        0   Arm Angle (theta)         -10.0           10.0
-        1   Cart Velocity             -Inf            Inf
-        2   Pole Angle                -90.0°          90.0°
-        3   Pole Velocity At Tip      -Inf            Inf
-
+        Num Observation                   Min         Max
+        0   Cos Arm angle (theta)        -1.0         1.0
+        1   Sin Arm angle (theta)        -1.0         1.0
+        2   Cos Pendulum angle (theta)   -1.0         1.0
+        3   Sin Pendulum angle (theta)   -1.0         1.0
+        4   Cart Velocity                -Inf         Inf
+        5   Pole Velocity                -Inf         Inf
         Note: the velocities are limited by the physical system.
 
     Actions:
-        Type: Continuous (voltage applied to motor)
+        Type: Real number (1-D Continuous) (voltage applied to motor)
 
     Reward:
         Reward is 1 for every step taken, including the termination step
@@ -73,9 +68,9 @@ class QubeBeginUprightEnv(QubeBaseEnv):
         inverted state. This has inherent randomness.
 
     Episode Termination:
-        Pendulum Angle (alpha) is more than ±10° from upright
+        Pendulum Angle (alpha) is more than ±20° from upright or after 5 seconds
     """
-    def __init__(self, frequency=1000, use_simulator=False):
+    def __init__(self, frequency=300, use_simulator=False):
         super(QubeBeginUprightEnv, self).__init__(
             frequency=frequency,
             use_simulator=use_simulator)
@@ -85,35 +80,26 @@ class QubeBeginUprightEnv(QubeBaseEnv):
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
 
-        self._total_steps = 0
+        self._episode_steps = 0
 
     def reset(self):
         # Start the pendulum stationary at the top (stable point)
         state = self.flip_up()
-        self._total_steps = 0
+        self._episode_steps = 0
         return state
 
     def _done(self):
         # The episode ends whenever the angle alpha is outside the tolerance
         done = abs(self._alpha) > (20 * np.pi / 180)
+        done |= self._episode_steps > (self.frequency * 5) # Greater than 5s
         return done
 
     def step(self, action):
-        self._total_steps += 1
         state, reward, _, info = super(QubeBeginUprightEnv, self).step(action)
-
-        # Get the angles
-        theta_x, theta_y = state[0], state[1]
-        alpha_x, alpha_y = state[2], state[3]
-        theta = np.arctan2(theta_y, theta_x)
-        alpha = np.arctan2(alpha_y, alpha_x)
-        theta_dot = state[4]
-        alpha_dot = state[5]
-
         # Make the state simpler/closer to cartpole
-        state = np.asarray([theta, alpha, theta_dot, alpha_dot])
-
+        state = state[:6]
         done = self._done()
+        self._episode_steps += 1
         return state, reward, done, info
 
 

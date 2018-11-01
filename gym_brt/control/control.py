@@ -7,7 +7,7 @@ import numpy as np
 
 # Set the motor saturation limits for the Aero and Qube
 AERO_MAX_VOLTAGE = 15.0
-QUBE_MAX_VOLTAGE = 6.0
+QUBE_MAX_VOLTAGE = 8.0
 
 
 class Control(object):
@@ -170,19 +170,14 @@ class QubeFlipUpControl(Control):
 
     def action(self, state):
         # Get the angles
-        # theta_x = state[0]
-        # theta_y = state[1]
-        # alpha_x = state[2]
-        # alpha_y = state[3]
-        # theta = np.arctan2(theta_y, theta_x)
-        # alpha = np.arctan2(alpha_y, alpha_x)
-        # theta_dot = state[4]
-        # alpha_dot = state[5]
-
-        theta = state[0]
-        alpha = state[1]
-        theta_dot = state[2]
-        alpha_dot = state[3]
+        theta_x = state[0]
+        theta_y = state[1]
+        alpha_x = state[2]
+        alpha_y = state[3]
+        theta = np.arctan2(theta_y, theta_x)
+        alpha = np.arctan2(alpha_y, alpha_x)
+        theta_dot = state[4]
+        alpha_dot = state[5]
 
         # If pendulum is within 20 degrees of upright, enable balance control
         if np.abs(alpha) <= (20.0 * np.pi / 180.0):

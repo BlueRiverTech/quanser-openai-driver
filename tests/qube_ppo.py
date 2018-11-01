@@ -7,11 +7,12 @@ import time
 import gym
 import os
 
-from gym_brt.envs import QubeBeginUprightEnv
+from gym_brt.envs import QubeBeginUprightEnv, QubeBeginDownEnv
 
 try:
     from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
     from baselines.ppo2.ppo2 import learn as learn_ppo2
+    from baselines import logger
 except:
     raise ImportError('Please install OpenAI baselines from: https://github.com/openai/baselines')
 
@@ -21,7 +22,16 @@ def main(args):
     network_kwargs = {'num_layers':2, 'num_hidden':64, 'activation':tf.tanh}
 
     try:
-        env = lambda *a, **k: QubeBeginUprightEnv(frequency=300)
+        logger.configure()
+
+        if args.env == 'QubeBeginUprightEnv':
+            qube_env = QubeBeginUprightEnv
+        elif args.env == 'QubeBeginDownEnv':
+            qube_env = QubeBeginDownEnv
+        else:
+            raise ValueError
+
+        env = lambda *a, **k: qube_env(frequency=args.frequency)
         env = DummyVecEnv([env])
 
         model = learn_ppo2(
@@ -29,6 +39,7 @@ def main(args):
             nsteps=2048, ent_coef=0.0, lr=lambda f: 3e-4 * f,
             vf_coef=0.5, max_grad_norm=0.5, gamma=0.99, lam=0.95,
             log_interval=1, nminibatches=32, noptepochs=10, cliprange=0.2,
+            save_interval=50000,
             load_path=args.load_path,
             **network_kwargs)
 
@@ -58,12 +69,18 @@ if __name__ == '__main__':
     # Parse command line args
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        '-e',
+        '--env',
+        default='QubeBeginUprightEnv',
+        choices=['QubeBeginUprightEnv', 'QubeBeginDownEnv'],
+        help='Enviroment to run.')
+    parser.add_argument(
         '--num_steps', '-n',
         default=0,
         help='Total number of steps to run.')
     parser.add_argument(
         '--frequency', '-f',
-        default='1000',
+        default='300',
         type=float,
         help='The frequency of samples on the Quanser hardware.')
     parser.add_argument('--save_path', '-s', type=str)

@@ -13,20 +13,19 @@ from gym_brt.quanser import QubeServo2, QubeServo2Simulator
 from gym_brt.control import QubeFlipUpControl
 
 
-# theta, alpha: positions, velocities, accelerations
-OBSERVATION_HIGH = np.asarray([
-    1, 1, 1, 1,  # angles
-    np.pi / 4, np.pi / 4,  # velocities
-    np.pi / 4, np.pi / 4,  # accelerations
-    4100,  # tach0
-    0.2,  # sense
-], dtype=np.float64)
-OBSERVATION_LOW = -OBSERVATION_HIGH
-
-
-MAX_MOTOR_VOLTAGE = 8.0
+MAX_MOTOR_VOLTAGE = 15
 ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
+
+# theta, alpha: positions, velocities, accelerations
+OBSERVATION_HIGH = np.asarray([
+    1, 1, 1, 1,  # cos/sin of angles
+    np.inf, np.inf,  # velocities
+    np.inf, np.inf,  # accelerations
+    np.inf,  # tach0
+    MAX_MOTOR_VOLTAGE / 8.4,  # current sense = max_voltage / R_equivalent
+], dtype=np.float64)
+OBSERVATION_LOW = -OBSERVATION_HIGH
 
 
 STATE_KEYS = [
@@ -145,14 +144,10 @@ class QubeBaseEnv(gym.Env):
         ], dtype=np.float32)
         return state
 
-    def _flip_up(self, early_quit=False):
+    def _flip_up(self):
         """Run classic control for flip-up until the pendulum is inverted for
         a set amount of time. Assumes that initial state is stationary
         downwards.
-
-        Args:
-            early_quit: Quit if flip up doesn't succeed after set amount of
-                time
         """
         control = QubeFlipUpControl(env=self, sample_freq=self._frequency)
         time_hold = 1.0 * self._frequency # Number of samples to hold upright
@@ -187,7 +182,8 @@ class QubeBaseEnv(gym.Env):
             state, _, _, _ = self.step(action)
             # Break if pendulum is stationary
             ref_state = [0., 0.]
-            if np.allclose(state[2:4], ref_state, rtol=1e-02, atol=1e-03):
+            pen_state = [self._theta_velocity, self._alpha_velocity]
+            if np.allclose(pen_state, ref_state, rtol=1e-02, atol=1e-03):
                 if samples_downwards > time_hold:
                     break
                 samples_downwards += 1
@@ -197,8 +193,10 @@ class QubeBaseEnv(gym.Env):
         return self._get_state()
 
     def flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
-        # self.dampen_down() # Uncommenting increases the flip up time
-        return self._flip_up(early_quit=early_quit)
+        # Uncomment the following line for a more stable flip-up
+        # Note: uncommenting significantly increases the flip up time
+        # self.dampen_down()
+        return self._flip_up()
 
     def dampen_down(self):
         return self._dampen_down()
