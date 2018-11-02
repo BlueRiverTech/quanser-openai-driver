@@ -11,6 +11,13 @@ from gym_brt.envs.qube_base_env import \
     ACTION_LOW
 
 
+OBSERVATION_HIGH = np.asarray([
+    1, 1, 1, 1,  # cos/sin of angles
+    np.inf, np.inf,  # velocities
+], dtype=np.float64)
+OBSERVATION_LOW = -OBSERVATION_HIGH
+
+
 class QubeBeginDownReward(object):
     def __init__(self):
         self.target_space = spaces.Box(
@@ -72,6 +79,10 @@ class QubeBeginDownEnv(QubeBaseEnv):
             frequency=frequency,
             use_simulator=use_simulator)
         self.reward_fn = QubeBeginDownReward()
+
+        self.observation_space = spaces.Box(
+            OBSERVATION_LOW, OBSERVATION_HIGH,
+            dtype=np.float32)
 
         self._episode_steps = 0
 
