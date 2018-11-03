@@ -39,25 +39,20 @@ class QubeBeginUprightReward(object):
 
 
 class QubeBeginUprightEnv(QubeBaseEnv):
-    def __init__(self,
-                 frequency=1000,
-                 use_simulator=False,
-                 alpha_tolerance=10 * np.pi / 180):
+    def __init__(self, frequency=1000, use_simulator=False):
         super(QubeBeginUprightEnv, self).__init__(
             frequency=frequency,
-            use_simulator=use_simulator,
-            alpha_tolerance=alpha_tolerance)
+            use_simulator=use_simulator)
         self.reward_fn = QubeBeginUprightReward()
 
     def reset(self):
         # Start the pendulum stationary at the top (stable point)
         state = self.flip_up()
-        self.qube.reset_encoders()
         return state
 
     def _done(self):
         # The episode ends whenever the angle alpha is outside the tolerance
-        return self._alpha > self._alpha_tolerance
+        return self._alpha > (10 * np.pi / 180)
 
     def step(self, action):
         state, reward, _, info = super(QubeBeginUprightEnv, self).step(action)
