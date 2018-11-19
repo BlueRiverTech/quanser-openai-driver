@@ -32,28 +32,24 @@ def forward_model(theta, alpha, theta_dot, alpha_dot, Vm, dt, euler_steps):
     for step in range(euler_steps):
         tau = (km * (Vm - km * theta_dot)) / Rm  # torque
 
-        theta_dot_dot = -(
-            Lp * Lr * mp *
-            (8.0 * Dp * alpha_dot - Lp**2 * mp * theta_dot**2 * math.sin(
-                2.0 * alpha) + 4.0 * Lp * g * mp * math.sin(alpha)) *
-            math.cos(alpha) + (4.0 * Jp + Lp**2 * mp) *
-            (4.0 * Dr * theta_dot +
-             Lp**2 * alpha_dot * mp * theta_dot * math.sin(2.0 * alpha) +
-             2.0 * Lp * Lr * alpha_dot**2 * mp * math.sin(alpha) - 4.0 * tau)) / (
-                 4.0 * Lp**2 * Lr**2 * mp**2 * math.cos(alpha)**2 +
-                 (4.0 * Jp + Lp**2 * mp) *
-                 (4.0 * Jr + Lp**2 * mp * math.sin(alpha)**2 + 4.0 * Lr**2 * mp))
-        alpha_dot_dot = (
-            4.0 * Lp * Lr * mp *
-            (2.0 * Dr * theta_dot + 0.5 * Lp**2 * alpha_dot * mp * theta_dot *
-             math.sin(2.0 * alpha) + Lp * Lr * alpha_dot**2 * mp * math.sin(alpha)
-             - 2.0 * tau) * math.cos(alpha) -
-            (4.0 * Jr + Lp**2 * mp * math.sin(alpha)**2 + 4.0 * Lr**2 * mp) *
-            (4.0 * Dp * alpha_dot - 0.5 * Lp**2 * mp * theta_dot**2 *
-             math.sin(2.0 * alpha) + 2.0 * Lp * g * mp * math.sin(alpha))) / (
-                 4.0 * Lp**2 * Lr**2 * mp**2 * math.cos(alpha)**2 +
-                 (4.0 * Jp + Lp**2 * mp) *
-                 (4.0 * Jr + Lp**2 * mp * math.sin(alpha)**2 + 4.0 * Lr**2 * mp))
+        theta_dot_dot = (-Lp*Lr*mp*(8.0*Dp*theta_dot - 
+            Lp**2*mp*theta_dot**2*math.sin(2.0*alpha) + 
+            4.0*Lp*g*mp*math.sin(alpha))*math.cos(alpha) + 
+            (4.0*Jp + Lp**2*mp)*(4.0*Dr*theta_dot + 
+            Lp**2*mp*theta_dot*theta_dot*math.sin(2.0*alpha) + 
+            2.0*Lp*Lr*mp*theta_dot**2*math.sin(alpha) - 
+            4.0*tau))/(4.0*Lp**2*Lr**2*mp**2*math.cos(alpha)**2 - 
+            (4.0*Jp + Lp**2*mp)*(4.0*Jr + Lp**2*mp*math.cos(alpha)**2 + 
+            4.0*Lr**2*mp))
+        alpha_dot_dot = (-2.0*Lp*Lr*mp*(4.0*Dr*theta_dot + 
+            Lp**2*mp*theta_dot*theta_dot*math.sin(2.0*alpha) + 
+            2.0*Lp*Lr*mp*theta_dot**2*math.sin(alpha) - 
+            4.0*tau)*math.cos(alpha) + 0.5*(4.0*Jr + 
+            Lp**2*mp*math.cos(alpha)**2 + 4.0*Lr**2*mp)*(8.0*Dp*theta_dot - 
+            Lp**2*mp*theta_dot**2*math.sin(2.0*alpha) + 
+            4.0*Lp*g*mp*math.sin(alpha)))/(4.0*Lp**2*Lr**2*mp**2*math.cos(alpha)**2 - 
+            (4.0*Jp + Lp**2*mp)*(4.0*Jr + Lp**2*mp*math.cos(alpha)**2 + 
+            4.0*Lr**2*mp))
 
         theta_dot += theta_dot_dot * dt
         alpha_dot += alpha_dot_dot * dt
