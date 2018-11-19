@@ -85,11 +85,17 @@ class QubeServo2Simulator(object):
         self.state = [0, 0, 0, 0, 0]
 
     def __enter__(self):
-        self.state = [0, 0, 0, 0, 0]
+        self.state = (np.random.randn(5) * 0.0001).tolist()
         return self
 
     def __exit__(self, type, value, traceback):
         pass
+
+    def reset_up(self):
+        self.state = (np.random.randn(5) * 0.0001 + np.array([0, 0, 0, 0, 0])).tolist()
+
+    def reset_down(self):
+        self.state = (np.random.randn(5) * 0.0001 + np.array([0, np.pi, np.pi, 0, 0])).tolist()
 
     def reset_encoders(self):
         pass
@@ -107,5 +113,5 @@ class QubeServo2Simulator(object):
         currents = [action / 8.4]  # 8.4 is resistance
         others = [0.]  #[tach0, other_stuff]
 
-        return encoders, currents, others
+        return currents, encoders, others
 

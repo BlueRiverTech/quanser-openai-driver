@@ -9,7 +9,7 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from gym_brt.quanser import QubeServo2
+from gym_brt.quanser  import QubeServo2Simulator, QubeServo2
 from gym_brt.control import QubeFlipUpControl
 
 
@@ -44,7 +44,12 @@ STATE_KEYS = [
 
 
 def normalize_angle(theta):
+    '''Convert the range of the angle from [0, 2*pi] to [-pi, pi]'''
     return ((theta + np.pi) % (2 * np.pi)) - np.pi
+
+def unnormailize_angle(theta):
+    '''Conver the range of the angle from [-pi, pi] to [0, 2*pi]'''
+    return (theta + 2 * np.pi) % (2 * np.pi)
 
 
 class QubeBaseReward(object):
@@ -58,7 +63,14 @@ class QubeBaseReward(object):
 
 
 class QubeBaseEnv(gym.Env):
-    def __init__(self, frequency=1000):
+    metadata = {
+        'render.modes': ['human', 'rgb_array'],
+        'video.frames_per_second' : 50
+    }
+
+    def __init__(self,
+                 frequency=1000,
+                 use_simulator=False):
         self.observation_space = spaces.Box(
             OBSERVATION_LOW, OBSERVATION_HIGH,
             dtype=np.float32)
@@ -74,9 +86,17 @@ class QubeBaseEnv(gym.Env):
         self._frequency = frequency
 
         # Open the Qube
-        self.qube = QubeServo2(frequency=frequency)
+        if use_simulator:
+            self.qube = QubeServo2Simulator(
+                euler_steps=25,
+                frequency=frequency)
+        else:
+            self.qube = QubeServo2(frequency=frequency)
         self.qube.__enter__()
+
         self.seed()
+        self._viewer = None
+        self.use_simulator = use_simulator
 
     def __enter__(self):
         return self
@@ -178,10 +198,24 @@ class QubeBaseEnv(gym.Env):
         return self._get_state()
 
     def flip_up(self):
-        return self._flip_up()
+        if self.use_simulator:
+            self.qube.reset_up()
+            action = np.zeros(
+                shape=self.action_space.shape,
+                dtype=self.action_space.dtype)
+            return self.step(action)[0]
+        else:
+            return self._flip_up()
 
     def dampen_down(self):
-        return self._dampen_down()
+        if self.use_simulator:
+            self.qube.reset_down()
+            action = np.zeros(
+                shape=self.action_space.shape,
+                dtype=self.action_space.dtype)
+            return self.step(action)[0]
+        else:
+            return self._dampen_down()
 
     def reset(self):
         # Start the pendulum stationary at the bottom (stable point)
@@ -194,9 +228,39 @@ class QubeBaseEnv(gym.Env):
         info = {}
         return state, reward, done, info
 
-    def render(self, mode):
-        pass
+    def render(self, mode='human'):
+        if self._viewer is None:
+            from gym.envs.classic_control import rendering
+            width, height = (640, 240)
+            self._viewer = rendering.Viewer(width, height)
+            l, r, t, b = (2, -2, 0, 100)
+            theta_poly = rendering.make_polygon([(l, b), (l, t), (r, t), (r, b)])
+            l, r, t, b = (2, -2, 0, 100)
+            alpha_poly = rendering.make_polygon([(l, b), (l, t), (r, t), (r, b)])
+            theta_circle = rendering.make_circle(radius=100, res=64, filled=False)
+            theta_circle.set_color(0.5, 0.5, 0.5)
+            alpha_circle = rendering.make_circle(radius=100, res=64, filled=False)
+            alpha_circle.set_color(0.5, 0.5, 0.5)
+            theta_origin = (width / 2 - 150, height / 2)
+            alpha_origin = (width / 2 + 150, height / 2)
+            self._theta_tx = rendering.Transform(translation=theta_origin)
+            self._alpha_tx = rendering.Transform(translation=alpha_origin)
+            theta_poly.add_attr(self._theta_tx)
+            alpha_poly.add_attr(self._alpha_tx)
+            theta_circle.add_attr(self._theta_tx)
+            alpha_circle.add_attr(self._alpha_tx)
+            self._viewer.add_geom(theta_poly)
+            self._viewer.add_geom(alpha_poly)
+            self._viewer.add_geom(theta_circle)
+            self._viewer.add_geom(alpha_circle)
+
+        self._theta_tx.set_rotation(self._theta + np.pi)
+        self._alpha_tx.set_rotation(self._alpha + np.pi)
+
+        return self._viewer.render(return_rgb_array=mode == 'rgb_array')
+
 
     def close(self, type=None, value=None, traceback=None):
         # Safely close the Qube
         self.qube.__exit__(type=type, value=value, traceback=traceback)
+        if self._viewer: self._viewer.close()
