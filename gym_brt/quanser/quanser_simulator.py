@@ -26,7 +26,7 @@ Dp = 0.0005  # Equivalent viscous damping coefficient (N-m-s/rad)
 g = 9.81  # Gravity constant
 
 
-def forward_model(theta, alpha, theta_dot, alpha_dot, Vm, dt, euler_steps):
+def forward_model(theta, alpha, alpha_unnorm, theta_dot, alpha_dot, Vm, dt, euler_steps):
 
     dt /= euler_steps
     for step in range(euler_steps):
@@ -60,7 +60,10 @@ def forward_model(theta, alpha, theta_dot, alpha_dot, Vm, dt, euler_steps):
         theta %= (2 * math.pi)
         alpha %= (2 * math.pi)
 
-    return theta, alpha, theta_dot, alpha_dot
+        # Ensures that the encoder value is the same as in the Qube
+        alpha_unnorm += alpha_dot * dt
+
+    return theta, alpha, alpha_unnorm, theta_dot, alpha_dot
 
 
 # Use numba if installed
@@ -79,9 +82,10 @@ class QubeServo2Simulator(object):
                  frequency=1000):
         self._time_step = 1.0 / frequency
         self._euler_steps = euler_steps
-        self.state = [0, 0, 0, 0]
+        self.state = [0, 0, 0, 0, 0]
 
     def __enter__(self):
+        self.state = [0, 0, 0, 0, 0]
         return self
 
     def __exit__(self, type, value, traceback):
@@ -96,9 +100,12 @@ class QubeServo2Simulator(object):
             action,
             self._time_step,
             self._euler_steps)
-        encoders = self.state[:2]  # [theta, alpha]
+        # Convert the angles into counts ()
+        theta_counts = int((self.state[0] / np.pi) * 2048)
+        alpha_counts = int((self.state[2] / np.pi) * 2048)  # use unnormalized alpha
+        encoders = [theta_counts, alpha_counts]
         currents = [action / 8.4]  # 8.4 is resistance
-        others = [0.] #[tach0, other_stuff]
+        others = [0.]  #[tach0, other_stuff]
 
-        return currents, encoders, others
+        return encoders, currents, others
 

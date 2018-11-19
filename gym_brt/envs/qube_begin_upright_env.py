@@ -47,8 +47,7 @@ class QubeBeginUprightEnv(QubeBaseEnv):
 
     def reset(self):
         # Start the pendulum stationary at the top (stable point)
-        state = self.flip_up()
-        return state
+        return self.flip_up()
 
     def _done(self):
         # The episode ends whenever the angle alpha is outside the tolerance
