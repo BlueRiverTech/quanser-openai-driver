@@ -102,7 +102,7 @@ def main():
 	quanser workbook and more importantly achieve balance on the Qube Hardware
 	'''
 	#Correct K from quanser workbook -
-	#K = kp_theta = [2.0, -35.0, 1.5, -3.0]
+	#K = [2.0, -35.0, 1.5, -3.0]
 	print(LQR_control())
 
 if __name__ == '__main__':
