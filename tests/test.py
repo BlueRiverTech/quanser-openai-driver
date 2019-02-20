@@ -145,11 +145,13 @@ def main():
         choices=list(controllers.keys()),
         help='Select what type of action to take.')
     parser.add_argument(
+        '-ne',
         '--num-episodes',
         default='10',
         type=int,
         help='Number of episodes to run.')
     parser.add_argument(
+        '-ns',
         '--num-steps',
         default='10000',
         type=int,

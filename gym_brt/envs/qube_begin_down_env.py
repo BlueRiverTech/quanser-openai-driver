@@ -23,13 +23,22 @@ class QubeBeginDownReward(object):
         self.target_space = spaces.Box(
             low=ACTION_LOW,
             high=ACTION_HIGH, dtype=np.float32)
+        self.buffer = 0
 
     def __call__(self, state, action):
+        theta_x, theta_y = state[0], state[1]
         alpha_x, alpha_y = state[2], state[3]
+        theta = np.arctan2(theta_y, theta_x)
         alpha = np.arctan2(alpha_y, alpha_x)
 
-        reward = (abs(alpha) < (20 * np.pi / 180))
-        return reward
+        if abs(alpha) < (20 * np.pi / 180) and abs(theta) < (90 * np.pi / 180):
+            self.buffer += 1
+            reward = min(self.buffer, 100) / 100
+            # Encourage alpha=0, theta=0
+            reward *= 1 - 0.5*(np.abs(alpha)+np.abs(theta))
+            return reward
+        else:
+            return 0
 
 
 class QubeBeginDownEnv(QubeBaseEnv):
@@ -64,15 +73,17 @@ class QubeBeginDownEnv(QubeBaseEnv):
 
     Reward:
         Reward is 0 for when the pendulum is not upright (alpha is greater than
-        ±20°) and the reward is 1 for every step taken where the pendulum is
-        upright (alpha is smaller in magnitude than ±20°)
+        ±20°). The reward is 1 - 0.5*abs(alpha) - 0.5*abs(theta) for every
+        step taken where the pendulum is upright (alpha is smaller in magnitude
+        than ±20°), this is scaled by a the number of consecutive steps that
+        the pendulum has been upright.
 
     Starting State:
         Use a classical controller to get the pendulum into it's initial
-        inverted state. This has inherent randomness.
+        downward stationary state.
 
     Episode Termination:
-        After 5 seconds.
+        After 10 seconds or when theta is greater than ±90°
     """
     def __init__(self, frequency=300, use_simulator=False):
         super(QubeBeginDownEnv, self).__init__(
@@ -87,13 +98,16 @@ class QubeBeginDownEnv(QubeBaseEnv):
         self._episode_steps = 0
 
     def reset(self):
-        # Start the pendulum stationary at the top (stable point)
         self._episode_steps = 0
         return super(QubeBeginDownEnv, self).reset()
 
     def _done(self):
-        done = self._episode_steps > (self._frequency * 5) # Greater than 5s
-        return done
+        if abs(self._theta) > (90 * np.pi / 180):
+            return True
+        elif self._episode_steps > (self._frequency * 10):
+            return True
+        else:
+            return False
 
     def step(self, action):
         state, reward, _, info = super(QubeBeginDownEnv, self).step(action)

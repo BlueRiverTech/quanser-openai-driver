@@ -5,8 +5,8 @@ from __future__ import division
 import numpy as np
 
 
-# Set the motor saturation limits for the Aero and Qube
-AERO_MAX_VOLTAGE = 15.0
+# Set the motor saturation limits for the Aero and Qub
+eAERO_MAX_VOLTAGE = 15.0
 QUBE_MAX_VOLTAGE = 8.0
 
 
@@ -63,13 +63,13 @@ class AeroControl(Control):
 
     def action(self, state):
         # Use only pitch and yaw for control
-        pitch_rad = state[0]  # in radians
-        yaw_rad = state[1]  # in radians
+        pitch_rad = state[0]
+        yaw_rad = state[1]
 
         self._state_x[0] = pitch_rad
         self._state_x[1] = yaw_rad
 
-        # Z transform 1st order derivative filter start
+        # Z transform 1st order derivative filter
         pitch_n = pitch_rad
         pitch_dot = (46 * pitch_n) - \
             (46 * self._pitch_n_k1) + (0.839 * self._pitch_dot_k1)
@@ -98,7 +98,6 @@ class AeroControl(Control):
         voltages = np.empty(2,)
         voltages[0] = self._v_motors[0]
         voltages[1] = self._v_motors[1]
-        # Filter end
 
         # NOTE: was at 24.0 V for both below
         # Set the saturation limit to +/- AERO_MAX_VOLTAGE for Motor0
@@ -111,7 +110,6 @@ class AeroControl(Control):
             voltages[1] = AERO_MAX_VOLTAGE
         elif (voltages[1] < -AERO_MAX_VOLTAGE):
             voltages[1] = -AERO_MAX_VOLTAGE
-        # End of Custom Code
         voltages = -voltages
 
         voltages = np.array(voltages, dtype=np.float64)
@@ -156,7 +154,7 @@ class QubeFlipUpControl(Control):
         return -voltage
 
     def _action_hold(self, theta, alpha, theta_dot, alpha_dot):
-        # multiply by proportional and derivative gains
+        # Multiply by proportional and derivative gains
         kp_theta = -2.0
         kp_alpha = 35.0
         kd_theta = -1.5
@@ -170,14 +168,11 @@ class QubeFlipUpControl(Control):
 
     def action(self, state):
         # Get the angles
-        theta_x = state[0]
-        theta_y = state[1]
-        alpha_x = state[2]
-        alpha_y = state[3]
+        theta_x, theta_y = state[0], state[1]
+        alpha_x, alpha_y = state[2], state[3]
         theta = np.arctan2(theta_y, theta_x)
         alpha = np.arctan2(alpha_y, alpha_x)
-        theta_dot = state[4]
-        alpha_dot = state[5]
+        theta_dot, alpha_dot = state[4], state[5]
 
         # If pendulum is within 20 degrees of upright, enable balance control
         if np.abs(alpha) <= (20.0 * np.pi / 180.0):
@@ -203,3 +198,50 @@ class QubeHoldControl(QubeFlipUpControl):
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
         return 0
+
+
+class QubeDampenControl(Control):
+    '''Classical controller that uses stops the pendulum at the bottom, uses PD
+    control to dampen the pendulum towards stationary down.'''
+    def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
+        super(QubeDampenControl, self).__init__(env=env)
+        self.sample_freq = sample_freq
+
+    def _dampen(self,theta, alpha, theta_dot, alpha_dot):
+        kp_theta = -2
+        kp_alpha = 35
+        kd_theta = -1.5
+        kd_alpha = 3
+        if alpha >= 0:
+            action = \
+                -theta * kp_theta   + \
+                (np.pi-alpha) * kp_alpha + \
+                -theta_dot * kd_theta + \
+                -alpha_dot * kd_alpha
+            return action
+        else:
+            action = \
+                -theta * kp_theta   + \
+                (-np.pi-alpha) * kp_alpha + \
+                -theta_dot * kd_theta + \
+                -alpha_dot * kd_alpha
+            return action
+
+    def action(self, state):
+        # Get the angles
+        theta_x, theta_y = state[0], state[1]
+        alpha_x, alpha_y = state[2], state[3]
+        theta = np.arctan2(theta_y, theta_x)
+        alpha = np.arctan2(alpha_y, alpha_x)
+        theta_dot, alpha_dot = state[4], state[5]
+
+        if np.abs(alpha) > (14.0 * np.pi / 180.0) and np.abs(theta) < (np.pi / 4):
+            action = self._dampen(theta, alpha, theta_dot, alpha_dot)
+        else:
+            action = 0
+
+        voltages = np.array([action], dtype=np.float64)
+        # set the saturation limit to +/- the Qube saturation voltage
+        np.clip(voltages, -QUBE_MAX_VOLTAGE, QUBE_MAX_VOLTAGE, out=voltages)
+        assert voltages.shape == self.action_shape
+        return voltages

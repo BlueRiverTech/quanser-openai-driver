@@ -10,10 +10,10 @@ import numpy as np
 from gym import spaces
 from gym.utils import seeding
 from gym_brt.quanser import QubeServo2, QubeServo2Simulator
-from gym_brt.control import QubeFlipUpControl
+from gym_brt.control import QubeFlipUpControl, QubeDampenControl
 
 
-MAX_MOTOR_VOLTAGE = 15
+MAX_MOTOR_VOLTAGE = 3
 ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
 
@@ -104,7 +104,7 @@ class QubeBaseEnv(gym.Env):
 
     def _step(self, action):
         motor_voltages = np.clip(np.array(
-            [action[0]], dtype=np.float64), ACTION_LOW, ACTION_HIGH)
+            action, dtype=np.float64), ACTION_LOW, ACTION_HIGH)
         currents, encoders, others = self.qube.action(motor_voltages)
 
         self._sense = currents[0]
@@ -112,8 +112,10 @@ class QubeBaseEnv(gym.Env):
 
         # Calculate alpha, theta, alpha_velocity, and theta_velocity
         self._theta = encoders[0] * (-2.0 * np.pi / 2048)
-        alpha_un = encoders[1] * (2.0 * np.pi / 2048)  # Alpha without normalizing
-        self._alpha = (alpha_un % (2.0 * np.pi)) - np.pi  # Normalized and shifted alpha
+        # Alpha without normalizing
+        alpha_un = encoders[1] * (2.0 * np.pi / 2048)
+        # Normalized and shifted alpha
+        self._alpha = (alpha_un % (2.0 * np.pi)) - np.pi
 
         theta_velocity = -2500 * self._theta_velocity_cstate + 50 * self._theta
         alpha_velocity = -2500 * self._alpha_velocity_cstate + 50 * alpha_un
@@ -175,22 +177,24 @@ class QubeBaseEnv(gym.Env):
             shape=self.action_space.shape,
             dtype=self.action_space.dtype)
 
+        control = QubeDampenControl(env=self, sample_freq=self._frequency)
         time_hold = min_hold_time * self._frequency
         samples_downwards = 0  # Consecutive samples pendulum is stationary
 
+        state, _, _, _ = self.step([1.0])
         while True:
+            action = control.action(state)
             state, _, _, _ = self.step(action)
+
             # Break if pendulum is stationary
-            ref_state = [0., 0.]
-            pen_state = [self._theta_velocity, self._alpha_velocity]
-            if np.allclose(pen_state, ref_state, rtol=1e-02, atol=1e-03):
+            ref_state = [0.]
+            if abs(self._alpha) > (178 * np.pi / 180):
                 if samples_downwards > time_hold:
                     break
                 samples_downwards += 1
             else:
                 samples_downwards = 0
-
-        return self._get_state()
+        return state
 
     def flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
         # Uncomment the following line for a more stable flip-up

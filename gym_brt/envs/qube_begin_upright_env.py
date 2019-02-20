@@ -24,11 +24,18 @@ class QubeBeginUprightReward(object):
             low=ACTION_LOW,
             high=ACTION_HIGH, dtype=np.float32)
 
+        self.buffer = 0
+        self.prev_energy = 0
+
     def __call__(self, state, action):
-        # Reward of 1 every timestep the pendulum is upright
-        # The same as QubeBeginDownEnv
-        # reward = (abs(alpha) < (20 * np.pi / 180))
-        return 1
+        theta_x, theta_y = state[0], state[1]
+        alpha_x, alpha_y = state[2], state[3]
+        theta = np.arctan2(theta_y, theta_x)
+        alpha = np.arctan2(alpha_y, alpha_x)
+        theta_dot = state[4]
+        alpha_dot = state[5]
+
+        return 1 - np.abs(alpha) - 0.1*np.abs(theta)
 
 
 class QubeBeginUprightEnv(QubeBaseEnv):
@@ -61,14 +68,17 @@ class QubeBeginUprightEnv(QubeBaseEnv):
         Type: Real number (1-D Continuous) (voltage applied to motor)
 
     Reward:
-        Reward is 1 for every step taken, including the termination step
+        Reward is 1 - abs(alpha) - 0.1*abs(theta) for every step taken, 
+        including the termination step. This encourages the pendulum to stay
+        stationary and stable at the top.
 
     Starting State:
         Use a classical controller to get the pendulum into it's initial
         inverted state. This has inherent randomness.
 
     Episode Termination:
-        Pendulum Angle (alpha) is more than ±20° from upright or after 5 seconds
+        Pendulum Angle (alpha) is greater than ±20° from upright, when theta is
+        greater than ±90°, or after 5 seconds have past
     """
     def __init__(self, frequency=300, use_simulator=False):
         super(QubeBeginUprightEnv, self).__init__(
@@ -90,9 +100,14 @@ class QubeBeginUprightEnv(QubeBaseEnv):
 
     def _done(self):
         # The episode ends whenever the angle alpha is outside the tolerance
-        done = abs(self._alpha) > (20 * np.pi / 180)
-        done |= self._episode_steps > (self._frequency * 5) # Greater than 5s
-        return done
+        if abs(self._alpha) > (20 * np.pi / 180):
+            return True
+        elif abs(self._theta) > (90 * np.pi / 180):
+            return True
+        elif self._episode_steps > (self._frequency * 5):  # Greater than 5s
+            return True
+        else:
+            return False
 
     def step(self, action):
         state, reward, _, info = super(QubeBeginUprightEnv, self).step(action)
