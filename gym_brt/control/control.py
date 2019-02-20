@@ -5,8 +5,8 @@ from __future__ import division
 import numpy as np
 
 
-# Set the motor saturation limits for the Aero and Qub
-eAERO_MAX_VOLTAGE = 15.0
+# Set the motor saturation limits for the Aero and Qube
+AERO_MAX_VOLTAGE = 15.0
 QUBE_MAX_VOLTAGE = 8.0
 
 
