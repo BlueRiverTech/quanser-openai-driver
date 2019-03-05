@@ -4,42 +4,32 @@ from __future__ import division
 
 import numpy as np
 from gym import spaces
-from gym_brt.envs.qube_base_env import \
-    QubeBaseEnv, \
-    normalize_angle, \
-    ACTION_HIGH, \
-    ACTION_LOW
+from gym_brt.envs.qube_base_env import QubeBaseEnv
 
 
-OBSERVATION_HIGH = np.asarray([
-    1, 1, 1, 1,  # cos/sin of angles
+OBS_HIGH = np.asarray([
+    1, 1,  # cos/sin of theta
+    1, 1,  # cos/sin of alpha
     np.inf, np.inf,  # velocities
 ], dtype=np.float64)
-OBSERVATION_LOW = -OBSERVATION_HIGH
+OBS_LOW = -OBS_HIGH
 
 
 class QubeBeginUprightReward(object):
     def __init__(self):
-        self.target_space = spaces.Box(
-            low=ACTION_LOW,
-            high=ACTION_HIGH, dtype=np.float32)
-
-        self.buffer = 0
-        self.prev_energy = 0
+        pass
 
     def __call__(self, state, action):
         theta_x, theta_y = state[0], state[1]
         alpha_x, alpha_y = state[2], state[3]
         theta = np.arctan2(theta_y, theta_x)
         alpha = np.arctan2(alpha_y, alpha_x)
-        theta_dot = state[4]
-        alpha_dot = state[5]
-
-        return 1 - np.abs(alpha) - 0.1*np.abs(theta)
+        # Encourage alpha=0, theta=0
+        return 1 - 0.5 * (np.abs(alpha) + np.abs(theta))
 
 
 class QubeBeginUprightEnv(QubeBaseEnv):
-    """
+    '''
     Description:
         A pendulum is attached to an un-actuated joint to a horizontal arm,
         which is actuated by a rotary motor. The pendulum begins
@@ -68,7 +58,7 @@ class QubeBeginUprightEnv(QubeBaseEnv):
         Type: Real number (1-D Continuous) (voltage applied to motor)
 
     Reward:
-        Reward is 1 - abs(alpha) - 0.1*abs(theta) for every step taken, 
+        Reward is 1 - abs(alpha) - 0.1*abs(theta) for every step taken,
         including the termination step. This encourages the pendulum to stay
         stationary and stable at the top.
 
@@ -78,57 +68,23 @@ class QubeBeginUprightEnv(QubeBaseEnv):
 
     Episode Termination:
         Pendulum Angle (alpha) is greater than ±20° from upright, when theta is
-        greater than ±90°, or after 5 seconds have past
-    """
-    def __init__(self, frequency=300, use_simulator=False):
-        super(QubeBeginUprightEnv, self).__init__(
-            frequency=frequency,
-            use_simulator=use_simulator)
+        greater than ±90°, or after 2048 steps
+    '''
+    def __init__(self, frequency=250, **kwargs):
+        super(QubeBeginUprightEnv, self).__init__(frequency=frequency, **kwargs)
         self.reward_fn = QubeBeginUprightReward()
+        self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
 
-        self.observation_space = spaces.Box(
-            OBSERVATION_LOW, OBSERVATION_HIGH,
-            dtype=np.float32)
-
-        self._episode_steps = 0
 
     def reset(self):
+        super(QubeBeginUprightEnv, self).reset()
         # Start the pendulum stationary at the top (stable point)
-        state = self.flip_up()
-        self._episode_steps = 0
+        state = self.flip_up()[:6]  # Simplify the state
         return state
 
-    def _done(self):
-        # The episode ends whenever the angle alpha is outside the tolerance
-        if abs(self._alpha) > (20 * np.pi / 180):
-            return True
-        elif abs(self._theta) > (90 * np.pi / 180):
-            return True
-        elif self._episode_steps > (self._frequency * 5):  # Greater than 5s
-            return True
-        else:
-            return False
-
     def step(self, action):
-        state, reward, _, info = super(QubeBeginUprightEnv, self).step(action)
-        # Make the state simpler/closer to cartpole
-        state = state[:6]
-        done = self._done()
-        self._episode_steps += 1
+        state, reward, done, info = super(QubeBeginUprightEnv, self).step(action)
+        state = state[:6]  # Simplify the state (only angles & velocities)
+        done |= abs(self._alpha) > (20 * np.pi / 180)
+
         return state, reward, done, info
-
-
-def main():
-    num_episodes = 10
-    num_steps = 250
-
-    with QubeBeginUprightEnv() as env:
-        for episode in range(num_episodes):
-            state = env.reset()
-            for step in range(num_steps):
-                action = env.action_space.sample()
-                state, reward, done, _ = env.step(action)
-
-
-if __name__ == '__main__':
-    main()

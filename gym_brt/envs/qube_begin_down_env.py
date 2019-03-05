@@ -4,26 +4,19 @@ from __future__ import division
 
 import numpy as np
 from gym import spaces
-from gym_brt.envs.qube_base_env import \
-    QubeBaseEnv, \
-    normalize_angle, \
-    ACTION_HIGH, \
-    ACTION_LOW
+from gym_brt.envs.qube_base_env import QubeBaseEnv
 
-
-OBSERVATION_HIGH = np.asarray([
-    1, 1, 1, 1,  # cos/sin of angles
+OBS_HIGH = np.asarray([
+    1, 1,  # cos/sin of theta
+    1, 1,  # cos/sin of alpha
     np.inf, np.inf,  # velocities
 ], dtype=np.float64)
-OBSERVATION_LOW = -OBSERVATION_HIGH
+OBS_LOW = -OBS_HIGH
 
 
 class QubeBeginDownReward(object):
     def __init__(self):
-        self.target_space = spaces.Box(
-            low=ACTION_LOW,
-            high=ACTION_HIGH, dtype=np.float32)
-        self.buffer = 0
+        pass
 
     def __call__(self, state, action):
         theta_x, theta_y = state[0], state[1]
@@ -32,17 +25,14 @@ class QubeBeginDownReward(object):
         alpha = np.arctan2(alpha_y, alpha_x)
 
         if abs(alpha) < (20 * np.pi / 180) and abs(theta) < (90 * np.pi / 180):
-            self.buffer += 1
-            reward = min(self.buffer, 100) / 100
             # Encourage alpha=0, theta=0
-            reward *= 1 - 0.5*(np.abs(alpha)+np.abs(theta))
-            return reward
+            return 1 - 0.5*(np.abs(alpha)+np.abs(theta))
         else:
             return 0
 
 
 class QubeBeginDownEnv(QubeBaseEnv):
-    """
+    '''
     Description:
         A pendulum is attached to an un-actuated joint to a horizontal arm,
         which is actuated by a rotary motor. The pendulum begins
@@ -83,52 +73,20 @@ class QubeBeginDownEnv(QubeBaseEnv):
         downward stationary state.
 
     Episode Termination:
-        After 10 seconds or when theta is greater than ±90°
-    """
-    def __init__(self, frequency=300, use_simulator=False):
-        super(QubeBeginDownEnv, self).__init__(
-            frequency=frequency,
-            use_simulator=use_simulator)
+        When theta is greater than ±90° or after 2048 steps
+    '''
+    def __init__(self, frequency=250, **kwargs):
+        super(QubeBeginDownEnv, self).__init__(frequency=frequency, **kwargs)
         self.reward_fn = QubeBeginDownReward()
-
-        self.observation_space = spaces.Box(
-            OBSERVATION_LOW, OBSERVATION_HIGH,
-            dtype=np.float32)
-
-        self._episode_steps = 0
+        self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
 
     def reset(self):
-        self._episode_steps = 0
-        return super(QubeBeginDownEnv, self).reset()
-
-    def _done(self):
-        if abs(self._theta) > (90 * np.pi / 180):
-            return True
-        elif self._episode_steps > (self._frequency * 10):
-            return True
-        else:
-            return False
+        super(QubeBeginDownEnv, self).reset()
+        state = self.dampen_down()[:6]  # Simplify the state
+        return state
 
     def step(self, action):
-        state, reward, _, info = super(QubeBeginDownEnv, self).step(action)
-        # Make the state simpler/closer to cartpole
+        state, reward, done, info = super(QubeBeginDownEnv, self).step(action)
         state = state[:6]
-        done = self._done()
-        self._episode_steps += 1
         return state, reward, done, info
 
-
-def main():
-    num_episodes = 10
-    num_steps = 250
-
-    with QubeBeginDownEnv() as env:
-        for episode in range(num_episodes):
-            state = env.reset()
-            for step in range(num_steps):
-                action = env.action_space.sample()
-                state, reward, done, _ = env.step(action)
-
-
-if __name__ == '__main__':
-    main()
