@@ -202,10 +202,23 @@ cdef class QuanserWrapper:
             hil.hil_task_stop(self.task)
             hil.hil_task_delete(self.task)
 
-    def reset_encoders(self):
-        # Set the encoder encoder_r_buffer to 0
-        self.encoder_r_buffer = np.zeros(
-            self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
+    def reset_encoders(self, channels=None):
+        '''Reset all or a few of the encoders'''
+        if channels is None:
+            # Set the entire encoder encoder_r_buffer to 0
+            self.encoder_r_buffer = np.zeros(
+                self.num_encoder_r_channels,
+                dtype=np.int32)  # t_int32 is 32 bits
+        else:
+            # Set only specific encoders to 0, while leaving the others
+            for channel in channels:
+                # Check if the channel is valid (in the available encoder
+                # channels for the hardware)
+                if channel not in self.encoder_r_channels:
+                    raise ValueError('Channel: {} is not a possible channel on '
+                        + 'this hardware.')
+                self.encoder_r_buffer[channel] = 0
+
         result = hil.hil_set_encoder_counts(
             self.board,
             &self.encoder_r_channels[0],

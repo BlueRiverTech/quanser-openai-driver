@@ -42,8 +42,8 @@ class QubeBaseEnv(gym.Env):
     '''A base class for all qube-based environments.'''
     def __init__(self,
                  frequency=1000,
-                 batch_size=2048,
-                 hard_reset_steps=10000):
+                 batch_size=2048000,
+                 hard_reset_steps=10):
         self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
         self.action_space = spaces.Box(ACT_LOW, ACT_HIGH)
         self.reward_fn = QubeBaseReward()
@@ -185,7 +185,7 @@ class QubeBaseEnv(gym.Env):
 
     def reset(self):
         # Occasionaly reset the enocoders to remove sensor drift
-        if self._steps_since_hard_reset >= hard_reset_steps:
+        if self._steps_since_hard_reset >= self._hard_reset_steps:
             self.hard_reset()
             self._steps_since_hard_reset = 0
 
@@ -208,9 +208,14 @@ class QubeBaseEnv(gym.Env):
             dtype=self.action_space.dtype)
         self.step(action)
         print('Hard reset')
-        time.sleep(3)  # Do nothing for 3 seconds to ensure pendulum is stopped
-        # TODO: center the angle and then reset encoders
-        # self.qube.reset_encoders()
+        time.sleep(5)  # Do nothing for 3 seconds to ensure pendulum is stopped
+
+        # This is needed to prevent sensor drift on the alpha/pendulum angle
+        # We ONLY reset the alpha channel because the dampen function stops the
+        # pendulum from moving but does not perfectly center the pendulum at the
+        # bottom (this way alpha is very close to perfect and theta does not
+        # drift much)
+        self.qube.reset_encoders(channels=[0])  # Alpha channel only
 
     def step(self, action):
         state = self._step(action)

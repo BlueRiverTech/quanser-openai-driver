@@ -1236,7 +1236,7 @@ struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWr
 };
 
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":288
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":301
  * 
  * 
  * cdef class QuanserAero(QuanserWrapper):             # <<<<<<<<<<<<<<
@@ -1248,7 +1248,7 @@ struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAe
 };
 
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":317
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":330
  * 
  * 
  * cdef class QubeServo2(QuanserWrapper):             # <<<<<<<<<<<<<<
@@ -1604,6 +1604,12 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
 /* RaiseException.proto */
 static void __Pyx_Raise(PyObject *type, PyObject *value, PyObject *tb, PyObject *cause);
 
+/* PySequenceContains.proto */
+static CYTHON_INLINE int __Pyx_PySequence_ContainsTF(PyObject* item, PyObject* seq, int eq) {
+    int result = PySequence_Contains(seq, item);
+    return unlikely(result < 0) ? result : (result == (eq == Py_EQ));
+}
+
 /* ArgTypeTest.proto */
 #define __Pyx_ArgTypeTest(obj, type, none_allowed, name, exact)\
     ((likely((Py_TYPE(obj) == type) | (none_allowed && (obj == Py_None)))) ? 1 :\
@@ -1924,6 +1930,10 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_npy_uint32(npy_uint32 value);
+
+/* MemviewDtypeToObject.proto */
+static CYTHON_INLINE PyObject *__pyx_memview_get_nn_t_uint32(const char *itemp);
+static CYTHON_INLINE int __pyx_memview_set_nn_t_uint32(const char *itemp, PyObject *obj);
 
 /* CIntToPy.proto */
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_npy_int32(npy_int32 value);
@@ -2280,6 +2290,7 @@ static const char __pyx_k_fortran[] = "fortran";
 static const char __pyx_k_memview[] = "memview";
 static const char __pyx_k_set_led[] = "_set_led";
 static const char __pyx_k_Ellipsis[] = "Ellipsis";
+static const char __pyx_k_channels[] = "channels";
 static const char __pyx_k_getstate[] = "__getstate__";
 static const char __pyx_k_itemsize[] = "itemsize";
 static const char __pyx_k_pyx_type[] = "__pyx_type";
@@ -2306,6 +2317,7 @@ static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
 static const char __pyx_k_stringsource[] = "stringsource";
 static const char __pyx_k_pyx_getbuffer[] = "__pyx_getbuffer";
 static const char __pyx_k_reduce_cython[] = "__reduce_cython__";
+static const char __pyx_k_this_hardware[] = "this hardware.";
 static const char __pyx_k_Missed_samples[] = "Missed {} samples";
 static const char __pyx_k_led_w_channels[] = "led_w_channels";
 static const char __pyx_k_View_MemoryView[] = "View.MemoryView";
@@ -2345,6 +2357,7 @@ static const char __pyx_k_Buffer_view_does_not_expose_stri[] = "Buffer view does
 static const char __pyx_k_Can_only_create_a_buffer_that_is[] = "Can only create a buffer that is contiguous in memory.";
 static const char __pyx_k_Cannot_assign_to_read_only_memor[] = "Cannot assign to read-only memoryview";
 static const char __pyx_k_Cannot_create_writable_memory_vi[] = "Cannot create writable memory view from read-only memoryview";
+static const char __pyx_k_Channel_is_not_a_possible_channe[] = "Channel: {} is not a possible channel on ";
 static const char __pyx_k_Empty_shape_tuple_for_cython_arr[] = "Empty shape tuple for cython.array";
 static const char __pyx_k_Format_string_allocated_too_shor[] = "Format string allocated too short, see comment in numpy.pxd";
 static const char __pyx_k_Incompatible_checksums_s_vs_0xb0[] = "Incompatible checksums (%s vs 0xb068931 = (name))";
@@ -2367,6 +2380,7 @@ static PyObject *__pyx_kp_s_Can_only_create_a_buffer_that_is;
 static PyObject *__pyx_kp_s_Cannot_assign_to_read_only_memor;
 static PyObject *__pyx_kp_s_Cannot_create_writable_memory_vi;
 static PyObject *__pyx_kp_s_Cannot_index_with_type_s;
+static PyObject *__pyx_kp_s_Channel_is_not_a_possible_channe;
 static PyObject *__pyx_kp_s_Could_not_start_hil_task;
 static PyObject *__pyx_n_s_Ellipsis;
 static PyObject *__pyx_kp_s_Empty_shape_tuple_for_cython_arr;
@@ -2402,6 +2416,7 @@ static PyObject *__pyx_n_s_asarray;
 static PyObject *__pyx_n_s_base;
 static PyObject *__pyx_n_s_c;
 static PyObject *__pyx_n_u_c;
+static PyObject *__pyx_n_s_channels;
 static PyObject *__pyx_n_s_class;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
@@ -2485,6 +2500,7 @@ static PyObject *__pyx_kp_s_stringsource;
 static PyObject *__pyx_n_s_struct;
 static PyObject *__pyx_n_s_super;
 static PyObject *__pyx_n_s_test;
+static PyObject *__pyx_kp_s_this_hardware;
 static PyObject *__pyx_n_s_traceback;
 static PyObject *__pyx_n_s_type;
 static PyObject *__pyx_n_s_uint32;
@@ -2501,7 +2517,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
 static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_4__exit__(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_type, CYTHON_UNUSED PyObject *__pyx_v_value, CYTHON_UNUSED PyObject *__pyx_v_traceback); /* proto */
 static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_6_create_task(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_8_stop_task(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_10reset_encoders(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self); /* proto */
+static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_10reset_encoders(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self, PyObject *__pyx_v_channels); /* proto */
 static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_12action(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self, PyObject *__pyx_v_voltages_w, PyObject *__pyx_v_led_w); /* proto */
 static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_14_action(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self, PyArrayObject *__pyx_v_voltages_w); /* proto */
 static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_16_set_led(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self, PyArrayObject *__pyx_v_led_w); /* proto */
@@ -4769,7 +4785,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  *             hil.hil_task_stop(self.task)
  *             hil.hil_task_delete(self.task)             # <<<<<<<<<<<<<<
  * 
- *     def reset_encoders(self):
+ *     def reset_encoders(self, channels=None):
  */
     (void)(hil_task_delete(__pyx_v_self->task));
 
@@ -4800,196 +4816,400 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
 /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":205
  *             hil.hil_task_delete(self.task)
  * 
- *     def reset_encoders(self):             # <<<<<<<<<<<<<<
- *         # Set the encoder encoder_r_buffer to 0
- *         self.encoder_r_buffer = np.zeros(
+ *     def reset_encoders(self, channels=None):             # <<<<<<<<<<<<<<
+ *         '''Reset all or a few of the encoders'''
+ *         if channels is None:
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_11reset_encoders(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused); /*proto*/
-static PyObject *__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_11reset_encoders(PyObject *__pyx_v_self, CYTHON_UNUSED PyObject *unused) {
+static PyObject *__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_11reset_encoders(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_10reset_encoders[] = "Reset all or a few of the encoders";
+static PyObject *__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_11reset_encoders(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_channels = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("reset_encoders (wrapper)", 0);
-  __pyx_r = __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_10reset_encoders(((struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *)__pyx_v_self));
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_channels,0};
+    PyObject* values[1] = {0};
+    values[0] = ((PyObject *)Py_None);
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_channels);
+          if (value) { values[0] = value; kw_args--; }
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "reset_encoders") < 0)) __PYX_ERR(0, 205, __pyx_L3_error)
+      }
+    } else {
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+    }
+    __pyx_v_channels = values[0];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("reset_encoders", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 205, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("gym_brt.quanser.quanser_wrapper.quanser_wrapper.QuanserWrapper.reset_encoders", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_10reset_encoders(((struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *)__pyx_v_self), __pyx_v_channels);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_10reset_encoders(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self) {
+static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_10reset_encoders(struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *__pyx_v_self, PyObject *__pyx_v_channels) {
+  PyObject *__pyx_v_channel = NULL;
   t_error __pyx_v_result;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  PyObject *__pyx_t_2 = NULL;
+  int __pyx_t_1;
+  int __pyx_t_2;
   PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
-  __Pyx_memviewslice __pyx_t_6 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  Py_ssize_t __pyx_t_7;
-  int __pyx_t_8;
+  PyObject *__pyx_t_6 = NULL;
+  PyObject *__pyx_t_7 = NULL;
+  __Pyx_memviewslice __pyx_t_8 = { 0, 0, { 0 }, { 0 }, { 0 } };
   Py_ssize_t __pyx_t_9;
+  PyObject *(*__pyx_t_10)(PyObject *);
+  Py_ssize_t __pyx_t_11;
+  Py_ssize_t __pyx_t_12;
+  int __pyx_t_13;
+  Py_ssize_t __pyx_t_14;
+  Py_ssize_t __pyx_t_15;
   __Pyx_RefNannySetupContext("reset_encoders", 0);
 
   /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":207
- *     def reset_encoders(self):
- *         # Set the encoder encoder_r_buffer to 0
- *         self.encoder_r_buffer = np.zeros(             # <<<<<<<<<<<<<<
- *             self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
+ *     def reset_encoders(self, channels=None):
+ *         '''Reset all or a few of the encoders'''
+ *         if channels is None:             # <<<<<<<<<<<<<<
+ *             # Set the entire encoder encoder_r_buffer to 0
+ *             self.encoder_r_buffer = np.zeros(
+ */
+  __pyx_t_1 = (__pyx_v_channels == Py_None);
+  __pyx_t_2 = (__pyx_t_1 != 0);
+  if (__pyx_t_2) {
+
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":209
+ *         if channels is None:
+ *             # Set the entire encoder encoder_r_buffer to 0
+ *             self.encoder_r_buffer = np.zeros(             # <<<<<<<<<<<<<<
+ *                 self.num_encoder_r_channels,
+ *                 dtype=np.int32)  # t_int32 is 32 bits
+ */
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":210
+ *             # Set the entire encoder encoder_r_buffer to 0
+ *             self.encoder_r_buffer = np.zeros(
+ *                 self.num_encoder_r_channels,             # <<<<<<<<<<<<<<
+ *                 dtype=np.int32)  # t_int32 is 32 bits
+ *         else:
+ */
+    __pyx_t_3 = __Pyx_PyInt_From_npy_uint32(__pyx_v_self->num_encoder_r_channels); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 210, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":209
+ *         if channels is None:
+ *             # Set the entire encoder encoder_r_buffer to 0
+ *             self.encoder_r_buffer = np.zeros(             # <<<<<<<<<<<<<<
+ *                 self.num_encoder_r_channels,
+ *                 dtype=np.int32)  # t_int32 is 32 bits
+ */
+    __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_GIVEREF(__pyx_t_3);
+    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3);
+    __pyx_t_3 = 0;
+
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":211
+ *             self.encoder_r_buffer = np.zeros(
+ *                 self.num_encoder_r_channels,
+ *                 dtype=np.int32)  # t_int32 is 32 bits             # <<<<<<<<<<<<<<
+ *         else:
+ *             # Set only specific encoders to 0, while leaving the others
+ */
+    __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 211, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 211, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int32); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 211, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 211, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":209
+ *         if channels is None:
+ *             # Set the entire encoder encoder_r_buffer to 0
+ *             self.encoder_r_buffer = np.zeros(             # <<<<<<<<<<<<<<
+ *                 self.num_encoder_r_channels,
+ *                 dtype=np.int32)  # t_int32 is 32 bits
+ */
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn_t_int32(__pyx_t_7, PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 209, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __PYX_XDEC_MEMVIEW(&__pyx_v_self->encoder_r_buffer, 0);
+    __pyx_v_self->encoder_r_buffer = __pyx_t_8;
+    __pyx_t_8.memview = NULL;
+    __pyx_t_8.data = NULL;
+
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":207
+ *     def reset_encoders(self, channels=None):
+ *         '''Reset all or a few of the encoders'''
+ *         if channels is None:             # <<<<<<<<<<<<<<
+ *             # Set the entire encoder encoder_r_buffer to 0
+ *             self.encoder_r_buffer = np.zeros(
+ */
+    goto __pyx_L3;
+  }
+
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":214
+ *         else:
+ *             # Set only specific encoders to 0, while leaving the others
+ *             for channel in channels:             # <<<<<<<<<<<<<<
+ *                 # Check if the channel is valid (in the available encoder
+ *                 # channels for the hardware)
+ */
+  /*else*/ {
+    if (likely(PyList_CheckExact(__pyx_v_channels)) || PyTuple_CheckExact(__pyx_v_channels)) {
+      __pyx_t_7 = __pyx_v_channels; __Pyx_INCREF(__pyx_t_7); __pyx_t_9 = 0;
+      __pyx_t_10 = NULL;
+    } else {
+      __pyx_t_9 = -1; __pyx_t_7 = PyObject_GetIter(__pyx_v_channels); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 214, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_7);
+      __pyx_t_10 = Py_TYPE(__pyx_t_7)->tp_iternext; if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 214, __pyx_L1_error)
+    }
+    for (;;) {
+      if (likely(!__pyx_t_10)) {
+        if (likely(PyList_CheckExact(__pyx_t_7))) {
+          if (__pyx_t_9 >= PyList_GET_SIZE(__pyx_t_7)) break;
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_3 = PyList_GET_ITEM(__pyx_t_7, __pyx_t_9); __Pyx_INCREF(__pyx_t_3); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(0, 214, __pyx_L1_error)
+          #else
+          __pyx_t_3 = PySequence_ITEM(__pyx_t_7, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 214, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_3);
+          #endif
+        } else {
+          if (__pyx_t_9 >= PyTuple_GET_SIZE(__pyx_t_7)) break;
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_7, __pyx_t_9); __Pyx_INCREF(__pyx_t_3); __pyx_t_9++; if (unlikely(0 < 0)) __PYX_ERR(0, 214, __pyx_L1_error)
+          #else
+          __pyx_t_3 = PySequence_ITEM(__pyx_t_7, __pyx_t_9); __pyx_t_9++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 214, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_3);
+          #endif
+        }
+      } else {
+        __pyx_t_3 = __pyx_t_10(__pyx_t_7);
+        if (unlikely(!__pyx_t_3)) {
+          PyObject* exc_type = PyErr_Occurred();
+          if (exc_type) {
+            if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+            else __PYX_ERR(0, 214, __pyx_L1_error)
+          }
+          break;
+        }
+        __Pyx_GOTREF(__pyx_t_3);
+      }
+      __Pyx_XDECREF_SET(__pyx_v_channel, __pyx_t_3);
+      __pyx_t_3 = 0;
+
+      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":217
+ *                 # Check if the channel is valid (in the available encoder
+ *                 # channels for the hardware)
+ *                 if channel not in self.encoder_r_channels:             # <<<<<<<<<<<<<<
+ *                     raise ValueError('Channel: {} is not a possible channel on '
+ *                         + 'this hardware.')
+ */
+      if (unlikely(!__pyx_v_self->encoder_r_channels.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 217, __pyx_L1_error)}
+      __pyx_t_3 = __pyx_memoryview_fromslice(__pyx_v_self->encoder_r_channels, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn_t_uint32, (int (*)(char *, PyObject *)) __pyx_memview_set_nn_t_uint32, 0);; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 217, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_2 = (__Pyx_PySequence_ContainsTF(__pyx_v_channel, __pyx_t_3, Py_NE)); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 217, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_1 = (__pyx_t_2 != 0);
+      if (unlikely(__pyx_t_1)) {
+
+        /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":219
+ *                 if channel not in self.encoder_r_channels:
+ *                     raise ValueError('Channel: {} is not a possible channel on '
+ *                         + 'this hardware.')             # <<<<<<<<<<<<<<
+ *                 self.encoder_r_buffer[channel] = 0
+ * 
+ */
+        __pyx_t_3 = PyNumber_Add(__pyx_kp_s_Channel_is_not_a_possible_channe, __pyx_kp_s_this_hardware); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 219, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+
+        /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":218
+ *                 # channels for the hardware)
+ *                 if channel not in self.encoder_r_channels:
+ *                     raise ValueError('Channel: {} is not a possible channel on '             # <<<<<<<<<<<<<<
+ *                         + 'this hardware.')
+ *                 self.encoder_r_buffer[channel] = 0
+ */
+        __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_builtin_ValueError, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 218, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_5);
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __Pyx_Raise(__pyx_t_5, 0, 0, 0);
+        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+        __PYX_ERR(0, 218, __pyx_L1_error)
+
+        /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":217
+ *                 # Check if the channel is valid (in the available encoder
+ *                 # channels for the hardware)
+ *                 if channel not in self.encoder_r_channels:             # <<<<<<<<<<<<<<
+ *                     raise ValueError('Channel: {} is not a possible channel on '
+ *                         + 'this hardware.')
+ */
+      }
+
+      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":220
+ *                     raise ValueError('Channel: {} is not a possible channel on '
+ *                         + 'this hardware.')
+ *                 self.encoder_r_buffer[channel] = 0             # <<<<<<<<<<<<<<
+ * 
  *         result = hil.hil_set_encoder_counts(
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 207, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 207, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      if (unlikely(!__pyx_v_self->encoder_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 220, __pyx_L1_error)}
+      __pyx_t_11 = __Pyx_PyIndex_AsSsize_t(__pyx_v_channel); if (unlikely((__pyx_t_11 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 220, __pyx_L1_error)
+      __pyx_t_12 = __pyx_t_11;
+      __pyx_t_13 = -1;
+      if (__pyx_t_12 < 0) {
+        __pyx_t_12 += __pyx_v_self->encoder_r_buffer.shape[0];
+        if (unlikely(__pyx_t_12 < 0)) __pyx_t_13 = 0;
+      } else if (unlikely(__pyx_t_12 >= __pyx_v_self->encoder_r_buffer.shape[0])) __pyx_t_13 = 0;
+      if (unlikely(__pyx_t_13 != -1)) {
+        __Pyx_RaiseBufferIndexError(__pyx_t_13);
+        __PYX_ERR(0, 220, __pyx_L1_error)
+      }
+      *((t_int32 *) ( /* dim=0 */ (__pyx_v_self->encoder_r_buffer.data + __pyx_t_12 * __pyx_v_self->encoder_r_buffer.strides[0]) )) = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":208
- *         # Set the encoder encoder_r_buffer to 0
- *         self.encoder_r_buffer = np.zeros(
- *             self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits             # <<<<<<<<<<<<<<
- *         result = hil.hil_set_encoder_counts(
- *             self.board,
+      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":214
+ *         else:
+ *             # Set only specific encoders to 0, while leaving the others
+ *             for channel in channels:             # <<<<<<<<<<<<<<
+ *                 # Check if the channel is valid (in the available encoder
+ *                 # channels for the hardware)
  */
-  __pyx_t_1 = __Pyx_PyInt_From_npy_uint32(__pyx_v_self->num_encoder_r_channels); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 208, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
+    }
+    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  }
+  __pyx_L3:;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":207
- *     def reset_encoders(self):
- *         # Set the encoder encoder_r_buffer to 0
- *         self.encoder_r_buffer = np.zeros(             # <<<<<<<<<<<<<<
- *             self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
- *         result = hil.hil_set_encoder_counts(
- */
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 207, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
-  __pyx_t_1 = 0;
-
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":208
- *         # Set the encoder encoder_r_buffer to 0
- *         self.encoder_r_buffer = np.zeros(
- *             self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits             # <<<<<<<<<<<<<<
- *         result = hil.hil_set_encoder_counts(
- *             self.board,
- */
-  __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 208, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 208, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int32); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 208, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 208, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":207
- *     def reset_encoders(self):
- *         # Set the encoder encoder_r_buffer to 0
- *         self.encoder_r_buffer = np.zeros(             # <<<<<<<<<<<<<<
- *             self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
- *         result = hil.hil_set_encoder_counts(
- */
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 207, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn_t_int32(__pyx_t_5, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 207, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __PYX_XDEC_MEMVIEW(&__pyx_v_self->encoder_r_buffer, 0);
-  __pyx_v_self->encoder_r_buffer = __pyx_t_6;
-  __pyx_t_6.memview = NULL;
-  __pyx_t_6.data = NULL;
-
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":211
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":224
  *         result = hil.hil_set_encoder_counts(
  *             self.board,
  *             &self.encoder_r_channels[0],             # <<<<<<<<<<<<<<
  *             self.num_encoder_r_channels,
  *             &self.encoder_r_buffer[0])
  */
-  if (unlikely(!__pyx_v_self->encoder_r_channels.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 211, __pyx_L1_error)}
-  __pyx_t_7 = 0;
-  __pyx_t_8 = -1;
-  if (__pyx_t_7 < 0) {
-    __pyx_t_7 += __pyx_v_self->encoder_r_channels.shape[0];
-    if (unlikely(__pyx_t_7 < 0)) __pyx_t_8 = 0;
-  } else if (unlikely(__pyx_t_7 >= __pyx_v_self->encoder_r_channels.shape[0])) __pyx_t_8 = 0;
-  if (unlikely(__pyx_t_8 != -1)) {
-    __Pyx_RaiseBufferIndexError(__pyx_t_8);
-    __PYX_ERR(0, 211, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->encoder_r_channels.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 224, __pyx_L1_error)}
+  __pyx_t_14 = 0;
+  __pyx_t_13 = -1;
+  if (__pyx_t_14 < 0) {
+    __pyx_t_14 += __pyx_v_self->encoder_r_channels.shape[0];
+    if (unlikely(__pyx_t_14 < 0)) __pyx_t_13 = 0;
+  } else if (unlikely(__pyx_t_14 >= __pyx_v_self->encoder_r_channels.shape[0])) __pyx_t_13 = 0;
+  if (unlikely(__pyx_t_13 != -1)) {
+    __Pyx_RaiseBufferIndexError(__pyx_t_13);
+    __PYX_ERR(0, 224, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":213
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":226
  *             &self.encoder_r_channels[0],
  *             self.num_encoder_r_channels,
  *             &self.encoder_r_buffer[0])             # <<<<<<<<<<<<<<
  *         print_possible_error(result)
  * 
  */
-  if (unlikely(!__pyx_v_self->encoder_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 213, __pyx_L1_error)}
-  __pyx_t_9 = 0;
-  __pyx_t_8 = -1;
-  if (__pyx_t_9 < 0) {
-    __pyx_t_9 += __pyx_v_self->encoder_r_buffer.shape[0];
-    if (unlikely(__pyx_t_9 < 0)) __pyx_t_8 = 0;
-  } else if (unlikely(__pyx_t_9 >= __pyx_v_self->encoder_r_buffer.shape[0])) __pyx_t_8 = 0;
-  if (unlikely(__pyx_t_8 != -1)) {
-    __Pyx_RaiseBufferIndexError(__pyx_t_8);
-    __PYX_ERR(0, 213, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->encoder_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 226, __pyx_L1_error)}
+  __pyx_t_15 = 0;
+  __pyx_t_13 = -1;
+  if (__pyx_t_15 < 0) {
+    __pyx_t_15 += __pyx_v_self->encoder_r_buffer.shape[0];
+    if (unlikely(__pyx_t_15 < 0)) __pyx_t_13 = 0;
+  } else if (unlikely(__pyx_t_15 >= __pyx_v_self->encoder_r_buffer.shape[0])) __pyx_t_13 = 0;
+  if (unlikely(__pyx_t_13 != -1)) {
+    __Pyx_RaiseBufferIndexError(__pyx_t_13);
+    __PYX_ERR(0, 226, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":209
- *         self.encoder_r_buffer = np.zeros(
- *             self.num_encoder_r_channels, dtype=np.int32)  # t_int32 is 32 bits
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":222
+ *                 self.encoder_r_buffer[channel] = 0
+ * 
  *         result = hil.hil_set_encoder_counts(             # <<<<<<<<<<<<<<
  *             self.board,
  *             &self.encoder_r_channels[0],
  */
-  __pyx_v_result = hil_set_encoder_counts(__pyx_v_self->board, (&(*((t_uint32 *) ( /* dim=0 */ (__pyx_v_self->encoder_r_channels.data + __pyx_t_7 * __pyx_v_self->encoder_r_channels.strides[0]) )))), __pyx_v_self->num_encoder_r_channels, (&(*((t_int32 *) ( /* dim=0 */ (__pyx_v_self->encoder_r_buffer.data + __pyx_t_9 * __pyx_v_self->encoder_r_buffer.strides[0]) )))));
+  __pyx_v_result = hil_set_encoder_counts(__pyx_v_self->board, (&(*((t_uint32 *) ( /* dim=0 */ (__pyx_v_self->encoder_r_channels.data + __pyx_t_14 * __pyx_v_self->encoder_r_channels.strides[0]) )))), __pyx_v_self->num_encoder_r_channels, (&(*((t_int32 *) ( /* dim=0 */ (__pyx_v_self->encoder_r_buffer.data + __pyx_t_15 * __pyx_v_self->encoder_r_buffer.strides[0]) )))));
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":214
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":227
  *             self.num_encoder_r_channels,
  *             &self.encoder_r_buffer[0])
  *         print_possible_error(result)             # <<<<<<<<<<<<<<
  * 
  *     def action(self, voltages_w, led_w=None):
  */
-  __pyx_t_5 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 214, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+  __pyx_t_7 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 227, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
   /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":205
  *             hil.hil_task_delete(self.task)
  * 
- *     def reset_encoders(self):             # <<<<<<<<<<<<<<
- *         # Set the encoder encoder_r_buffer to 0
- *         self.encoder_r_buffer = np.zeros(
+ *     def reset_encoders(self, channels=None):             # <<<<<<<<<<<<<<
+ *         '''Reset all or a few of the encoders'''
+ *         if channels is None:
  */
 
   /* function exit code */
   __pyx_r = Py_None; __Pyx_INCREF(Py_None);
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
-  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_6, 1);
+  __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_7);
+  __PYX_XDEC_MEMVIEW(&__pyx_t_8, 1);
   __Pyx_AddTraceback("gym_brt.quanser.quanser_wrapper.quanser_wrapper.QuanserWrapper.reset_encoders", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_channel);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":216
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":229
  *         print_possible_error(result)
  * 
  *     def action(self, voltages_w, led_w=None):             # <<<<<<<<<<<<<<
@@ -5033,7 +5253,7 @@ static PyObject *__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "action") < 0)) __PYX_ERR(0, 216, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "action") < 0)) __PYX_ERR(0, 229, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5049,7 +5269,7 @@ static PyObject *__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("action", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 216, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("action", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 229, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("gym_brt.quanser.quanser_wrapper.quanser_wrapper.QuanserWrapper.action", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5080,7 +5300,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __Pyx_INCREF(__pyx_v_voltages_w);
   __Pyx_INCREF(__pyx_v_led_w);
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":219
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":232
  *         # If it's the first time running action, then start the background r/w
  *         # task
  *         if not self.task_started:             # <<<<<<<<<<<<<<
@@ -5090,14 +5310,14 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_t_1 = ((!(__pyx_v_self->task_started != 0)) != 0);
   if (__pyx_t_1) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":220
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":233
  *         # task
  *         if not self.task_started:
  *             self._create_task()             # <<<<<<<<<<<<<<
  * 
  *         # Ensure safe voltage data
  */
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_create_task); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 220, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_create_task); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 233, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_4 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -5110,16 +5330,16 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
       }
     }
     if (__pyx_t_4) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 220, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 233, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else {
-      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 220, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 233, __pyx_L1_error)
     }
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":219
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":232
  *         # If it's the first time running action, then start the background r/w
  *         # task
  *         if not self.task_started:             # <<<<<<<<<<<<<<
@@ -5128,7 +5348,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":223
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":236
  * 
  *         # Ensure safe voltage data
  *         if isinstance(voltages_w, list):             # <<<<<<<<<<<<<<
@@ -5139,33 +5359,33 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_t_5 = (__pyx_t_1 != 0);
   if (__pyx_t_5) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":224
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":237
  *         # Ensure safe voltage data
  *         if isinstance(voltages_w, list):
  *             voltages_w = np.array(voltages_w, dtype=np.float64)             # <<<<<<<<<<<<<<
  *         assert isinstance(voltages_w, np.ndarray)
  *         assert voltages_w.shape == (self.num_analog_w_channels,)
  */
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 224, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 224, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 224, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_v_voltages_w);
     __Pyx_GIVEREF(__pyx_v_voltages_w);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_voltages_w);
-    __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 224, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 224, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 224, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_float64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 224, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 224, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5173,7 +5393,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     __Pyx_DECREF_SET(__pyx_v_voltages_w, __pyx_t_7);
     __pyx_t_7 = 0;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":223
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":236
  * 
  *         # Ensure safe voltage data
  *         if isinstance(voltages_w, list):             # <<<<<<<<<<<<<<
@@ -5182,7 +5402,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":225
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":238
  *         if isinstance(voltages_w, list):
  *             voltages_w = np.array(voltages_w, dtype=np.float64)
  *         assert isinstance(voltages_w, np.ndarray)             # <<<<<<<<<<<<<<
@@ -5194,12 +5414,12 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     __pyx_t_5 = __Pyx_TypeCheck(__pyx_v_voltages_w, __pyx_ptype_5numpy_ndarray); 
     if (unlikely(!(__pyx_t_5 != 0))) {
       PyErr_SetNone(PyExc_AssertionError);
-      __PYX_ERR(0, 225, __pyx_L1_error)
+      __PYX_ERR(0, 238, __pyx_L1_error)
     }
   }
   #endif
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":226
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":239
  *             voltages_w = np.array(voltages_w, dtype=np.float64)
  *         assert isinstance(voltages_w, np.ndarray)
  *         assert voltages_w.shape == (self.num_analog_w_channels,)             # <<<<<<<<<<<<<<
@@ -5208,28 +5428,28 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(!Py_OptimizeFlag)) {
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_voltages_w, __pyx_n_s_shape); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 226, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_voltages_w, __pyx_n_s_shape); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 239, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_4 = __Pyx_PyInt_From_npy_uint32(__pyx_v_self->num_analog_w_channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 226, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_npy_uint32(__pyx_v_self->num_analog_w_channels); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 239, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 226, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 239, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
     __pyx_t_4 = 0;
-    __pyx_t_4 = PyObject_RichCompare(__pyx_t_7, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 226, __pyx_L1_error)
+    __pyx_t_4 = PyObject_RichCompare(__pyx_t_7, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 239, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 226, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 239, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     if (unlikely(!__pyx_t_5)) {
       PyErr_SetNone(PyExc_AssertionError);
-      __PYX_ERR(0, 226, __pyx_L1_error)
+      __PYX_ERR(0, 239, __pyx_L1_error)
     }
   }
   #endif
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":227
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":240
  *         assert isinstance(voltages_w, np.ndarray)
  *         assert voltages_w.shape == (self.num_analog_w_channels,)
  *         assert voltages_w.dtype == np.float64             # <<<<<<<<<<<<<<
@@ -5238,26 +5458,26 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   #ifndef CYTHON_WITHOUT_ASSERTIONS
   if (unlikely(!Py_OptimizeFlag)) {
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_voltages_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_voltages_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 240, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 240, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_float64); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 240, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_2 = PyObject_RichCompare(__pyx_t_4, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 240, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 227, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 240, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     if (unlikely(!__pyx_t_5)) {
       PyErr_SetNone(PyExc_AssertionError);
-      __PYX_ERR(0, 227, __pyx_L1_error)
+      __PYX_ERR(0, 240, __pyx_L1_error)
     }
   }
   #endif
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":228
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":241
  *         assert voltages_w.shape == (self.num_analog_w_channels,)
  *         assert voltages_w.dtype == np.float64
  *         for i in range(self.num_analog_w_channels):             # <<<<<<<<<<<<<<
@@ -5269,7 +5489,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
     __pyx_v_i = __pyx_t_10;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":229
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":242
  *         assert voltages_w.dtype == np.float64
  *         for i in range(self.num_analog_w_channels):
  *             assert -self.safe_operating_voltage <= voltages_w[i] <= \             # <<<<<<<<<<<<<<
@@ -5278,47 +5498,47 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
-      __pyx_t_2 = PyFloat_FromDouble((-__pyx_v_self->safe_operating_voltage)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 229, __pyx_L1_error)
+      __pyx_t_2 = PyFloat_FromDouble((-__pyx_v_self->safe_operating_voltage)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_7 = __Pyx_GetItemInt(__pyx_v_voltages_w, __pyx_v_i, t_uint32, 0, __Pyx_PyInt_From_npy_uint32, 0, 0, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 229, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_GetItemInt(__pyx_v_voltages_w, __pyx_v_i, t_uint32, 0, __Pyx_PyInt_From_npy_uint32, 0, 0, 1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 242, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_4 = PyObject_RichCompare(__pyx_t_2, __pyx_t_7, Py_LE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 229, __pyx_L1_error)
+      __pyx_t_4 = PyObject_RichCompare(__pyx_t_2, __pyx_t_7, Py_LE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 242, __pyx_L1_error)
       if (__Pyx_PyObject_IsTrue(__pyx_t_4)) {
         __Pyx_DECREF(__pyx_t_4);
 
-        /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":230
+        /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":243
  *         for i in range(self.num_analog_w_channels):
  *             assert -self.safe_operating_voltage <= voltages_w[i] <= \
  *                     self.safe_operating_voltage             # <<<<<<<<<<<<<<
  * 
  *         if led_w is not None:
  */
-        __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->safe_operating_voltage); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 230, __pyx_L1_error)
+        __pyx_t_3 = PyFloat_FromDouble(__pyx_v_self->safe_operating_voltage); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 243, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_4 = PyObject_RichCompare(__pyx_t_7, __pyx_t_3, Py_LE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 229, __pyx_L1_error)
+        __pyx_t_4 = PyObject_RichCompare(__pyx_t_7, __pyx_t_3, Py_LE); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 242, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
       }
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":229
+      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":242
  *         assert voltages_w.dtype == np.float64
  *         for i in range(self.num_analog_w_channels):
  *             assert -self.safe_operating_voltage <= voltages_w[i] <= \             # <<<<<<<<<<<<<<
  *                     self.safe_operating_voltage
  * 
  */
-      __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 229, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 242, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       if (unlikely(!__pyx_t_5)) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 229, __pyx_L1_error)
+        __PYX_ERR(0, 242, __pyx_L1_error)
       }
     }
     #endif
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":232
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":245
  *                     self.safe_operating_voltage
  * 
  *         if led_w is not None:             # <<<<<<<<<<<<<<
@@ -5329,7 +5549,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_t_1 = (__pyx_t_5 != 0);
   if (__pyx_t_1) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":234
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":247
  *         if led_w is not None:
  *             # Ensure safe LED data
  *             if isinstance(led_w, list):             # <<<<<<<<<<<<<<
@@ -5340,33 +5560,33 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     __pyx_t_5 = (__pyx_t_1 != 0);
     if (__pyx_t_5) {
 
-      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":235
+      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":248
  *             # Ensure safe LED data
  *             if isinstance(led_w, list):
  *                 led_w = np.array(led_w, dtype=np.float64)             # <<<<<<<<<<<<<<
  *             assert led_w.shape == (self.num_led_w_channels,)
  *             assert led_w.dtype == np.float64
  */
-      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 235, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 235, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 235, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_INCREF(__pyx_v_led_w);
       __Pyx_GIVEREF(__pyx_v_led_w);
       PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_led_w);
-      __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 235, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 235, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 235, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-      if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(0, 235, __pyx_L1_error)
+      if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 235, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 248, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -5374,7 +5594,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
       __Pyx_DECREF_SET(__pyx_v_led_w, __pyx_t_6);
       __pyx_t_6 = 0;
 
-      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":234
+      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":247
  *         if led_w is not None:
  *             # Ensure safe LED data
  *             if isinstance(led_w, list):             # <<<<<<<<<<<<<<
@@ -5383,7 +5603,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
     }
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":236
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":249
  *             if isinstance(led_w, list):
  *                 led_w = np.array(led_w, dtype=np.float64)
  *             assert led_w.shape == (self.num_led_w_channels,)             # <<<<<<<<<<<<<<
@@ -5392,28 +5612,28 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
-      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_led_w, __pyx_n_s_shape); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_led_w, __pyx_n_s_shape); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 249, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
-      __pyx_t_2 = __Pyx_PyInt_From_npy_uint32(__pyx_v_self->num_led_w_channels); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyInt_From_npy_uint32(__pyx_v_self->num_led_w_channels); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 249, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 249, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_2 = PyObject_RichCompare(__pyx_t_6, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_2 = PyObject_RichCompare(__pyx_t_6, __pyx_t_4, Py_EQ); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 249, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 236, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 249, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       if (unlikely(!__pyx_t_5)) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 236, __pyx_L1_error)
+        __PYX_ERR(0, 249, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":237
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":250
  *                 led_w = np.array(led_w, dtype=np.float64)
  *             assert led_w.shape == (self.num_led_w_channels,)
  *             assert led_w.dtype == np.float64             # <<<<<<<<<<<<<<
@@ -5422,26 +5642,26 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
     #ifndef CYTHON_WITHOUT_ASSERTIONS
     if (unlikely(!Py_OptimizeFlag)) {
-      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_led_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 237, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_led_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 250, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 250, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
-      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 237, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_float64); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 250, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-      __pyx_t_4 = PyObject_RichCompare(__pyx_t_2, __pyx_t_6, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
+      __pyx_t_4 = PyObject_RichCompare(__pyx_t_2, __pyx_t_6, Py_EQ); __Pyx_XGOTREF(__pyx_t_4); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 250, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 237, __pyx_L1_error)
+      __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_4); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 250, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       if (unlikely(!__pyx_t_5)) {
         PyErr_SetNone(PyExc_AssertionError);
-        __PYX_ERR(0, 237, __pyx_L1_error)
+        __PYX_ERR(0, 250, __pyx_L1_error)
       }
     }
     #endif
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":238
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":251
  *             assert led_w.shape == (self.num_led_w_channels,)
  *             assert led_w.dtype == np.float64
  *             for i in range(self.num_led_w_channels):             # <<<<<<<<<<<<<<
@@ -5453,7 +5673,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     for (__pyx_t_10 = 0; __pyx_t_10 < __pyx_t_9; __pyx_t_10+=1) {
       __pyx_v_i = __pyx_t_10;
 
-      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":239
+      /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":252
  *             assert led_w.dtype == np.float64
  *             for i in range(self.num_led_w_channels):
  *                 assert 0.0 <= led_w[i] <= 1.0  # HIL uses RGB scaled from 0-1             # <<<<<<<<<<<<<<
@@ -5462,32 +5682,32 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
       #ifndef CYTHON_WITHOUT_ASSERTIONS
       if (unlikely(!Py_OptimizeFlag)) {
-        __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_led_w, __pyx_v_i, t_uint32, 0, __Pyx_PyInt_From_npy_uint32, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 239, __pyx_L1_error)
+        __pyx_t_4 = __Pyx_GetItemInt(__pyx_v_led_w, __pyx_v_i, t_uint32, 0, __Pyx_PyInt_From_npy_uint32, 0, 0, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 252, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_4);
-        __pyx_t_6 = PyObject_RichCompare(__pyx_float_0_0, __pyx_t_4, Py_LE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 239, __pyx_L1_error)
+        __pyx_t_6 = PyObject_RichCompare(__pyx_float_0_0, __pyx_t_4, Py_LE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 252, __pyx_L1_error)
         if (__Pyx_PyObject_IsTrue(__pyx_t_6)) {
           __Pyx_DECREF(__pyx_t_6);
-          __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_float_1_0, Py_LE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 239, __pyx_L1_error)
+          __pyx_t_6 = PyObject_RichCompare(__pyx_t_4, __pyx_float_1_0, Py_LE); __Pyx_XGOTREF(__pyx_t_6); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 252, __pyx_L1_error)
         }
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-        __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 239, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_6); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 252, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
         if (unlikely(!__pyx_t_5)) {
           PyErr_SetNone(PyExc_AssertionError);
-          __PYX_ERR(0, 239, __pyx_L1_error)
+          __PYX_ERR(0, 252, __pyx_L1_error)
         }
       }
       #endif
     }
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":240
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":253
  *             for i in range(self.num_led_w_channels):
  *                 assert 0.0 <= led_w[i] <= 1.0  # HIL uses RGB scaled from 0-1
  *             self._set_led(led_w)  # An immediate write to LED (not timed task)             # <<<<<<<<<<<<<<
  * 
  *         return self._action(voltages_w)
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_set_led); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 240, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_set_led); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 253, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_2 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -5500,13 +5720,13 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
       }
     }
     if (!__pyx_t_2) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_led_w); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 240, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_led_w); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 253, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_4)) {
         PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_led_w};
-        __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 240, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 253, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_6);
       } else
@@ -5514,19 +5734,19 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
         PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_v_led_w};
-        __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 240, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 253, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_6);
       } else
       #endif
       {
-        __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 240, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 253, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_2); __pyx_t_2 = NULL;
         __Pyx_INCREF(__pyx_v_led_w);
         __Pyx_GIVEREF(__pyx_v_led_w);
         PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_v_led_w);
-        __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 240, __pyx_L1_error)
+        __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_7, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 253, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
@@ -5534,7 +5754,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":232
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":245
  *                     self.safe_operating_voltage
  * 
  *         if led_w is not None:             # <<<<<<<<<<<<<<
@@ -5543,7 +5763,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":242
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":255
  *             self._set_led(led_w)  # An immediate write to LED (not timed task)
  * 
  *         return self._action(voltages_w)             # <<<<<<<<<<<<<<
@@ -5551,7 +5771,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  *     def _action(self,
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_action); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 242, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_action); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_7 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_4))) {
@@ -5564,13 +5784,13 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_voltages_w); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 242, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_voltages_w); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 255, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_v_voltages_w};
-      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 242, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 255, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else
@@ -5578,19 +5798,19 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_v_voltages_w};
-      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 242, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 255, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_6);
     } else
     #endif
     {
-      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L1_error)
+      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 255, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_7); __pyx_t_7 = NULL;
       __Pyx_INCREF(__pyx_v_voltages_w);
       __Pyx_GIVEREF(__pyx_v_voltages_w);
       PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_v_voltages_w);
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 242, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 255, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     }
@@ -5600,7 +5820,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_t_6 = 0;
   goto __pyx_L0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":216
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":229
  *         print_possible_error(result)
  * 
  *     def action(self, voltages_w, led_w=None):             # <<<<<<<<<<<<<<
@@ -5625,7 +5845,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   return __pyx_r;
 }
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":244
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":257
  *         return self._action(voltages_w)
  * 
  *     def _action(self,             # <<<<<<<<<<<<<<
@@ -5639,7 +5859,7 @@ static PyObject *__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_action (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_voltages_w), __pyx_ptype_5numpy_ndarray, 0, "voltages_w", 0))) __PYX_ERR(0, 245, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_voltages_w), __pyx_ptype_5numpy_ndarray, 0, "voltages_w", 0))) __PYX_ERR(0, 258, __pyx_L1_error)
   __pyx_r = __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_14_action(((struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *)__pyx_v_self), ((PyArrayObject *)__pyx_v_voltages_w));
 
   /* function exit code */
@@ -5682,18 +5902,18 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_pybuffernd_voltages_w.rcbuffer = &__pyx_pybuffer_voltages_w;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_voltages_w.rcbuffer->pybuffer, (PyObject*)__pyx_v_voltages_w, &__Pyx_TypeInfo_nn_t_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 244, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_voltages_w.rcbuffer->pybuffer, (PyObject*)__pyx_v_voltages_w, &__Pyx_TypeInfo_nn_t_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 257, __pyx_L1_error)
   }
   __pyx_pybuffernd_voltages_w.diminfo[0].strides = __pyx_pybuffernd_voltages_w.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_voltages_w.diminfo[0].shape = __pyx_pybuffernd_voltages_w.rcbuffer->pybuffer.shape[0];
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":249
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":262
  *             self.task,
  *             1, # Number of samples to read
  *             &self.currents_r[0],             # <<<<<<<<<<<<<<
  *             &self.encoder_r_buffer[0],
  *             NULL,
  */
-  if (unlikely(!__pyx_v_self->currents_r.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 249, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->currents_r.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 262, __pyx_L1_error)}
   __pyx_t_1 = 0;
   __pyx_t_2 = -1;
   if (__pyx_t_1 < 0) {
@@ -5702,17 +5922,17 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   } else if (unlikely(__pyx_t_1 >= __pyx_v_self->currents_r.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 249, __pyx_L1_error)
+    __PYX_ERR(0, 262, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":250
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":263
  *             1, # Number of samples to read
  *             &self.currents_r[0],
  *             &self.encoder_r_buffer[0],             # <<<<<<<<<<<<<<
  *             NULL,
  *             &self.other_r_buffer[0])
  */
-  if (unlikely(!__pyx_v_self->encoder_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 250, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->encoder_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 263, __pyx_L1_error)}
   __pyx_t_3 = 0;
   __pyx_t_2 = -1;
   if (__pyx_t_3 < 0) {
@@ -5721,17 +5941,17 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   } else if (unlikely(__pyx_t_3 >= __pyx_v_self->encoder_r_buffer.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 250, __pyx_L1_error)
+    __PYX_ERR(0, 263, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":252
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":265
  *             &self.encoder_r_buffer[0],
  *             NULL,
  *             &self.other_r_buffer[0])             # <<<<<<<<<<<<<<
  *         if samples_read < 0:
  *             print_possible_error(samples_read)
  */
-  if (unlikely(!__pyx_v_self->other_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 252, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->other_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 265, __pyx_L1_error)}
   __pyx_t_4 = 0;
   __pyx_t_2 = -1;
   if (__pyx_t_4 < 0) {
@@ -5740,10 +5960,10 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   } else if (unlikely(__pyx_t_4 >= __pyx_v_self->other_r_buffer.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 252, __pyx_L1_error)
+    __PYX_ERR(0, 265, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":246
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":259
  *     def _action(self,
  *                 np.ndarray[qt.t_double, ndim=1, mode='c'] voltages_w not None):
  *         samples_read = hil.hil_task_read(             # <<<<<<<<<<<<<<
@@ -5752,7 +5972,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   __pyx_v_samples_read = hil_task_read(__pyx_v_self->task, 1, (&(*((t_double *) ( /* dim=0 */ (__pyx_v_self->currents_r.data + __pyx_t_1 * __pyx_v_self->currents_r.strides[0]) )))), (&(*((t_int32 *) ( /* dim=0 */ (__pyx_v_self->encoder_r_buffer.data + __pyx_t_3 * __pyx_v_self->encoder_r_buffer.strides[0]) )))), NULL, (&(*((t_double *) ( /* dim=0 */ (__pyx_v_self->other_r_buffer.data + __pyx_t_4 * __pyx_v_self->other_r_buffer.strides[0]) )))));
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":253
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":266
  *             NULL,
  *             &self.other_r_buffer[0])
  *         if samples_read < 0:             # <<<<<<<<<<<<<<
@@ -5762,18 +5982,18 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_t_5 = ((__pyx_v_samples_read < 0) != 0);
   if (__pyx_t_5) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":254
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":267
  *             &self.other_r_buffer[0])
  *         if samples_read < 0:
  *             print_possible_error(samples_read)             # <<<<<<<<<<<<<<
  * 
  *         samples_overflowed = hil.hil_task_get_buffer_overflows(self.task)
  */
-    __pyx_t_6 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_samples_read); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 254, __pyx_L1_error)
+    __pyx_t_6 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_samples_read); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 267, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":253
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":266
  *             NULL,
  *             &self.other_r_buffer[0])
  *         if samples_read < 0:             # <<<<<<<<<<<<<<
@@ -5782,53 +6002,53 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":256
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":269
  *             print_possible_error(samples_read)
  * 
  *         samples_overflowed = hil.hil_task_get_buffer_overflows(self.task)             # <<<<<<<<<<<<<<
  *         if samples_overflowed > self.samples_overflowed:
  *             print('Missed {} samples'.format(
  */
-  __pyx_t_6 = __Pyx_PyInt_From_npy_int32(hil_task_get_buffer_overflows(__pyx_v_self->task)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 256, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_npy_int32(hil_task_get_buffer_overflows(__pyx_v_self->task)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 269, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __pyx_v_samples_overflowed = __pyx_t_6;
   __pyx_t_6 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":257
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":270
  * 
  *         samples_overflowed = hil.hil_task_get_buffer_overflows(self.task)
  *         if samples_overflowed > self.samples_overflowed:             # <<<<<<<<<<<<<<
  *             print('Missed {} samples'.format(
  *                 samples_overflowed - self.samples_overflowed))
  */
-  __pyx_t_6 = __Pyx_PyInt_From_npy_int32(__pyx_v_self->samples_overflowed); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 257, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_npy_int32(__pyx_v_self->samples_overflowed); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 270, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyObject_RichCompare(__pyx_v_samples_overflowed, __pyx_t_6, Py_GT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 257, __pyx_L1_error)
+  __pyx_t_7 = PyObject_RichCompare(__pyx_v_samples_overflowed, __pyx_t_6, Py_GT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 270, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 257, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 270, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   if (__pyx_t_5) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":258
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":271
  *         samples_overflowed = hil.hil_task_get_buffer_overflows(self.task)
  *         if samples_overflowed > self.samples_overflowed:
  *             print('Missed {} samples'.format(             # <<<<<<<<<<<<<<
  *                 samples_overflowed - self.samples_overflowed))
  *             self.samples_overflowed = samples_overflowed
  */
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_Missed_samples, __pyx_n_s_format); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 258, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_Missed_samples, __pyx_n_s_format); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 271, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":259
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":272
  *         if samples_overflowed > self.samples_overflowed:
  *             print('Missed {} samples'.format(
  *                 samples_overflowed - self.samples_overflowed))             # <<<<<<<<<<<<<<
  *             self.samples_overflowed = samples_overflowed
  * 
  */
-    __pyx_t_8 = __Pyx_PyInt_From_npy_int32(__pyx_v_self->samples_overflowed); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 259, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyInt_From_npy_int32(__pyx_v_self->samples_overflowed); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 272, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
-    __pyx_t_9 = PyNumber_Subtract(__pyx_v_samples_overflowed, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 259, __pyx_L1_error)
+    __pyx_t_9 = PyNumber_Subtract(__pyx_v_samples_overflowed, __pyx_t_8); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 272, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __pyx_t_8 = NULL;
@@ -5842,14 +6062,14 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
       }
     }
     if (!__pyx_t_8) {
-      __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_9); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 258, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_9); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 271, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_7);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_6)) {
         PyObject *__pyx_temp[2] = {__pyx_t_8, __pyx_t_9};
-        __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 271, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -5858,49 +6078,49 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
         PyObject *__pyx_temp[2] = {__pyx_t_8, __pyx_t_9};
-        __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 271, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       } else
       #endif
       {
-        __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 271, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_10);
         __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_8); __pyx_t_8 = NULL;
         __Pyx_GIVEREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_9);
         __pyx_t_9 = 0;
-        __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_10, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 258, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_10, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 271, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       }
     }
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":258
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":271
  *         samples_overflowed = hil.hil_task_get_buffer_overflows(self.task)
  *         if samples_overflowed > self.samples_overflowed:
  *             print('Missed {} samples'.format(             # <<<<<<<<<<<<<<
  *                 samples_overflowed - self.samples_overflowed))
  *             self.samples_overflowed = samples_overflowed
  */
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 258, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_print, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 271, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":260
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":273
  *             print('Missed {} samples'.format(
  *                 samples_overflowed - self.samples_overflowed))
  *             self.samples_overflowed = samples_overflowed             # <<<<<<<<<<<<<<
  * 
  *         # Then write voltages_w calculated for previous time step
  */
-    __pyx_t_11 = __Pyx_PyInt_As_npy_int32(__pyx_v_samples_overflowed); if (unlikely((__pyx_t_11 == ((t_int)-1)) && PyErr_Occurred())) __PYX_ERR(0, 260, __pyx_L1_error)
+    __pyx_t_11 = __Pyx_PyInt_As_npy_int32(__pyx_v_samples_overflowed); if (unlikely((__pyx_t_11 == ((t_int)-1)) && PyErr_Occurred())) __PYX_ERR(0, 273, __pyx_L1_error)
     __pyx_v_self->samples_overflowed = __pyx_t_11;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":257
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":270
  * 
  *         samples_overflowed = hil.hil_task_get_buffer_overflows(self.task)
  *         if samples_overflowed > self.samples_overflowed:             # <<<<<<<<<<<<<<
@@ -5909,27 +6129,27 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":263
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":276
  * 
  *         # Then write voltages_w calculated for previous time step
  *         self.voltages_w = voltages_w             # <<<<<<<<<<<<<<
  *         result_write = hil.hil_write_analog(
  *             self.board,
  */
-  __pyx_t_12 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn_t_double(((PyObject *)__pyx_v_voltages_w), PyBUF_WRITABLE); if (unlikely(!__pyx_t_12.memview)) __PYX_ERR(0, 263, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn_t_double(((PyObject *)__pyx_v_voltages_w), PyBUF_WRITABLE); if (unlikely(!__pyx_t_12.memview)) __PYX_ERR(0, 276, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->voltages_w, 0);
   __pyx_v_self->voltages_w = __pyx_t_12;
   __pyx_t_12.memview = NULL;
   __pyx_t_12.data = NULL;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":266
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":279
  *         result_write = hil.hil_write_analog(
  *             self.board,
  *             &self.analog_w_channels[0],             # <<<<<<<<<<<<<<
  *             self.num_analog_w_channels,
  *             &self.voltages_w[0])
  */
-  if (unlikely(!__pyx_v_self->analog_w_channels.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 266, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->analog_w_channels.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 279, __pyx_L1_error)}
   __pyx_t_13 = 0;
   __pyx_t_2 = -1;
   if (__pyx_t_13 < 0) {
@@ -5938,17 +6158,17 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   } else if (unlikely(__pyx_t_13 >= __pyx_v_self->analog_w_channels.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 266, __pyx_L1_error)
+    __PYX_ERR(0, 279, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":268
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":281
  *             &self.analog_w_channels[0],
  *             self.num_analog_w_channels,
  *             &self.voltages_w[0])             # <<<<<<<<<<<<<<
  *         if result_write < 0:
  *             print_possible_error(result_write)
  */
-  if (unlikely(!__pyx_v_self->voltages_w.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 268, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->voltages_w.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 281, __pyx_L1_error)}
   __pyx_t_14 = 0;
   __pyx_t_2 = -1;
   if (__pyx_t_14 < 0) {
@@ -5957,10 +6177,10 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   } else if (unlikely(__pyx_t_14 >= __pyx_v_self->voltages_w.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 268, __pyx_L1_error)
+    __PYX_ERR(0, 281, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":264
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":277
  *         # Then write voltages_w calculated for previous time step
  *         self.voltages_w = voltages_w
  *         result_write = hil.hil_write_analog(             # <<<<<<<<<<<<<<
@@ -5969,7 +6189,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   __pyx_v_result_write = hil_write_analog(__pyx_v_self->board, (&(*((t_uint32 *) ( /* dim=0 */ (__pyx_v_self->analog_w_channels.data + __pyx_t_13 * __pyx_v_self->analog_w_channels.strides[0]) )))), __pyx_v_self->num_analog_w_channels, (&(*((t_double *) ( /* dim=0 */ (__pyx_v_self->voltages_w.data + __pyx_t_14 * __pyx_v_self->voltages_w.strides[0]) )))));
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":269
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":282
  *             self.num_analog_w_channels,
  *             &self.voltages_w[0])
  *         if result_write < 0:             # <<<<<<<<<<<<<<
@@ -5979,18 +6199,18 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_t_5 = ((__pyx_v_result_write < 0) != 0);
   if (__pyx_t_5) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":270
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":283
  *             &self.voltages_w[0])
  *         if result_write < 0:
  *             print_possible_error(result_write)             # <<<<<<<<<<<<<<
  * 
  *         return np.asarray(self.currents_r), \
  */
-    __pyx_t_6 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result_write); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 270, __pyx_L1_error)
+    __pyx_t_6 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result_write); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 283, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":269
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":282
  *             self.num_analog_w_channels,
  *             &self.voltages_w[0])
  *         if result_write < 0:             # <<<<<<<<<<<<<<
@@ -5999,7 +6219,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":272
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":285
  *             print_possible_error(result_write)
  * 
  *         return np.asarray(self.currents_r), \             # <<<<<<<<<<<<<<
@@ -6007,13 +6227,13 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  *             np.asarray(self.other_r_buffer)
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 272, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 285, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_asarray); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 272, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_asarray); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 285, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (unlikely(!__pyx_v_self->currents_r.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 272, __pyx_L1_error)}
-  __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_v_self->currents_r, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn_t_double, (int (*)(char *, PyObject *)) __pyx_memview_set_nn_t_double, 0);; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 272, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->currents_r.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 285, __pyx_L1_error)}
+  __pyx_t_7 = __pyx_memoryview_fromslice(__pyx_v_self->currents_r, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn_t_double, (int (*)(char *, PyObject *)) __pyx_memview_set_nn_t_double, 0);; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 285, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_9 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_10))) {
@@ -6026,14 +6246,14 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     }
   }
   if (!__pyx_t_9) {
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 272, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 285, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_GOTREF(__pyx_t_6);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_10)) {
       PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_7};
-      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_10, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 272, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_10, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 285, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -6042,40 +6262,40 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_10)) {
       PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_7};
-      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_10, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 272, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_10, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 285, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 272, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 285, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_9); __pyx_t_9 = NULL;
       __Pyx_GIVEREF(__pyx_t_7);
       PyTuple_SET_ITEM(__pyx_t_8, 0+1, __pyx_t_7);
       __pyx_t_7 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_8, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 272, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_8, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 285, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":273
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":286
  * 
  *         return np.asarray(self.currents_r), \
  *             np.asarray(self.encoder_r_buffer), \             # <<<<<<<<<<<<<<
  *             np.asarray(self.other_r_buffer)
  * 
  */
-  __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 273, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_asarray); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 273, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_8, __pyx_n_s_asarray); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  if (unlikely(!__pyx_v_self->encoder_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 273, __pyx_L1_error)}
-  __pyx_t_8 = __pyx_memoryview_fromslice(__pyx_v_self->encoder_r_buffer, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn_t_int32, (int (*)(char *, PyObject *)) __pyx_memview_set_nn_t_int32, 0);; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 273, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->encoder_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 286, __pyx_L1_error)}
+  __pyx_t_8 = __pyx_memoryview_fromslice(__pyx_v_self->encoder_r_buffer, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn_t_int32, (int (*)(char *, PyObject *)) __pyx_memview_set_nn_t_int32, 0);; if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __pyx_t_9 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -6088,14 +6308,14 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     }
   }
   if (!__pyx_t_9) {
-    __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 273, __pyx_L1_error)
+    __pyx_t_10 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 286, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_GOTREF(__pyx_t_10);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_8};
-      __pyx_t_10 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 273, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 286, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -6104,40 +6324,40 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_8};
-      __pyx_t_10 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 273, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 286, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     } else
     #endif
     {
-      __pyx_t_15 = PyTuple_New(1+1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 273, __pyx_L1_error)
+      __pyx_t_15 = PyTuple_New(1+1); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 286, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_15);
       __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_9); __pyx_t_9 = NULL;
       __Pyx_GIVEREF(__pyx_t_8);
       PyTuple_SET_ITEM(__pyx_t_15, 0+1, __pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_15, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 273, __pyx_L1_error)
+      __pyx_t_10 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_15, NULL); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 286, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":274
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":287
  *         return np.asarray(self.currents_r), \
  *             np.asarray(self.encoder_r_buffer), \
  *             np.asarray(self.other_r_buffer)             # <<<<<<<<<<<<<<
  * 
  *     def _set_led(self,
  */
-  __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 274, __pyx_L1_error)
+  __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 287, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_asarray); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 274, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_asarray); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 287, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  if (unlikely(!__pyx_v_self->other_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 274, __pyx_L1_error)}
-  __pyx_t_15 = __pyx_memoryview_fromslice(__pyx_v_self->other_r_buffer, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn_t_double, (int (*)(char *, PyObject *)) __pyx_memview_set_nn_t_double, 0);; if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 274, __pyx_L1_error)
+  if (unlikely(!__pyx_v_self->other_r_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 287, __pyx_L1_error)}
+  __pyx_t_15 = __pyx_memoryview_fromslice(__pyx_v_self->other_r_buffer, 1, (PyObject *(*)(char *)) __pyx_memview_get_nn_t_double, (int (*)(char *, PyObject *)) __pyx_memview_set_nn_t_double, 0);; if (unlikely(!__pyx_t_15)) __PYX_ERR(0, 287, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_15);
   __pyx_t_9 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -6150,14 +6370,14 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     }
   }
   if (!__pyx_t_9) {
-    __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_15); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 274, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_15); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 287, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
     __Pyx_GOTREF(__pyx_t_7);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_8)) {
       PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_15};
-      __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 274, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 287, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
@@ -6166,34 +6386,34 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
       PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_15};
-      __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 274, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 287, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
     } else
     #endif
     {
-      __pyx_t_16 = PyTuple_New(1+1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 274, __pyx_L1_error)
+      __pyx_t_16 = PyTuple_New(1+1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 287, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_16);
       __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_9); __pyx_t_9 = NULL;
       __Pyx_GIVEREF(__pyx_t_15);
       PyTuple_SET_ITEM(__pyx_t_16, 0+1, __pyx_t_15);
       __pyx_t_15 = 0;
-      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_16, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 274, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_16, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 287, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":272
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":285
  *             print_possible_error(result_write)
  * 
  *         return np.asarray(self.currents_r), \             # <<<<<<<<<<<<<<
  *             np.asarray(self.encoder_r_buffer), \
  *             np.asarray(self.other_r_buffer)
  */
-  __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 272, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(3); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 285, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_6);
@@ -6208,7 +6428,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_t_8 = 0;
   goto __pyx_L0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":244
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":257
  *         return self._action(voltages_w)
  * 
  *     def _action(self,             # <<<<<<<<<<<<<<
@@ -6244,7 +6464,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   return __pyx_r;
 }
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":276
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":289
  *             np.asarray(self.other_r_buffer)
  * 
  *     def _set_led(self,             # <<<<<<<<<<<<<<
@@ -6258,7 +6478,7 @@ static PyObject *__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("_set_led (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_led_w), __pyx_ptype_5numpy_ndarray, 0, "led_w", 0))) __PYX_ERR(0, 277, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_led_w), __pyx_ptype_5numpy_ndarray, 0, "led_w", 0))) __PYX_ERR(0, 290, __pyx_L1_error)
   __pyx_r = __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_16_set_led(((struct __pyx_obj_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper *)__pyx_v_self), ((PyArrayObject *)__pyx_v_led_w));
 
   /* function exit code */
@@ -6289,31 +6509,31 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_pybuffernd_led_w.rcbuffer = &__pyx_pybuffer_led_w;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_led_w.rcbuffer->pybuffer, (PyObject*)__pyx_v_led_w, &__Pyx_TypeInfo_nn_t_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 276, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_led_w.rcbuffer->pybuffer, (PyObject*)__pyx_v_led_w, &__Pyx_TypeInfo_nn_t_double, PyBUF_FORMAT| PyBUF_C_CONTIGUOUS, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 289, __pyx_L1_error)
   }
   __pyx_pybuffernd_led_w.diminfo[0].strides = __pyx_pybuffernd_led_w.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_led_w.diminfo[0].shape = __pyx_pybuffernd_led_w.rcbuffer->pybuffer.shape[0];
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":278
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":291
  *     def _set_led(self,
  *                 np.ndarray[qt.t_double, ndim=1, mode='c'] led_w not None):
  *         self.led_w_buffer = led_w             # <<<<<<<<<<<<<<
  *         result = hil.hil_write_other(
  *             self.board,
  */
-  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn_t_double(((PyObject *)__pyx_v_led_w), PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 278, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_nn_t_double(((PyObject *)__pyx_v_led_w), PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 291, __pyx_L1_error)
   __PYX_XDEC_MEMVIEW(&__pyx_v_self->led_w_buffer, 0);
   __pyx_v_self->led_w_buffer = __pyx_t_1;
   __pyx_t_1.memview = NULL;
   __pyx_t_1.data = NULL;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":281
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":294
  *         result = hil.hil_write_other(
  *             self.board,
  *             &self.led_w_channels[0],             # <<<<<<<<<<<<<<
  *             self.num_led_w_channels,
  *             &self.led_w_buffer[0])
  */
-  if (unlikely(!__pyx_v_self->led_w_channels.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 281, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->led_w_channels.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 294, __pyx_L1_error)}
   __pyx_t_2 = 0;
   __pyx_t_3 = -1;
   if (__pyx_t_2 < 0) {
@@ -6322,17 +6542,17 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   } else if (unlikely(__pyx_t_2 >= __pyx_v_self->led_w_channels.shape[0])) __pyx_t_3 = 0;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    __PYX_ERR(0, 281, __pyx_L1_error)
+    __PYX_ERR(0, 294, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":283
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":296
  *             &self.led_w_channels[0],
  *             self.num_led_w_channels,
  *             &self.led_w_buffer[0])             # <<<<<<<<<<<<<<
  *         if result < 0:
  *             print_possible_error(result)
  */
-  if (unlikely(!__pyx_v_self->led_w_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 283, __pyx_L1_error)}
+  if (unlikely(!__pyx_v_self->led_w_buffer.memview)) {PyErr_SetString(PyExc_AttributeError,"Memoryview is not initialized");__PYX_ERR(0, 296, __pyx_L1_error)}
   __pyx_t_4 = 0;
   __pyx_t_3 = -1;
   if (__pyx_t_4 < 0) {
@@ -6341,10 +6561,10 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   } else if (unlikely(__pyx_t_4 >= __pyx_v_self->led_w_buffer.shape[0])) __pyx_t_3 = 0;
   if (unlikely(__pyx_t_3 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_3);
-    __PYX_ERR(0, 283, __pyx_L1_error)
+    __PYX_ERR(0, 296, __pyx_L1_error)
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":279
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":292
  *                 np.ndarray[qt.t_double, ndim=1, mode='c'] led_w not None):
  *         self.led_w_buffer = led_w
  *         result = hil.hil_write_other(             # <<<<<<<<<<<<<<
@@ -6353,7 +6573,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   __pyx_v_result = hil_write_other(__pyx_v_self->board, (&(*((t_uint32 *) ( /* dim=0 */ (__pyx_v_self->led_w_channels.data + __pyx_t_2 * __pyx_v_self->led_w_channels.strides[0]) )))), __pyx_v_self->num_led_w_channels, (&(*((t_double *) ( /* dim=0 */ (__pyx_v_self->led_w_buffer.data + __pyx_t_4 * __pyx_v_self->led_w_buffer.strides[0]) )))));
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":284
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":297
  *             self.num_led_w_channels,
  *             &self.led_w_buffer[0])
  *         if result < 0:             # <<<<<<<<<<<<<<
@@ -6363,18 +6583,18 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   __pyx_t_5 = ((__pyx_v_result < 0) != 0);
   if (__pyx_t_5) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":285
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":298
  *             &self.led_w_buffer[0])
  *         if result < 0:
  *             print_possible_error(result)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_6 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 285, __pyx_L1_error)
+    __pyx_t_6 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 298, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":284
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":297
  *             self.num_led_w_channels,
  *             &self.led_w_buffer[0])
  *         if result < 0:             # <<<<<<<<<<<<<<
@@ -6383,7 +6603,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":276
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":289
  *             np.asarray(self.other_r_buffer)
  * 
  *     def _set_led(self,             # <<<<<<<<<<<<<<
@@ -6521,7 +6741,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   return __pyx_r;
 }
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":289
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":302
  * 
  * cdef class QuanserAero(QuanserWrapper):
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -6557,7 +6777,7 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   int __pyx_t_4;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":290
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":303
  * cdef class QuanserAero(QuanserWrapper):
  *     def __cinit__(self):
  *         board_type = b'quanser_aero_usb'             # <<<<<<<<<<<<<<
@@ -6567,7 +6787,7 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __Pyx_INCREF(__pyx_n_b_quanser_aero_usb);
   __pyx_v_board_type = __pyx_n_b_quanser_aero_usb;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":291
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":304
  *     def __cinit__(self):
  *         board_type = b'quanser_aero_usb'
  *         board_identifier = b'0'             # <<<<<<<<<<<<<<
@@ -6577,29 +6797,29 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __Pyx_INCREF(__pyx_kp_b_0);
   __pyx_v_board_identifier = __pyx_kp_b_0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":292
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":305
  *         board_type = b'quanser_aero_usb'
  *         board_identifier = b'0'
  *         result = hil.hil_open(board_type, board_identifier, &self.board)             # <<<<<<<<<<<<<<
  *         print_possible_error(result)
  *         if result < 0:
  */
-  __pyx_t_1 = __Pyx_PyBytes_AsString(__pyx_v_board_type); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 292, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_v_board_identifier); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 292, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBytes_AsString(__pyx_v_board_type); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 305, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_v_board_identifier); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 305, __pyx_L1_error)
   __pyx_v_result = hil_open(__pyx_t_1, __pyx_t_2, (&__pyx_v_self->__pyx_base.board));
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":293
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":306
  *         board_identifier = b'0'
  *         result = hil.hil_open(board_type, board_identifier, &self.board)
  *         print_possible_error(result)             # <<<<<<<<<<<<<<
  *         if result < 0:
  *             raise IOError('Board could not be opened.')
  */
-  __pyx_t_3 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 293, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 306, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":294
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":307
  *         result = hil.hil_open(board_type, board_identifier, &self.board)
  *         print_possible_error(result)
  *         if result < 0:             # <<<<<<<<<<<<<<
@@ -6609,20 +6829,20 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __pyx_t_4 = ((__pyx_v_result < 0) != 0);
   if (unlikely(__pyx_t_4)) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":295
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":308
  *         print_possible_error(result)
  *         if result < 0:
  *             raise IOError('Board could not be opened.')             # <<<<<<<<<<<<<<
  * 
  *     def __init__(self, frequency=100):
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_IOError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 295, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_IOError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 308, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __PYX_ERR(0, 295, __pyx_L1_error)
+    __PYX_ERR(0, 308, __pyx_L1_error)
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":294
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":307
  *         result = hil.hil_open(board_type, board_identifier, &self.board)
  *         print_possible_error(result)
  *         if result < 0:             # <<<<<<<<<<<<<<
@@ -6631,7 +6851,7 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":289
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":302
  * 
  * cdef class QuanserAero(QuanserWrapper):
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -6653,7 +6873,7 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   return __pyx_r;
 }
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":297
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":310
  *             raise IOError('Board could not be opened.')
  * 
  *     def __init__(self, frequency=100):             # <<<<<<<<<<<<<<
@@ -6690,7 +6910,7 @@ static int __pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 297, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 310, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -6704,7 +6924,7 @@ static int __pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 297, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 310, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("gym_brt.quanser.quanser_wrapper.quanser_wrapper.QuanserAero.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -6731,14 +6951,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":298
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":311
  * 
  *     def __init__(self, frequency=100):
  *         analog_r_channels = [0, 1]             # <<<<<<<<<<<<<<
  *         analog_w_channels = [0, 1]
  *         digital_w_channels = [0, 1]
  */
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 298, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 311, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -6749,14 +6969,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __pyx_v_analog_r_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":299
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":312
  *     def __init__(self, frequency=100):
  *         analog_r_channels = [0, 1]
  *         analog_w_channels = [0, 1]             # <<<<<<<<<<<<<<
  *         digital_w_channels = [0, 1]
  *         encoder_r_channels = [0, 1, 2, 3]
  */
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 299, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 312, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -6767,14 +6987,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __pyx_v_analog_w_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":300
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":313
  *         analog_r_channels = [0, 1]
  *         analog_w_channels = [0, 1]
  *         digital_w_channels = [0, 1]             # <<<<<<<<<<<<<<
  *         encoder_r_channels = [0, 1, 2, 3]
  *         other_r_channels = [3000, 3001, 3002, 4000, 4001, 4002, 14000, \
  */
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 300, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 313, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -6785,14 +7005,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __pyx_v_digital_w_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":301
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":314
  *         analog_w_channels = [0, 1]
  *         digital_w_channels = [0, 1]
  *         encoder_r_channels = [0, 1, 2, 3]             # <<<<<<<<<<<<<<
  *         other_r_channels = [3000, 3001, 3002, 4000, 4001, 4002, 14000, \
  *             14001, 14002, 14003]
  */
-  __pyx_t_1 = PyList_New(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 301, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -6809,14 +7029,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __pyx_v_encoder_r_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":302
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":315
  *         digital_w_channels = [0, 1]
  *         encoder_r_channels = [0, 1, 2, 3]
  *         other_r_channels = [3000, 3001, 3002, 4000, 4001, 4002, 14000, \             # <<<<<<<<<<<<<<
  *             14001, 14002, 14003]
  *         led_w_channels = [11000, 11001, 11002]
  */
-  __pyx_t_1 = PyList_New(10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 302, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_3000);
   __Pyx_GIVEREF(__pyx_int_3000);
@@ -6851,14 +7071,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __pyx_v_other_r_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":304
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":317
  *         other_r_channels = [3000, 3001, 3002, 4000, 4001, 4002, 14000, \
  *             14001, 14002, 14003]
  *         led_w_channels = [11000, 11001, 11002]             # <<<<<<<<<<<<<<
  * 
  *         super(QuanserAero, self).__init__(
  */
-  __pyx_t_1 = PyList_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 304, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 317, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_11000);
   __Pyx_GIVEREF(__pyx_int_11000);
@@ -6872,14 +7092,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __pyx_v_led_w_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":306
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":319
  *         led_w_channels = [11000, 11001, 11002]
  * 
  *         super(QuanserAero, self).__init__(             # <<<<<<<<<<<<<<
  *             safe_operating_voltage=18.0,
  *             analog_r_channels=analog_r_channels,
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(((PyObject *)__pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero));
   __Pyx_GIVEREF(((PyObject *)__pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero));
@@ -6887,101 +7107,101 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_11Quan
   __Pyx_INCREF(((PyObject *)__pyx_v_self));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_self));
   PyTuple_SET_ITEM(__pyx_t_1, 1, ((PyObject *)__pyx_v_self));
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_super, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_super, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_init); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_init); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":307
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":320
  * 
  *         super(QuanserAero, self).__init__(
  *             safe_operating_voltage=18.0,             # <<<<<<<<<<<<<<
  *             analog_r_channels=analog_r_channels,
  *             analog_w_channels=analog_w_channels,
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 307, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_safe_operating_voltage, __pyx_float_18_0) < 0) __PYX_ERR(0, 307, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_safe_operating_voltage, __pyx_float_18_0) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":308
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":321
  *         super(QuanserAero, self).__init__(
  *             safe_operating_voltage=18.0,
  *             analog_r_channels=analog_r_channels,             # <<<<<<<<<<<<<<
  *             analog_w_channels=analog_w_channels,
  *             digital_w_channels=digital_w_channels,
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_analog_r_channels, __pyx_v_analog_r_channels) < 0) __PYX_ERR(0, 307, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_analog_r_channels, __pyx_v_analog_r_channels) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":309
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":322
  *             safe_operating_voltage=18.0,
  *             analog_r_channels=analog_r_channels,
  *             analog_w_channels=analog_w_channels,             # <<<<<<<<<<<<<<
  *             digital_w_channels=digital_w_channels,
  *             encoder_r_channels=encoder_r_channels,
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_analog_w_channels, __pyx_v_analog_w_channels) < 0) __PYX_ERR(0, 307, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_analog_w_channels, __pyx_v_analog_w_channels) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":310
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":323
  *             analog_r_channels=analog_r_channels,
  *             analog_w_channels=analog_w_channels,
  *             digital_w_channels=digital_w_channels,             # <<<<<<<<<<<<<<
  *             encoder_r_channels=encoder_r_channels,
  *             other_r_channels=other_r_channels,
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_digital_w_channels, __pyx_v_digital_w_channels) < 0) __PYX_ERR(0, 307, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_digital_w_channels, __pyx_v_digital_w_channels) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":311
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":324
  *             analog_w_channels=analog_w_channels,
  *             digital_w_channels=digital_w_channels,
  *             encoder_r_channels=encoder_r_channels,             # <<<<<<<<<<<<<<
  *             other_r_channels=other_r_channels,
  *             led_w_channels=led_w_channels,
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_encoder_r_channels, __pyx_v_encoder_r_channels) < 0) __PYX_ERR(0, 307, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_encoder_r_channels, __pyx_v_encoder_r_channels) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":312
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":325
  *             digital_w_channels=digital_w_channels,
  *             encoder_r_channels=encoder_r_channels,
  *             other_r_channels=other_r_channels,             # <<<<<<<<<<<<<<
  *             led_w_channels=led_w_channels,
  *             frequency=frequency)
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_other_r_channels, __pyx_v_other_r_channels) < 0) __PYX_ERR(0, 307, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_other_r_channels, __pyx_v_other_r_channels) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":313
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":326
  *             encoder_r_channels=encoder_r_channels,
  *             other_r_channels=other_r_channels,
  *             led_w_channels=led_w_channels,             # <<<<<<<<<<<<<<
  *             frequency=frequency)
  * 
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_led_w_channels, __pyx_v_led_w_channels) < 0) __PYX_ERR(0, 307, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_led_w_channels, __pyx_v_led_w_channels) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":314
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":327
  *             other_r_channels=other_r_channels,
  *             led_w_channels=led_w_channels,
  *             frequency=frequency)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_frequency, __pyx_v_frequency) < 0) __PYX_ERR(0, 307, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_frequency, __pyx_v_frequency) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":306
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":319
  *         led_w_channels = [11000, 11001, 11002]
  * 
  *         super(QuanserAero, self).__init__(             # <<<<<<<<<<<<<<
  *             safe_operating_voltage=18.0,
  *             analog_r_channels=analog_r_channels,
  */
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 306, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":297
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":310
  *             raise IOError('Board could not be opened.')
  * 
  *     def __init__(self, frequency=100):             # <<<<<<<<<<<<<<
@@ -7116,7 +7336,7 @@ static PyObject *__pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_
   return __pyx_r;
 }
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":318
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":331
  * 
  * cdef class QubeServo2(QuanserWrapper):
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -7152,7 +7372,7 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   int __pyx_t_4;
   __Pyx_RefNannySetupContext("__cinit__", 0);
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":319
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":332
  * cdef class QubeServo2(QuanserWrapper):
  *     def __cinit__(self):
  *         board_type = b'qube_servo2_usb'             # <<<<<<<<<<<<<<
@@ -7162,7 +7382,7 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __Pyx_INCREF(__pyx_n_b_qube_servo2_usb);
   __pyx_v_board_type = __pyx_n_b_qube_servo2_usb;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":320
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":333
  *     def __cinit__(self):
  *         board_type = b'qube_servo2_usb'
  *         board_identifier = b'0'             # <<<<<<<<<<<<<<
@@ -7172,29 +7392,29 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __Pyx_INCREF(__pyx_kp_b_0);
   __pyx_v_board_identifier = __pyx_kp_b_0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":321
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":334
  *         board_type = b'qube_servo2_usb'
  *         board_identifier = b'0'
  *         result = hil.hil_open(board_type, board_identifier, &self.board)             # <<<<<<<<<<<<<<
  *         print_possible_error(result)
  *         if result < 0:
  */
-  __pyx_t_1 = __Pyx_PyBytes_AsString(__pyx_v_board_type); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 321, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_v_board_identifier); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 321, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBytes_AsString(__pyx_v_board_type); if (unlikely((!__pyx_t_1) && PyErr_Occurred())) __PYX_ERR(0, 334, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyBytes_AsString(__pyx_v_board_identifier); if (unlikely((!__pyx_t_2) && PyErr_Occurred())) __PYX_ERR(0, 334, __pyx_L1_error)
   __pyx_v_result = hil_open(__pyx_t_1, __pyx_t_2, (&__pyx_v_self->__pyx_base.board));
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":322
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":335
  *         board_identifier = b'0'
  *         result = hil.hil_open(board_type, board_identifier, &self.board)
  *         print_possible_error(result)             # <<<<<<<<<<<<<<
  *         if result < 0:
  *             raise IOError('Board could not be opened.')
  */
-  __pyx_t_3 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 322, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_print_possible_error(__pyx_v_result); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 335, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":323
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":336
  *         result = hil.hil_open(board_type, board_identifier, &self.board)
  *         print_possible_error(result)
  *         if result < 0:             # <<<<<<<<<<<<<<
@@ -7204,20 +7424,20 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __pyx_t_4 = ((__pyx_v_result < 0) != 0);
   if (unlikely(__pyx_t_4)) {
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":324
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":337
  *         print_possible_error(result)
  *         if result < 0:
  *             raise IOError('Board could not be opened.')             # <<<<<<<<<<<<<<
  * 
  *     def __init__(self, frequency=100):
  */
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_IOError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 324, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_IOError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 337, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_Raise(__pyx_t_3, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __PYX_ERR(0, 324, __pyx_L1_error)
+    __PYX_ERR(0, 337, __pyx_L1_error)
 
-    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":323
+    /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":336
  *         result = hil.hil_open(board_type, board_identifier, &self.board)
  *         print_possible_error(result)
  *         if result < 0:             # <<<<<<<<<<<<<<
@@ -7226,7 +7446,7 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
  */
   }
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":318
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":331
  * 
  * cdef class QubeServo2(QuanserWrapper):
  *     def __cinit__(self):             # <<<<<<<<<<<<<<
@@ -7248,7 +7468,7 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   return __pyx_r;
 }
 
-/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":326
+/* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":339
  *             raise IOError('Board could not be opened.')
  * 
  *     def __init__(self, frequency=100):             # <<<<<<<<<<<<<<
@@ -7285,7 +7505,7 @@ static int __pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 326, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 339, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -7299,7 +7519,7 @@ static int __pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 326, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 339, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("gym_brt.quanser.quanser_wrapper.quanser_wrapper.QubeServo2.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -7326,14 +7546,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":327
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":340
  * 
  *     def __init__(self, frequency=100):
  *         analog_r_channels = [0]             # <<<<<<<<<<<<<<
  *         analog_w_channels = [0]
  *         digital_w_channels = [0]
  */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 327, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 340, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -7341,14 +7561,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __pyx_v_analog_r_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":328
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":341
  *     def __init__(self, frequency=100):
  *         analog_r_channels = [0]
  *         analog_w_channels = [0]             # <<<<<<<<<<<<<<
  *         digital_w_channels = [0]
  *         encoder_r_channels = [0, 1]
  */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 328, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 341, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -7356,14 +7576,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __pyx_v_analog_w_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":329
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":342
  *         analog_r_channels = [0]
  *         analog_w_channels = [0]
  *         digital_w_channels = [0]             # <<<<<<<<<<<<<<
  *         encoder_r_channels = [0, 1]
  *         other_r_channels = [14000]
  */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 329, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 342, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -7371,14 +7591,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __pyx_v_digital_w_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":330
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":343
  *         analog_w_channels = [0]
  *         digital_w_channels = [0]
  *         encoder_r_channels = [0, 1]             # <<<<<<<<<<<<<<
  *         other_r_channels = [14000]
  *         led_w_channels = [11000, 11001, 11002]
  */
-  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 330, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 343, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_0);
   __Pyx_GIVEREF(__pyx_int_0);
@@ -7389,14 +7609,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __pyx_v_encoder_r_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":331
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":344
  *         digital_w_channels = [0]
  *         encoder_r_channels = [0, 1]
  *         other_r_channels = [14000]             # <<<<<<<<<<<<<<
  *         led_w_channels = [11000, 11001, 11002]
  * 
  */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 331, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 344, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_14000);
   __Pyx_GIVEREF(__pyx_int_14000);
@@ -7404,14 +7624,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __pyx_v_other_r_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":332
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":345
  *         encoder_r_channels = [0, 1]
  *         other_r_channels = [14000]
  *         led_w_channels = [11000, 11001, 11002]             # <<<<<<<<<<<<<<
  * 
  *         super(QubeServo2, self).__init__(
  */
-  __pyx_t_1 = PyList_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 332, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 345, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_int_11000);
   __Pyx_GIVEREF(__pyx_int_11000);
@@ -7425,14 +7645,14 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __pyx_v_led_w_channels = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":334
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":347
  *         led_w_channels = [11000, 11001, 11002]
  * 
  *         super(QubeServo2, self).__init__(             # <<<<<<<<<<<<<<
  *             safe_operating_voltage=18.0,
  *             analog_r_channels=analog_r_channels,
  */
-  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 334, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 347, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(((PyObject *)__pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2));
   __Pyx_GIVEREF(((PyObject *)__pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2));
@@ -7440,98 +7660,98 @@ static int __pyx_pf_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_10Qube
   __Pyx_INCREF(((PyObject *)__pyx_v_self));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_self));
   PyTuple_SET_ITEM(__pyx_t_1, 1, ((PyObject *)__pyx_v_self));
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_super, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 334, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_super, __pyx_t_1, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 347, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_init); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 334, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_init); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 347, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":335
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":348
  * 
  *         super(QubeServo2, self).__init__(
  *             safe_operating_voltage=18.0,             # <<<<<<<<<<<<<<
  *             analog_r_channels=analog_r_channels,
  *             analog_w_channels=analog_w_channels,
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 335, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_safe_operating_voltage, __pyx_float_18_0) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_safe_operating_voltage, __pyx_float_18_0) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":336
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":349
  *         super(QubeServo2, self).__init__(
  *             safe_operating_voltage=18.0,
  *             analog_r_channels=analog_r_channels,             # <<<<<<<<<<<<<<
  *             analog_w_channels=analog_w_channels,
  *             digital_w_channels=digital_w_channels,
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_analog_r_channels, __pyx_v_analog_r_channels) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_analog_r_channels, __pyx_v_analog_r_channels) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":337
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":350
  *             safe_operating_voltage=18.0,
  *             analog_r_channels=analog_r_channels,
  *             analog_w_channels=analog_w_channels,             # <<<<<<<<<<<<<<
  *             digital_w_channels=digital_w_channels,
  *             encoder_r_channels=encoder_r_channels,
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_analog_w_channels, __pyx_v_analog_w_channels) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_analog_w_channels, __pyx_v_analog_w_channels) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":338
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":351
  *             analog_r_channels=analog_r_channels,
  *             analog_w_channels=analog_w_channels,
  *             digital_w_channels=digital_w_channels,             # <<<<<<<<<<<<<<
  *             encoder_r_channels=encoder_r_channels,
  *             other_r_channels=other_r_channels,
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_digital_w_channels, __pyx_v_digital_w_channels) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_digital_w_channels, __pyx_v_digital_w_channels) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":339
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":352
  *             analog_w_channels=analog_w_channels,
  *             digital_w_channels=digital_w_channels,
  *             encoder_r_channels=encoder_r_channels,             # <<<<<<<<<<<<<<
  *             other_r_channels=other_r_channels,
  *             led_w_channels=led_w_channels,
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_encoder_r_channels, __pyx_v_encoder_r_channels) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_encoder_r_channels, __pyx_v_encoder_r_channels) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":340
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":353
  *             digital_w_channels=digital_w_channels,
  *             encoder_r_channels=encoder_r_channels,
  *             other_r_channels=other_r_channels,             # <<<<<<<<<<<<<<
  *             led_w_channels=led_w_channels,
  *             frequency=frequency)
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_other_r_channels, __pyx_v_other_r_channels) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_other_r_channels, __pyx_v_other_r_channels) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":341
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":354
  *             encoder_r_channels=encoder_r_channels,
  *             other_r_channels=other_r_channels,
  *             led_w_channels=led_w_channels,             # <<<<<<<<<<<<<<
  *             frequency=frequency)
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_led_w_channels, __pyx_v_led_w_channels) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_led_w_channels, __pyx_v_led_w_channels) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":342
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":355
  *             other_r_channels=other_r_channels,
  *             led_w_channels=led_w_channels,
  *             frequency=frequency)             # <<<<<<<<<<<<<<
  */
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_frequency, __pyx_v_frequency) < 0) __PYX_ERR(0, 335, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_frequency, __pyx_v_frequency) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":334
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":347
  *         led_w_channels = [11000, 11001, 11002]
  * 
  *         super(QubeServo2, self).__init__(             # <<<<<<<<<<<<<<
  *             safe_operating_voltage=18.0,
  *             analog_r_channels=analog_r_channels,
  */
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 334, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_empty_tuple, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 347, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":326
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":339
  *             raise IOError('Board could not be opened.')
  * 
  *     def __init__(self, frequency=100):             # <<<<<<<<<<<<<<
@@ -23108,7 +23328,7 @@ static PyMethodDef __pyx_methods_7gym_brt_7quanser_15quanser_wrapper_15quanser_w
   {"__exit__", (PyCFunction)__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_5__exit__, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_4__exit__},
   {"_create_task", (PyCFunction)__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_7_create_task, METH_NOARGS, __pyx_doc_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_6_create_task},
   {"_stop_task", (PyCFunction)__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_9_stop_task, METH_NOARGS, 0},
-  {"reset_encoders", (PyCFunction)__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_11reset_encoders, METH_NOARGS, 0},
+  {"reset_encoders", (PyCFunction)__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_11reset_encoders, METH_VARARGS|METH_KEYWORDS, __pyx_doc_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_10reset_encoders},
   {"action", (PyCFunction)__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_13action, METH_VARARGS|METH_KEYWORDS, 0},
   {"_action", (PyCFunction)__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_15_action, METH_O, 0},
   {"_set_led", (PyCFunction)__pyx_pw_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_14QuanserWrapper_17_set_led, METH_O, 0},
@@ -24039,6 +24259,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_Cannot_assign_to_read_only_memor, __pyx_k_Cannot_assign_to_read_only_memor, sizeof(__pyx_k_Cannot_assign_to_read_only_memor), 0, 0, 1, 0},
   {&__pyx_kp_s_Cannot_create_writable_memory_vi, __pyx_k_Cannot_create_writable_memory_vi, sizeof(__pyx_k_Cannot_create_writable_memory_vi), 0, 0, 1, 0},
   {&__pyx_kp_s_Cannot_index_with_type_s, __pyx_k_Cannot_index_with_type_s, sizeof(__pyx_k_Cannot_index_with_type_s), 0, 0, 1, 0},
+  {&__pyx_kp_s_Channel_is_not_a_possible_channe, __pyx_k_Channel_is_not_a_possible_channe, sizeof(__pyx_k_Channel_is_not_a_possible_channe), 0, 0, 1, 0},
   {&__pyx_kp_s_Could_not_start_hil_task, __pyx_k_Could_not_start_hil_task, sizeof(__pyx_k_Could_not_start_hil_task), 0, 0, 1, 0},
   {&__pyx_n_s_Ellipsis, __pyx_k_Ellipsis, sizeof(__pyx_k_Ellipsis), 0, 0, 1, 1},
   {&__pyx_kp_s_Empty_shape_tuple_for_cython_arr, __pyx_k_Empty_shape_tuple_for_cython_arr, sizeof(__pyx_k_Empty_shape_tuple_for_cython_arr), 0, 0, 1, 0},
@@ -24074,6 +24295,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_base, __pyx_k_base, sizeof(__pyx_k_base), 0, 0, 1, 1},
   {&__pyx_n_s_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 0, 1, 1},
   {&__pyx_n_u_c, __pyx_k_c, sizeof(__pyx_k_c), 0, 1, 0, 1},
+  {&__pyx_n_s_channels, __pyx_k_channels, sizeof(__pyx_k_channels), 0, 0, 1, 1},
   {&__pyx_n_s_class, __pyx_k_class, sizeof(__pyx_k_class), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
@@ -24157,6 +24379,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_struct, __pyx_k_struct, sizeof(__pyx_k_struct), 0, 0, 1, 1},
   {&__pyx_n_s_super, __pyx_k_super, sizeof(__pyx_k_super), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
+  {&__pyx_kp_s_this_hardware, __pyx_k_this_hardware, sizeof(__pyx_k_this_hardware), 0, 0, 1, 0},
   {&__pyx_n_s_traceback, __pyx_k_traceback, sizeof(__pyx_k_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_type, __pyx_k_type, sizeof(__pyx_k_type), 0, 0, 1, 1},
   {&__pyx_n_s_uint32, __pyx_k_uint32, sizeof(__pyx_k_uint32), 0, 0, 1, 1},
@@ -24173,10 +24396,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
 static int __Pyx_InitCachedBuiltins(void) {
   __pyx_builtin_print = __Pyx_GetBuiltinName(__pyx_n_s_print); if (!__pyx_builtin_print) __PYX_ERR(0, 16, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(0, 194, __pyx_L1_error)
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 228, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 241, __pyx_L1_error)
   __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
-  __pyx_builtin_IOError = __Pyx_GetBuiltinName(__pyx_n_s_IOError); if (!__pyx_builtin_IOError) __PYX_ERR(0, 295, __pyx_L1_error)
-  __pyx_builtin_super = __Pyx_GetBuiltinName(__pyx_n_s_super); if (!__pyx_builtin_super) __PYX_ERR(0, 306, __pyx_L1_error)
+  __pyx_builtin_IOError = __Pyx_GetBuiltinName(__pyx_n_s_IOError); if (!__pyx_builtin_IOError) __PYX_ERR(0, 308, __pyx_L1_error)
+  __pyx_builtin_super = __Pyx_GetBuiltinName(__pyx_n_s_super); if (!__pyx_builtin_super) __PYX_ERR(0, 319, __pyx_L1_error)
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) __PYX_ERR(2, 810, __pyx_L1_error)
   __pyx_builtin_ImportError = __Pyx_GetBuiltinName(__pyx_n_s_ImportError); if (!__pyx_builtin_ImportError) __PYX_ERR(2, 1000, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 147, __pyx_L1_error)
@@ -24223,14 +24446,14 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":295
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":308
  *         print_possible_error(result)
  *         if result < 0:
  *             raise IOError('Board could not be opened.')             # <<<<<<<<<<<<<<
  * 
  *     def __init__(self, frequency=100):
  */
-  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_s_Board_could_not_be_opened); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 295, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_s_Board_could_not_be_opened); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 308, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
@@ -24253,14 +24476,14 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":324
+  /* "gym_brt/quanser/quanser_wrapper/quanser_wrapper.pyx":337
  *         print_possible_error(result)
  *         if result < 0:
  *             raise IOError('Board could not be opened.')             # <<<<<<<<<<<<<<
  * 
  *     def __init__(self, frequency=100):
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_Board_could_not_be_opened); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 324, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_Board_could_not_be_opened); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 337, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
@@ -24757,22 +24980,22 @@ static int __Pyx_modinit_type_init_code(void) {
   if (__Pyx_setup_reduce((PyObject*)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
   __pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper = &__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper;
   __pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero.tp_base = __pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper;
-  if (PyType_Ready(&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero) < 0) __PYX_ERR(0, 288, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero) < 0) __PYX_ERR(0, 301, __pyx_L1_error)
   __pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero.tp_dictoffset && __pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (PyObject_SetAttrString(__pyx_m, "QuanserAero", (PyObject *)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero) < 0) __PYX_ERR(0, 288, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero) < 0) __PYX_ERR(0, 288, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "QuanserAero", (PyObject *)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero) < 0) __PYX_ERR(0, 301, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero) < 0) __PYX_ERR(0, 301, __pyx_L1_error)
   __pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero = &__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserAero;
   __pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2.tp_base = __pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QuanserWrapper;
-  if (PyType_Ready(&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2) < 0) __PYX_ERR(0, 317, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2) < 0) __PYX_ERR(0, 330, __pyx_L1_error)
   __pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2.tp_print = 0;
   if ((CYTHON_USE_TYPE_SLOTS && CYTHON_USE_PYTYPE_LOOKUP) && likely(!__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2.tp_dictoffset && __pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2.tp_getattro == PyObject_GenericGetAttr)) {
     __pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2.tp_getattro = __Pyx_PyObject_GenericGetAttr;
   }
-  if (PyObject_SetAttrString(__pyx_m, "QubeServo2", (PyObject *)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2) < 0) __PYX_ERR(0, 317, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2) < 0) __PYX_ERR(0, 317, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "QubeServo2", (PyObject *)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2) < 0) __PYX_ERR(0, 330, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2) < 0) __PYX_ERR(0, 330, __pyx_L1_error)
   __pyx_ptype_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2 = &__pyx_type_7gym_brt_7quanser_15quanser_wrapper_15quanser_wrapper_QubeServo2;
   __pyx_vtabptr_array = &__pyx_vtable_array;
   __pyx_vtable_array.get_memview = (PyObject *(*)(struct __pyx_array_obj *))__pyx_array_get_memview;
@@ -28119,6 +28342,18 @@ __pyx_capsule_create(void *p, CYTHON_UNUSED const char *sig)
         }\
         return (target_type) value;\
     }
+
+/* MemviewDtypeToObject */
+          static CYTHON_INLINE PyObject *__pyx_memview_get_nn_t_uint32(const char *itemp) {
+    return (PyObject *) __Pyx_PyInt_From_npy_uint32(*(t_uint32 *) itemp);
+}
+static CYTHON_INLINE int __pyx_memview_set_nn_t_uint32(const char *itemp, PyObject *obj) {
+    t_uint32 value = __Pyx_PyInt_As_npy_uint32(obj);
+    if ((value == ((t_uint32)-1)) && PyErr_Occurred())
+        return 0;
+    *(t_uint32 *) itemp = value;
+    return 1;
+}
 
 /* CIntToPy */
           static CYTHON_INLINE PyObject* __Pyx_PyInt_From_npy_int32(npy_int32 value) {
