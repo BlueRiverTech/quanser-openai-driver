@@ -42,7 +42,8 @@ class QubeBaseEnv(gym.Env):
     '''A base class for all qube-based environments.'''
     def __init__(self,
                  frequency=1000,
-                 batch_size=2048):
+                 batch_size=2048,
+                 hard_reset_steps=10000):
         self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
         self.action_space = spaces.Box(ACT_LOW, ACT_HIGH)
         self.reward_fn = QubeBaseReward()
@@ -51,11 +52,16 @@ class QubeBaseEnv(gym.Env):
         self._alpha_velocity_cstate = 0
         self._theta_velocity = 0
         self._alpha_velocity = 0
+        self._theta = 0
+        self._alpha = 0
         self._frequency = frequency
 
         # Ensures that samples in episode are the same as batch size
         self._max_episode_steps = batch_size  # Reset every batch_size steps (2048 ~= 8.192 seconds)
         self._episode_steps = 0
+        self._hard_reset_steps = hard_reset_steps
+        self._steps_since_hard_reset = 0
+        self._isdone = True
 
         # Open the Qube
         self.qube = QubeServo2(frequency=frequency)
@@ -167,6 +173,11 @@ class QubeBaseEnv(gym.Env):
         return self._dampen_down()
 
     def reset(self):
+        # Occasionaly reset the enocoders to remove sensor drift
+        if self._steps_since_hard_reset >= hard_reset_steps:
+            self.hard_reset()
+            self._steps_since_hard_reset = 0
+
         action = np.zeros(
             shape=self.action_space.shape,
             dtype=self.action_space.dtype)
@@ -178,15 +189,28 @@ class QubeBaseEnv(gym.Env):
         done |= abs(self._theta) > (90 * np.pi / 180)
         return done
 
+    def hard_reset(self):
+        '''Fully stop the pendulum at the bottom. '''
+        self.dampen_down()
+        action = np.zeros(
+            shape=self.action_space.shape,
+            dtype=self.action_space.dtype)
+        self.step(action)
+        print('Hard reset')
+        time.sleep(3)  # Do nothing for 3 seconds to ensure pendulum is stopped
+        # TODO: center the angle and then reset encoders
+        # self.qube.reset_encoders()
+
     def step(self, action):
         state = self._step(action)
         reward = self.reward_fn(state, action)
 
         self._episode_steps += 1
+        self._steps_since_hard_reset += 1
 
-        done = self._done()
+        self._isdone = self._done()
         info = {}
-        return state, reward, done, info
+        return state, reward, self._isdone, info
 
     def render(self, mode='human'):
         pass

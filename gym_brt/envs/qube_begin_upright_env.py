@@ -85,6 +85,6 @@ class QubeBeginUprightEnv(QubeBaseEnv):
     def step(self, action):
         state, reward, done, info = super(QubeBeginUprightEnv, self).step(action)
         state = state[:6]  # Simplify the state (only angles & velocities)
-        done |= abs(self._alpha) > (20 * np.pi / 180)
+        self._isdone |= abs(self._alpha) > (20 * np.pi / 180)
 
-        return state, reward, done, info
+        return state, reward, self._isdone, info
