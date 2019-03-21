@@ -78,10 +78,21 @@ class QubeBaseEnv(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def _step(self, action):
+    def _step(self, action, led=None):
+        if led is None:
+            if self._isdone:  # Doing reset
+                led = [1.0, 1.0, 0.0]  # Yellow = [255, 255, 0]
+            else:
+                if abs(self._alpha) > (20 * np.pi / 180):
+                    led = [1.0, 0.0, 0.0]  # Red
+                elif abs(self._theta) > (90 * np.pi / 180):
+                    led = [1.0, 0.0, 0.0]  # Red
+                else:
+                    led = [0.0, 1.0, 0.0]  # Green
+
         motor_voltages = np.clip(
             np.array(action, dtype=np.float64), ACT_LOW, ACT_HIGH)
-        currents, encoders, others = self.qube.action(motor_voltages)
+        currents, encoders, others = self.qube.action(motor_voltages, led_w=led)
 
         self._sense = currents[0]
         self._tach0 = others[0]
