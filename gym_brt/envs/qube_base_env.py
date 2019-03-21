@@ -42,8 +42,8 @@ class QubeBaseEnv(gym.Env):
     '''A base class for all qube-based environments.'''
     def __init__(self,
                  frequency=1000,
-                 batch_size=2048000,
-                 hard_reset_steps=10):
+                 batch_size=2048,
+                 hard_reset_steps=100000):
         self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
         self.action_space = spaces.Box(ACT_LOW, ACT_HIGH)
         self.reward_fn = QubeBaseReward()
