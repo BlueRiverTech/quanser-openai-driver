@@ -122,7 +122,6 @@ def main():
         'qube': QubeBeginDownEnv,
         'QubeBeginDownEnv': QubeBeginDownEnv,
         'QubeBeginUprightEnv': QubeBeginUprightEnv,
-        'QubeBeginUprightFollowEnv': QubeBeginUprightFollowEnv,
         'down': QubeBeginDownEnv,
         'up': QubeBeginUprightEnv,
 
@@ -165,7 +164,7 @@ def main():
         '-f',
         '--frequency',
         '--sample-frequency',
-        default='1000',
+        default='250',
         type=float,
         help='The frequency of samples on the Quanser hardware.')
     parser.add_argument('-v', '--verbose', action='store_true')

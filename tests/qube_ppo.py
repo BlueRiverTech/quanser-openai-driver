@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function, division
 
-import tensorflow as tf
 import numpy as np
 import argparse
 import time
@@ -9,11 +8,15 @@ import gym
 from gym_brt.envs import QubeBeginUprightEnv, QubeBeginDownEnv
 
 try:
+    import tensorflow as tf
+except Exception as e:
+    raise ImportError('Please install TensorFlow.')
+try:
     from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
     from baselines.ppo2.ppo2 import learn as learn_ppo2
     from baselines import logger
 except:
-    raise ImportError('Please install OpenAI baselines from: https://github.com/openai/baselines')
+    raise ImportError('Please install OpenAI baselines from: https://github.com/openai/baselines.')
 
 
 def main(args):
