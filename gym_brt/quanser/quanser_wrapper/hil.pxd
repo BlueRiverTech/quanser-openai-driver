@@ -40,7 +40,8 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
     t_error hil_open(
         const char * card_type,
         const char * card_identifier,
-        t_card * card)
+        t_card * card
+    )
     t_error hil_close(t_card card)
 
     # For debugging
@@ -51,53 +52,62 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
         t_card card,
         const t_uint32 encoder_channels[],
         t_uint32 num_channels,
-        const t_int32 buffer[])
+        const t_int32 buffer[]
+    )
     t_error hil_write_analog(
         t_card card,
         const t_uint32 analog_channels[],
         t_uint32 num_channels,
-        const t_double buffer[])
+        const t_double buffer[]
+    )
     t_error hil_write_digital(
         t_card card,
         const t_uint32 digital_lines[],
         t_uint32 num_lines,
-        const t_boolean buffer[])
+        const t_boolean buffer[]
+    )
     t_error hil_write_other(
         t_card card,
         const t_uint32 other_channels[],
         t_uint32 num_channels,
-        const t_double buffer[])
+        const t_double buffer[]
+    )
 
     t_error hil_read_analog(
         t_card card,
         const t_uint32 analog_channels[],
         t_uint32 num_channels,
-        t_double buffer[])
+        t_double buffer[]
+    )
     t_error hil_read_encoder(
         t_card card,
         const t_uint32 encoder_channels[],
         t_uint32 num_channels,
-        t_int32 buffer[])
+        t_int32 buffer[]
+    )
     t_error hil_read_digital(
         t_card card,
         const t_uint32 digital_lines[],
         t_uint32 num_lines,
-        t_boolean buffer[])
+        t_boolean buffer[]
+    )
     t_error hil_read_other(
         t_card card,
         const t_uint32 other_channels[],
         t_uint32 num_channels,
-        t_double buffer[])
+        t_double buffer[]
+    )
     t_error hil_read(
-        t_card card, 
-        const t_uint32 analog_channels[], t_uint32 num_analog_channels, 
-        const t_uint32 encoder_channels[], t_uint32 num_encoder_channels, 
-        const t_uint32 digital_lines[], t_uint32 num_digital_lines, 
-        const t_uint32 other_channels[], t_uint32 num_other_channels, 
+        t_card card,
+        const t_uint32 analog_channels[], t_uint32 num_analog_channels,
+        const t_uint32 encoder_channels[], t_uint32 num_encoder_channels,
+        const t_uint32 digital_lines[], t_uint32 num_digital_lines,
+        const t_uint32 other_channels[], t_uint32 num_other_channels,
         t_double analog_buffer[],
         t_int32 encoder_buffer[],
         t_boolean digital_buffer[],
-        t_double other_buffer[])
+        t_double other_buffer[]
+    )
 
     # Async
     t_error hil_task_create_reader_writer(
@@ -119,7 +129,8 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
         t_uint32 num_digital_output_lines,
         const t_uint32 other_output_channels[],
         t_uint32 num_other_output_channels,
-        t_task *task)
+        t_task *task
+    )
     t_error hil_task_create_reader(
         t_card card, t_uint32 samples_in_buffer,
         const t_uint32 analog_channels[],
@@ -127,16 +138,18 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
         const t_uint32 encoder_channels[],
         t_uint32 num_encoder_channels,
         const t_uint32 digital_lines[],
-        t_uint32 num_digital_lines, 
+        t_uint32 num_digital_lines,
         const t_uint32 other_channels[],
         t_uint32 num_other_channels,
-        t_task *task)
+        t_task *task
+    )
 
     t_error hil_task_start(
         t_task task,
         t_clock clock,
         t_double frequency,
-        t_uint32 num_samples)
+        t_uint32 num_samples
+    )
     t_error hil_task_flush(t_task task)
     t_error hil_task_stop(t_task task)
     t_error hil_task_delete(t_task task)
@@ -151,19 +164,22 @@ cdef extern from "/opt/quanser/hil_sdk/include/hil.h":
         const t_double analog_output_buffer[],
         const t_double pwm_output_buffer[],
         const t_boolean digital_output_buffer[],
-        const t_double other_output_buffer[])
+        const t_double other_output_buffer[]
+    )
     t_error hil_task_write(
         t_task task, t_uint32 num_samples,
         const t_double analog_buffer[],
         const t_double pwm_buffer[],
         const t_boolean digital_buffer[],
-        const t_double other_buffer[])
+        const t_double other_buffer[]
+    )
     t_error hil_task_read(
         t_task task, t_uint32 num_samples,
         t_double analog_buffer[],
         t_int32 encoder_buffer[],
         t_boolean digital_buffer[],
-        t_double other_buffer[])
+        t_double other_buffer[]
+    )
 
     # Allow buffer overflow
     t_error hil_task_set_buffer_overflow_mode(
