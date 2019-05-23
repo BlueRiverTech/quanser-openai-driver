@@ -11,40 +11,46 @@ from gym_brt.quanser import QuanserAero
 
 
 # pitch, yaw, gyro, acceleration, current sense
-OBSERVATION_HIGH = np.asarray([
-    2048,  # pitch
-    np.inf,  # yaw (technically unlimited...)
-    np.pi / 4, np.pi / 4, np.pi / 4,  # gyro/velocity (x,y,z)
-    np.pi / 4, np.pi / 4, np.pi / 4,  # acceleration (x,y,z)
-    4100,  # tach for pitch
-    4100,  # tach for yaw
-    2.0, 2.0,  # peak current
-], dtype=np.float64)
+OBSERVATION_HIGH = np.asarray(
+    [
+        2048,  # pitch
+        np.inf,  # yaw (technically unlimited...)
+        np.pi / 4,
+        np.pi / 4,
+        np.pi / 4,  # gyro/velocity (x,y,z)
+        np.pi / 4,
+        np.pi / 4,
+        np.pi / 4,  # acceleration (x,y,z)
+        4100,  # tach for pitch
+        4100,  # tach for yaw
+        2.0,
+        2.0,  # peak current
+    ],
+    dtype=np.float64,
+)
 
 OBSERVATION_LOW = -OBSERVATION_HIGH
 
 MAX_MOTOR_VOLTAGE = 20.0
-ACTION_HIGH = np.asarray(
-    [MAX_MOTOR_VOLTAGE, MAX_MOTOR_VOLTAGE],
-    dtype=np.float64)
+ACTION_HIGH = np.asarray([MAX_MOTOR_VOLTAGE, MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACTION_LOW = -ACTION_HIGH
 
 WARMUP_STEPS = 100
 
 
 STATE_KEYS = [
-    'PITCH',
-    'YAW',
-    'VELOCITY_X',
-    'VELOCITY_Y',
-    'VELOCITY_Z',
-    'ACCELERATION_X',
-    'ACCELERATION_Y',
-    'ACCELERATION_Z',
-    'TACH_PITCH',
-    'TACH_YAW',
-    'SENSE0',
-    'SENSE1'
+    "PITCH",
+    "YAW",
+    "VELOCITY_X",
+    "VELOCITY_Y",
+    "VELOCITY_Z",
+    "ACCELERATION_X",
+    "ACCELERATION_Y",
+    "ACCELERATION_Z",
+    "TACH_PITCH",
+    "TACH_YAW",
+    "SENSE0",
+    "SENSE1",
 ]
 
 
@@ -55,8 +61,8 @@ def normalize_angle(theta):
 class AeroReward(object):
     def __init__(self, *args, **kwargs):
         self.target_space = spaces.Box(
-            low=ACTION_LOW,
-            high=ACTION_HIGH, dtype=np.float32)
+            low=ACTION_LOW, high=ACTION_HIGH, dtype=np.float32
+        )
 
     def __call__(self, state, action):
         pitch = state[0]
@@ -68,14 +74,16 @@ class AeroReward(object):
         acceleration_y = state[5]
         acceleration_z = state[6]
 
-        cost = pitch**2 + \
-            yaw**2 + \
-            0.01 * velocity_x**2 + \
-            0.01 * velocity_y**2 + \
-            0.01 * velocity_z**2 + \
-            0.01 * acceleration_x**2 + \
-            0.01 * acceleration_y**2 + \
-            0.01 * acceleration_z**2
+        cost = (
+            pitch ** 2
+            + yaw ** 2
+            + 0.01 * velocity_x ** 2
+            + 0.01 * velocity_y ** 2
+            + 0.01 * velocity_z ** 2
+            + 0.01 * acceleration_x ** 2
+            + 0.01 * acceleration_y ** 2
+            + 0.01 * acceleration_z ** 2
+        )
 
         reward = -cost
         return reward
@@ -84,12 +92,10 @@ class AeroReward(object):
 class AeroEnv(gym.Env):
     def __init__(self, frequency=1000, **kwargs):
         self.observation_space = spaces.Box(
-            OBSERVATION_LOW, OBSERVATION_HIGH,
-            dtype=np.float32)
+            OBSERVATION_LOW, OBSERVATION_HIGH, dtype=np.float32
+        )
 
-        self.action_space = spaces.Box(
-            ACTION_LOW, ACTION_HIGH,
-            dtype=np.float32)
+        self.action_space = spaces.Box(ACTION_LOW, ACTION_HIGH, dtype=np.float32)
 
         self.reward_fn = AeroReward()
 
@@ -122,8 +128,8 @@ class AeroEnv(gym.Env):
 
     def _step(self, action):
         motor_voltages = np.clip(
-            np.array([action[0], action[1]], dtype=np.float64),
-            ACTION_LOW, ACTION_HIGH)
+            np.array([action[0], action[1]], dtype=np.float64), ACTION_LOW, ACTION_HIGH
+        )
         currents, encoders, others = self.aero.action(motor_voltages)
 
         self._pitch = encoders[2] * ((2 * np.pi) / 2048.0)  # In rads
@@ -141,18 +147,21 @@ class AeroEnv(gym.Env):
         return self._get_state()
 
     def _get_state(self):
-        state = np.asarray([
-            self._pitch,
-            self._yaw,
-            self._velocity_x,
-            self._velocity_y,
-            self._velocity_z,
-            self._acceleration_x,
-            self._acceleration_y,
-            self._acceleration_z,
-            self._sense0,
-            self._sense1,
-        ], dtype=np.float64)
+        state = np.asarray(
+            [
+                self._pitch,
+                self._yaw,
+                self._velocity_x,
+                self._velocity_y,
+                self._velocity_z,
+                self._acceleration_x,
+                self._acceleration_y,
+                self._acceleration_z,
+                self._sense0,
+                self._sense1,
+            ],
+            dtype=np.float64,
+        )
         return state
 
     def reset(self):
@@ -160,14 +169,14 @@ class AeroEnv(gym.Env):
         if WARMUP_STEPS > 0:
             for i in range(WARMUP_STEPS):
                 action = np.zeros(
-                    shape=self.action_space.shape,
-                    dtype=self.action_space.dtype)
+                    shape=self.action_space.shape, dtype=self.action_space.dtype
+                )
                 state = self._step(action)
             return state
         else:
             action = np.zeros(
-                shape=self.action_space.shape,
-                dtype=self.action_space.dtype)
+                shape=self.action_space.shape, dtype=self.action_space.dtype
+            )
             return self._step(action)
 
     def step(self, action):
@@ -194,5 +203,5 @@ def main():
                 state, reward, done, _ = env.step(action)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -7,11 +7,10 @@ from gym import spaces
 from gym_brt.envs.qube_base_env import QubeBaseEnv
 
 
-OBS_HIGH = np.asarray([
-    1, 1,  # cos/sin of theta
-    1, 1,  # cos/sin of alpha
-    np.inf, np.inf,  # velocities
-], dtype=np.float64)
+OBS_HIGH = np.asarray(
+    [1, 1, 1, 1, np.inf, np.inf],  # cos/sin of theta  # cos/sin of alpha  # velocities
+    dtype=np.float64,
+)
 OBS_LOW = -OBS_HIGH
 
 
@@ -29,7 +28,7 @@ class QubeBeginUprightReward(object):
 
 
 class QubeBeginUprightEnv(QubeBaseEnv):
-    '''
+    """
     Description:
         A pendulum is attached to an un-actuated joint to a horizontal arm,
         which is actuated by a rotary motor. The pendulum begins
@@ -69,12 +68,12 @@ class QubeBeginUprightEnv(QubeBaseEnv):
     Episode Termination:
         Pendulum Angle (alpha) is greater than ±20° from upright, when theta is
         greater than ±90°, or after 2048 steps
-    '''
+    """
+
     def __init__(self, frequency=250, **kwargs):
         super(QubeBeginUprightEnv, self).__init__(frequency=frequency, **kwargs)
         self.reward_fn = QubeBeginUprightReward()
         self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
-
 
     def reset(self):
         super(QubeBeginUprightEnv, self).reset()

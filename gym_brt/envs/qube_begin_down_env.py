@@ -6,11 +6,10 @@ import numpy as np
 from gym import spaces
 from gym_brt.envs.qube_base_env import QubeBaseEnv
 
-OBS_HIGH = np.asarray([
-    1, 1,  # cos/sin of theta
-    1, 1,  # cos/sin of alpha
-    np.inf, np.inf,  # velocities
-], dtype=np.float64)
+OBS_HIGH = np.asarray(
+    [1, 1, 1, 1, np.inf, np.inf],  # cos/sin of theta  # cos/sin of alpha  # velocities
+    dtype=np.float64,
+)
 OBS_LOW = -OBS_HIGH
 
 
@@ -26,13 +25,13 @@ class QubeBeginDownReward(object):
 
         if abs(alpha) < (20 * np.pi / 180) and abs(theta) < (90 * np.pi / 180):
             # Encourage alpha=0, theta=0
-            return 1 - 0.5*(np.abs(alpha)+np.abs(theta))
+            return 1 - 0.5 * (np.abs(alpha) + np.abs(theta))
         else:
             return 0
 
 
 class QubeBeginDownEnv(QubeBaseEnv):
-    '''
+    """
     Description:
         A pendulum is attached to an un-actuated joint to a horizontal arm,
         which is actuated by a rotary motor. The pendulum begins
@@ -74,7 +73,8 @@ class QubeBeginDownEnv(QubeBaseEnv):
 
     Episode Termination:
         When theta is greater than ±90° or after 2048 steps
-    '''
+    """
+
     def __init__(self, frequency=250, **kwargs):
         super(QubeBeginDownEnv, self).__init__(frequency=frequency, **kwargs)
         self.reward_fn = QubeBeginDownReward()
@@ -89,4 +89,3 @@ class QubeBeginDownEnv(QubeBaseEnv):
         state, reward, done, info = super(QubeBeginDownEnv, self).step(action)
         state = state[:6]
         return state, reward, done, info
-

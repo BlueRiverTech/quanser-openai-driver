@@ -18,32 +18,36 @@ ACT_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 ACT_LOW = -ACT_HIGH
 
 # theta, alpha: positions, velocities, accelerations
-OBS_HIGH = np.asarray([
-    1, 1, 1, 1,  # cos/sin of angles
-    np.inf, np.inf,  # velocities
-    np.inf, np.inf,  # accelerations
-    np.inf,  # tach0
-    MAX_MOTOR_VOLTAGE / 8.4,  # current sense = max_voltage / R_equivalent
-], dtype=np.float64)
+OBS_HIGH = np.asarray(
+    [
+        1,
+        1,
+        1,
+        1,  # cos/sin of angles
+        np.inf,
+        np.inf,  # velocities
+        np.inf,
+        np.inf,  # accelerations
+        np.inf,  # tach0
+        MAX_MOTOR_VOLTAGE / 8.4,  # current sense = max_voltage / R_equivalent
+    ],
+    dtype=np.float64,
+)
 OBS_LOW = -OBS_HIGH
 
 
 class QubeBaseReward(object):
     def __init__(self):
-        self.target_space = spaces.Box(
-            low=ACT_LOW,
-            high=ACT_HIGH, dtype=np.float32)
+        self.target_space = spaces.Box(low=ACT_LOW, high=ACT_HIGH, dtype=np.float32)
 
     def __call__(self, state, action):
         raise NotImplementedError
 
 
 class QubeBaseEnv(gym.Env):
-    '''A base class for all qube-based environments.'''
-    def __init__(self,
-                 frequency=1000,
-                 batch_size=2048,
-                 hard_reset_steps=100000):
+    """A base class for all qube-based environments."""
+
+    def __init__(self, frequency=1000, batch_size=2048, hard_reset_steps=100000):
         self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
         self.action_space = spaces.Box(ACT_LOW, ACT_HIGH)
         self.reward_fn = QubeBaseReward()
@@ -57,7 +61,9 @@ class QubeBaseEnv(gym.Env):
         self._frequency = frequency
 
         # Ensures that samples in episode are the same as batch size
-        self._max_episode_steps = batch_size  # Reset every batch_size steps (2048 ~= 8.192 seconds)
+        self._max_episode_steps = (
+            batch_size
+        )  # Reset every batch_size steps (2048 ~= 8.192 seconds)
         self._episode_steps = 0
         self._hard_reset_steps = hard_reset_steps
         self._steps_since_hard_reset = 0
@@ -90,8 +96,7 @@ class QubeBaseEnv(gym.Env):
                 else:
                     led = [0.0, 1.0, 0.0]  # Green
 
-        motor_voltages = np.clip(
-            np.array(action, dtype=np.float64), ACT_LOW, ACT_HIGH)
+        motor_voltages = np.clip(np.array(action, dtype=np.float64), ACT_LOW, ACT_HIGH)
         currents, encoders, others = self.qube.action(motor_voltages, led_w=led)
 
         self._sense = currents[0]
@@ -104,35 +109,40 @@ class QubeBaseEnv(gym.Env):
         # Normalized and shifted alpha
         self._alpha = (alpha_un % (2.0 * np.pi)) - np.pi
 
+        # fmt: off
         self._theta_velocity = -2500 * self._theta_velocity_cstate + 50 * self._theta
         self._alpha_velocity = -2500 * self._alpha_velocity_cstate + 50 * alpha_un
         self._theta_velocity_cstate += (-50 * self._theta_velocity_cstate + self._theta) / self._frequency
         self._alpha_velocity_cstate += (-50 * self._alpha_velocity_cstate + alpha_un) / self._frequency
+        # fmt: on
 
         return self._get_state()
 
     def _get_state(self):
-        state = np.asarray([
-            np.cos(self._theta),
-            np.sin(self._theta),
-            np.cos(self._alpha),
-            np.sin(self._alpha),
-            self._theta_velocity,
-            self._alpha_velocity,
-            self._tach0,
-            self._sense,
-        ], dtype=np.float32)
+        state = np.asarray(
+            [
+                np.cos(self._theta),
+                np.sin(self._theta),
+                np.cos(self._alpha),
+                np.sin(self._alpha),
+                self._theta_velocity,
+                self._alpha_velocity,
+                self._tach0,
+                self._sense,
+            ],
+            dtype=np.float32,
+        )
         return state
 
     def _flip_up(self):
-        '''Run classic control for flip-up until the pendulum is inverted for
+        """Run classic control for flip-up until the pendulum is inverted for
         a set amount of time. Assumes that initial state is stationary
         downwards.
-        '''
+        """
         control = QubeFlipUpControl(env=self, sample_freq=self._frequency)
-        time_hold = 1.0 * self._frequency # Number of samples to hold upright
-        sample = 0 # Samples since control system started
-        samples_upright = 0 # Consecutive samples pendulum is upright
+        time_hold = 1.0 * self._frequency  # Number of samples to hold upright
+        sample = 0  # Samples since control system started
+        samples_upright = 0  # Consecutive samples pendulum is upright
 
         action = self.action_space.sample()
         state = self._step([1.0])
@@ -151,9 +161,7 @@ class QubeBaseEnv(gym.Env):
         return state
 
     def _dampen_down(self, min_hold_time=0.5):
-        action = np.zeros(
-            shape=self.action_space.shape,
-            dtype=self.action_space.dtype)
+        action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
 
         control = QubeDampenControl(env=self, sample_freq=self._frequency)
         time_hold = min_hold_time * self._frequency
@@ -165,7 +173,7 @@ class QubeBaseEnv(gym.Env):
             state = self._step(action)
 
             # Break if pendulum is stationary
-            ref_state = [0.]
+            ref_state = [0.0]
             if abs(self._alpha) > (178 * np.pi / 180):
                 if samples_downwards > time_hold:
                     break
@@ -189,9 +197,7 @@ class QubeBaseEnv(gym.Env):
             self.hard_reset()
             self._steps_since_hard_reset = 0
 
-        action = np.zeros(
-            shape=self.action_space.shape,
-            dtype=self.action_space.dtype)
+        action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
         return self._step(action)
 
     def _done(self):
@@ -201,13 +207,11 @@ class QubeBaseEnv(gym.Env):
         return done
 
     def hard_reset(self):
-        '''Fully stop the pendulum at the bottom. '''
+        """Fully stop the pendulum at the bottom. """
         self.dampen_down()
-        action = np.zeros(
-            shape=self.action_space.shape,
-            dtype=self.action_space.dtype)
+        action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
         self.step(action)
-        print('Hard reset')
+        print("Hard reset")
         time.sleep(5)  # Do nothing for 3 seconds to ensure pendulum is stopped
 
         # This is needed to prevent sensor drift on the alpha/pendulum angle
@@ -228,7 +232,7 @@ class QubeBaseEnv(gym.Env):
         info = {}
         return state, reward, self._isdone, info
 
-    def render(self, mode='human'):
+    def render(self, mode="human"):
         pass
 
     def close(self, type=None, value=None, traceback=None):

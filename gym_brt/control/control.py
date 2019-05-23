@@ -17,25 +17,27 @@ class Control(object):
         elif action_shape:
             self.action_shape = action_shape
         else:
-            raise ValueError('Either env or action_shape must be passed.')
+            raise ValueError("Either env or action_shape must be passed.")
 
     def action(self, state):
         raise NotImplementedError
 
 
 class NoControl(Control):
-    '''Output motor voltages of 0'''
+    """Output motor voltages of 0"""
+
     def __init__(self, env, *args, **kwargs):
         super(NoControl, self).__init__(env)
         self._action_space = env.action_space
 
     def action(self, state):
-        return 0. * self._action_space.sample()
+        return 0.0 * self._action_space.sample()
 
 
 class RandomControl(Control):
-    '''Output motor voltages smapling from the action space (from env).
-    '''
+    """Output motor voltages smapling from the action space (from env).
+    """
+
     def __init__(self, env, *args, **kwargs):
         super(RandomControl, self).__init__(env)
         self._action_space = env.action_space
@@ -45,9 +47,10 @@ class RandomControl(Control):
 
 
 class AeroControl(Control):
-    '''Classical controller to set the Quanser Aero back to its original
+    """Classical controller to set the Quanser Aero back to its original
     position.
-    '''
+    """
+
     def __init__(self, env, *args, **kwargs):
         super(AeroControl, self).__init__(env)
         self._desired = np.array([0, 0, 0, 0])
@@ -71,14 +74,14 @@ class AeroControl(Control):
 
         # Z transform 1st order derivative filter
         pitch_n = pitch_rad
-        pitch_dot = (46 * pitch_n) - \
-            (46 * self._pitch_n_k1) + (0.839 * self._pitch_dot_k1)
+        pitch_dot = (
+            (46 * pitch_n) - (46 * self._pitch_n_k1) + (0.839 * self._pitch_dot_k1)
+        )
         self._state_x[2] = pitch_dot
         self._pitch_n_k1 = pitch_n
         self._pitch_dot_k1 = pitch_dot
         yaw_n = yaw_rad
-        yaw_dot = (46 * yaw_n) - \
-            (46 * self._yaw_n_k1) + (0.839 * self._yaw_dot_k1)
+        yaw_dot = (46 * yaw_n) - (46 * self._yaw_n_k1) + (0.839 * self._yaw_dot_k1)
         self._state_x[3] = yaw_dot
         self._yaw_n_k1 = yaw_n
         self._yaw_dot_k1 = yaw_dot
@@ -95,20 +98,20 @@ class AeroControl(Control):
         self._v_motors[0] = out_p
         self._v_motors[1] = out_y
 
-        voltages = np.empty(2,)
+        voltages = np.empty(2)
         voltages[0] = self._v_motors[0]
         voltages[1] = self._v_motors[1]
 
         # NOTE: was at 24.0 V for both below
         # Set the saturation limit to +/- AERO_MAX_VOLTAGE for Motor0
-        if (voltages[0] > AERO_MAX_VOLTAGE):
+        if voltages[0] > AERO_MAX_VOLTAGE:
             voltages[0] = AERO_MAX_VOLTAGE
-        elif (voltages[0] < -AERO_MAX_VOLTAGE):
+        elif voltages[0] < -AERO_MAX_VOLTAGE:
             voltages[0] = -AERO_MAX_VOLTAGE
         # Set the saturation limit to +/- AERO_MAX_VOLTAGE for Motor1
-        if (voltages[1] > AERO_MAX_VOLTAGE):
+        if voltages[1] > AERO_MAX_VOLTAGE:
             voltages[1] = AERO_MAX_VOLTAGE
-        elif (voltages[1] < -AERO_MAX_VOLTAGE):
+        elif voltages[1] < -AERO_MAX_VOLTAGE:
             voltages[1] = -AERO_MAX_VOLTAGE
         voltages = -voltages
 
@@ -118,19 +121,20 @@ class AeroControl(Control):
 
 
 class QubeFlipUpControl(Control):
-    '''Classical controller to hold the pendulum upright whenever the
+    """Classical controller to hold the pendulum upright whenever the
     angle is within 20 degrees, and flips up the pendulum whenever
     outside 20 degrees.
-    '''
+    """
+
     def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
         super(QubeFlipUpControl, self).__init__(env=env)
         self.sample_freq = sample_freq
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
-        '''Implements a energy based swing-up controller'''
-        mu = 50.0 # in m/s/J
-        ref_energy = 30.0 / 1000.0 # Er in joules
-        max_u = 6.0 # Max action is 6m/s^2
+        """Implements a energy based swing-up controller"""
+        mu = 50.0  # in m/s/J
+        ref_energy = 30.0 / 1000.0  # Er in joules
+        max_u = 6.0  # Max action is 6m/s^2
 
         # System parameters
         jp = 3.3282e-5
@@ -142,8 +146,8 @@ class QubeFlipUpControl(Control):
         g = 9.81
         kt = 0.042
 
-        pend_torque = (1 / 2) * mp * g * lp * (1 + np.cos(alpha));
-        energy = (pend_torque + (jp / 2.0) * alpha_dot * alpha_dot);
+        pend_torque = (1 / 2) * mp * g * lp * (1 + np.cos(alpha))
+        energy = pend_torque + (jp / 2.0) * alpha_dot * alpha_dot
 
         # u = sat_u_max(mu * (E - Er) * sign(alpha_dot * cos(alpha)))
         u = mu * (energy - ref_energy) * np.sign(-1 * np.cos(alpha) * alpha_dot)
@@ -159,11 +163,12 @@ class QubeFlipUpControl(Control):
         kp_alpha = 35.0
         kd_theta = -1.5
         kd_alpha = 3.0
-        action = \
-            theta * kp_theta + \
-            alpha * kp_alpha + \
-            theta_dot * kd_theta + \
-            alpha_dot * kd_alpha
+        action = (
+            theta * kp_theta
+            + alpha * kp_alpha
+            + theta_dot * kd_theta
+            + alpha_dot * kd_alpha
+        )
         return action
 
     def action(self, state):
@@ -188,43 +193,46 @@ class QubeFlipUpControl(Control):
 
 
 class QubeHoldControl(QubeFlipUpControl):
-    '''Classical controller to hold the pendulum upright whenever the
+    """Classical controller to hold the pendulum upright whenever the
     angle is within 20 degrees. (Same as QubeFlipUpControl but without a
     flip up action)
-    '''
+    """
+
     def __init__(self, env, sample_freq=1000, **kwargs):
-        super(QubeHoldControl, self).__init__(
-            env, sample_freq=sample_freq)
+        super(QubeHoldControl, self).__init__(env, sample_freq=sample_freq)
 
     def _flip_up(self, theta, alpha, theta_dot, alpha_dot):
         return 0
 
 
 class QubeDampenControl(Control):
-    '''Classical controller that uses stops the pendulum at the bottom, uses PD
-    control to dampen the pendulum towards stationary down.'''
+    """Classical controller that uses stops the pendulum at the bottom, uses PD
+    control to dampen the pendulum towards stationary down."""
+
     def __init__(self, env=None, action_shape=None, sample_freq=1000, **kwargs):
         super(QubeDampenControl, self).__init__(env=env)
         self.sample_freq = sample_freq
 
-    def _dampen(self,theta, alpha, theta_dot, alpha_dot):
+    def _dampen(self, theta, alpha, theta_dot, alpha_dot):
         kp_theta = -2
         kp_alpha = 35
         kd_theta = -1.5
         kd_alpha = 3
         if alpha >= 0:
-            action = \
-                -theta * kp_theta   + \
-                (np.pi-alpha) * kp_alpha + \
-                -theta_dot * kd_theta + \
-                -alpha_dot * kd_alpha
+            action = (
+                -theta * kp_theta
+                + (np.pi - alpha) * kp_alpha
+                + -theta_dot * kd_theta
+                + -alpha_dot * kd_alpha
+            )
             return action
         else:
-            action = \
-                -theta * kp_theta   + \
-                (-np.pi-alpha) * kp_alpha + \
-                -theta_dot * kd_theta + \
-                -alpha_dot * kd_alpha
+            action = (
+                -theta * kp_theta
+                + (-np.pi - alpha) * kp_alpha
+                + -theta_dot * kd_theta
+                + -alpha_dot * kd_alpha
+            )
             return action
 
     def action(self, state):
