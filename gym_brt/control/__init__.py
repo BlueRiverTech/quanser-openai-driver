@@ -5,3 +5,4 @@ from gym_brt.control.control import RandomControl
 from gym_brt.control.control import AeroControl
 from gym_brt.control.control import QubeHoldControl
 from gym_brt.control.control import QubeFlipUpControl
+from gym_brt.control.control import QubeDampenControl
