@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
+from scipy.integrate import odeint
+from numba import jit
 import numpy as np
 import math
 
@@ -44,27 +46,20 @@ def diff_forward_model_ode(state, t, action, dt):
     return diff_state
 
 
-def forward_model_ode(
-    theta, alpha, alpha_unorm, theta_dot, alpha_dot, Vm, dt, integration_steps
-):
+def forward_model_ode(theta, alpha, theta_dot, alpha_dot, Vm, dt, integration_steps):
     t = np.linspace(0.0, dt, 2)  # TODO: add and check integration steps here
 
     state = np.array([theta, alpha, theta_dot, alpha_dot])
     next_state = np.array(odeint(diff_forward_model_ode, state, t, args=(Vm, dt)))[1, :]
-    theta, alpha, theta_dot, alpha_dot = state
+    theta, alpha, theta_dot, alpha_dot = next_state
 
     theta = ((theta + np.pi) % (2 * np.pi)) - np.pi
     alpha = ((alpha + np.pi) % (2 * np.pi)) - np.pi
 
-    # Ensure that the alpha encoder value is the same as in the Qube
-    alpha_unnorm += alpha_dot * dt
-
-    return theta, alpha, alpha_unnorm, theta_dot, alpha_dot
+    return theta, alpha, theta_dot, alpha_dot
 
 
-def forward_model_euler(
-    theta, alpha, alpha_unorm, theta_dot, alpha_dot, Vm, dt, integration_steps
-):
+def forward_model_euler(theta, alpha, theta_dot, alpha_dot, Vm, dt, integration_steps):
     dt /= integration_steps
     for step in range(integration_steps):
         tau = (km * (Vm - km * theta_dot)) / Rm  # torque
@@ -84,77 +79,4 @@ def forward_model_euler(
         theta = ((theta + np.pi) % (2 * np.pi)) - np.pi
         alpha = ((alpha + np.pi) % (2 * np.pi)) - np.pi
 
-    return theta, alpha, alpha_unorm, theta_dot, alpha_dot
-
-
-# Use numba if installed
-try:
-    import numba
-
-    diff_forward_model_ode = numba.jit(diff_forward_model_ode)
-    forward_model_ode = numba.jit(forward_model_ode)
-    forward_model_euler = numba.jit(forward_model_euler)
-except:
-    print("Warning: Install 'numba' for faster simulation.")
-
-
-class QubeServo2Simulator(object):
-    """Simulator that has the same interface as the hardware wrapper."""
-
-    def __init__(
-        self,
-        forward_model=None,
-        safe_operating_voltage=18.0,
-        integration_steps=1,
-        frequency=1000,
-    ):
-        self._dt = 1.0 / frequency
-        self._integration_steps = integration_steps
-        self._max_voltage = safe_operating_voltage
-        self.state = np.array([0, 0, 0, 0, 0]) + np.random.randn(5) * 0.01
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        pass
-
-    def reset_up(self):
-        self.state = np.array([0, 0, 0, 0, 0]) + np.random.randn(5) * 0.01
-
-    def reset_down(self):
-        self.state = np.array([0, np.pi, np.pi, 0, 0]) + np.random.randn(5) * 0.01
-
-    def reset_encoders(self):
-        pass
-
-    def action(self, action):
-        action = np.clip(action, -self._max_voltage, self._max_voltage)
-        self.state = forward_model(
-            *self.state, action, self._dt, self._integration_steps
-        )
-
-        # Convert the angles into encoder counts
-        # TODO: test if either of these should be negated
-        theta_counts = int(self.state[0] / (np.pi / 1024))
-        alpha_counts = int(self.state[2] / (np.pi / 1024))  # use unnormalized alpha
-
-        encoders = [theta_counts, alpha_counts]
-        currents = [action / 8.4]  # resistance is 8.4 ohms
-        others = [0.0]  # [tach0, other_stuff]
-
-        return currents, encoders, others
-
-
-class QubeServo2SimulatorEuler(QubeServo2Simulator):
-    def __init__(self, **kwargs):
-        super(QubeServo2SimulatorEuler, self).__init__(
-            forward_model=forward_model_euler, **kwargs
-        )
-
-
-class QubeServo2SimulatorODE(QubeServo2Simulator):
-    def __init__(self, **kwargs):
-        super(QubeServo2SimulatorODE, self).__init__(
-            forward_model=forward_model_ode, **kwargs
-        )
+    return theta, alpha, theta_dot, alpha_dot
