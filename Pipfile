@@ -5,6 +5,10 @@ name = "pypi"
 
 [dev-packages]
 cython = "*"
+scipy = "*"
+autograd = "*"
+baselines = "*"
+tensorflow = "*"
 
 [packages]
 numpy = "*"

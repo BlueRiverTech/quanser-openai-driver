@@ -1,6 +1,32 @@
-import autograd.numpy as np
-from autograd import grad, jacobian
-import scipy.linalg as sp_linalg
+try:
+    import autograd.numpy as np
+    from autograd import grad, jacobian
+except:
+    raise ImportError("Please install autograd.")
+try:
+    import scipy.linalg as sp_linalg
+except:
+    raise ImportError("Please install scipy.")
+
+
+# Motor
+Rm = 8.4  # Resistance
+kt = 0.042  # Current-torque (N-m/A)
+km = 0.042  # Back-emf constant (V-s/rad)
+
+# Rotary Arm
+mr = 0.095  # Mass (kg)
+Lr = 0.085  # Total length (m)
+Jr = mr * Lr ** 2 / 12  # Moment of inertia about pivot (kg-m^2)
+Br = Dr = 0.0015  # Equivalent viscous damping coefficient (N-m-s/rad)
+
+# Pendulum Link
+mp = 0.024  # Mass (kg)
+Lp = 0.129  # Total length (m)
+Jp = mp * Lp ** 2 / 12  # Moment of inertia about pivot (kg-m^2)
+Dp = Bp = 0.0005  # Equivalent viscous damping coefficient (N-m-s/rad)
+
+g = 9.81  # Gravity constant
 
 
 def forward_model(state, action, dt=1 / 300.0):
@@ -10,58 +36,18 @@ def forward_model(state, action, dt=1 / 300.0):
     alpha_dot = state[3]
     Vm = action
 
-    # Motor
-    Rm = 8.4  # Resistance
-    kt = 0.042  # Current-torque (N-m/A)
-    km = 0.042  # Back-emf constant (V-s/rad)
-
-    # Rotary Arm
-    mr = 0.095  # Mass (kg)
-    Lr = 0.085  # Total length (m)
-    Jr = mr * Lr ** 2 / 12  # Moment of inertia about pivot (kg-m^2)
-    Br = Dr = 0.0015  # Equivalent viscous damping coefficient (N-m-s/rad)
-
-    # Pendulum Link
-    mp = 0.024  # Mass (kg)
-    Lp = 0.129  # Total length (m)
-    Jp = mp * Lp ** 2 / 12  # Moment of inertia about pivot (kg-m^2)
-    Dp = Bp = 0.0005  # Equivalent viscous damping coefficient (N-m-s/rad)
-
-    g = 9.81  # Gravity constant
-
     tau = (km * (Vm - km * theta_dot)) / Rm  # torque
-    tau = -1.0 * tau  # Negation needed
 
     # fmt: off
-    alpha_dot_dot = (2.0*Lp*Lr*mp*(4.0*Dr*theta_dot + Lp**2*alpha_dot*mp*theta_dot*np.sin(2.0*alpha) + \
-        2.0*Lp*Lr*alpha_dot**2*mp*np.sin(alpha) - 4.0*(tau))*np.cos(alpha) - 0.5*(4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + \
-        4.0*Lr**2*mp)*(-8.0*Dp*alpha_dot + Lp**2*mp*theta_dot**2*np.sin(2.0*alpha) + 4.0*Lp*g*mp*np.sin(alpha)))\
-        /(4.0*Lp**2*Lr**2*mp**2*np.cos(alpha)**2 - (4.0*Jp + Lp**2*mp)*(4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp))
-
-    theta_dot_dot = (-Lp*Lr*mp*(-8.0*Dp*alpha_dot + Lp**2*mp*theta_dot**2*np.sin(2.0*alpha) + 4.0*Lp*g*mp*np.sin(alpha))*np.cos(alpha) + \
-        (4.0*Jp + Lp**2*mp)*(4.0*Dr*theta_dot + Lp**2*alpha_dot*mp*theta_dot*np.sin(2.0*alpha) + 2.0*Lp*Lr*alpha_dot**2*mp*np.sin(alpha)\
-        - 4.0*(tau)))/(4.0*Lp**2*Lr**2*mp**2*np.cos(alpha)**2 - (4.0*Jp + Lp**2*mp)*(4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp))
+    alpha_dot_dot = (2.0*Lp*Lr*mp*(4.0*Dr*theta_dot + Lp**2*alpha_dot*mp*theta_dot*np.sin(2.0*alpha) + 2.0*Lp*Lr*alpha_dot**2*mp*np.sin(alpha) - 4.0*(tau))*np.cos(alpha) - 0.5*(4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp)*(-8.0*Dp*alpha_dot + Lp**2*mp*theta_dot**2*np.sin(2.0*alpha) + 4.0*Lp*g*mp*np.sin(alpha)))/(4.0*Lp**2*Lr**2*mp**2*np.cos(alpha)**2 - (4.0*Jp + Lp**2*mp)*(4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp))
+    theta_dot_dot = (-Lp*Lr*mp*(-8.0*Dp*alpha_dot + Lp**2*mp*theta_dot**2*np.sin(2.0*alpha) + 4.0*Lp*g*mp*np.sin(alpha))*np.cos(alpha) + (4.0*Jp + Lp**2*mp)*(4.0*Dr*theta_dot + Lp**2*alpha_dot*mp*theta_dot*np.sin(2.0*alpha) + 2.0*Lp*Lr*alpha_dot**2*mp*np.sin(alpha) - 4.0*(tau)))/(4.0*Lp**2*Lr**2*mp**2*np.cos(alpha)**2 - (4.0*Jp + Lp**2*mp)*(4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp))
     # fmt: on
 
-    # Solved by Kirill - Cazzolato and Prime
-    """
-    theta_dot_dot = (-Lp*Lr*mp*(8.0*Bp*alpha_dot - 4.0*Jp*theta_dot**2*np.sin(2.0*alpha) - Lp**2*mp*theta_dot**2*np.sin(2.0*alpha)\
-     + 4.0*Lp*g*mp*np.sin(alpha))*np.cos(alpha) + (4.0*Jp + Lp**2*mp)*(4.0*Br*theta_dot + \
-     4.0*Jp*alpha_dot*theta_dot*np.sin(2.0*alpha) + Lp**2*mp*alpha_dot*theta_dot*np.sin(2.0*alpha)\
-      - 2.0*Lp*Lr*mp*alpha_dot**2*np.sin(alpha) - 4.0*tau))/(4.0*Lp**2*Lr**2*mp**2*np.cos(alpha)**2 -\
-       (4.0*Jp + Lp**2*mp)*(4.0*Jp*np.sin(alpha)**2 + 4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp + Lr**2*mr))
-    alpha_dot_dot = 0.5*(-4.0*Lp*Lr*mp*(4.0*Br*theta_dot + 4.0*Jp*alpha_dot*theta_dot*np.sin(2.0*alpha) + \
-        Lp**2*mp*alpha_dot*theta_dot*np.sin(2.0*alpha) - 2.0*Lp*Lr*mp*alpha_dot**2*np.sin(alpha) - 4.0*tau)*np.cos(alpha) \
-        + (8.0*Bp*alpha_dot - 4.0*Jp*theta_dot**2*np.sin(2.0*alpha) - Lp**2*mp*theta_dot**2*np.sin(2.0*alpha) + \
-            4.0*Lp*g*mp*np.sin(alpha))*(4.0*Jp*np.sin(alpha)**2 + 4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + \
-            4.0*Lr**2*mp + Lr**2*mr))/(4.0*Lp**2*Lr**2*mp**2*np.cos(alpha)**2 - (4.0*Jp + Lp**2*mp)*(4.0*Jp*np.sin(alpha)**2 +\
-             4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp + Lr**2*mr))
-    """
-    theta_dot += theta_dot_dot * dt  # Works around a single operating point
-    alpha_dot += alpha_dot_dot * dt  # Works around a single operating point
-
-    theta += theta_dot * dt  # Works around a single operating point
-    alpha += alpha_dot * dt  # Works around a single operating point
+    # Works around a single operating point
+    theta += theta_dot * dt  # TODO: Shouldn't the angles be ahead of the velocities?
+    alpha += alpha_dot * dt
+    theta_dot += theta_dot_dot * dt
+    alpha_dot += alpha_dot_dot * dt
 
     theta %= 2 * np.pi
     alpha %= 2 * np.pi
@@ -108,12 +94,14 @@ def LQR_control():
 
 def main():
     """
-    K obtained from dicrete dynamics + discrete LQR and continuous dynamics + continuous LQR should approximately match 
+    K obtained from dicrete dynamics + discrete LQR and continuous dynamics + continuous LQR should approximately match
     quanser workbook and more importantly achieve balance on the Qube Hardware
     """
-    # Correct K from quanser workbook -
-    # K = [2.0, -35.0, 1.5, -3.0]
-    print(LQR_control())
+    K_real = [-2.0, 35.0, -1.5, 3.0]  # Correct K from quanser workbook
+    K_calc = LQR_control().tolist()
+    print("The two following should be close to each other")
+    print("\tThe gains from Quanser are:", K_real)
+    print("\tThe calculated gains are:  ", K_calc)
 
 
 if __name__ == "__main__":
