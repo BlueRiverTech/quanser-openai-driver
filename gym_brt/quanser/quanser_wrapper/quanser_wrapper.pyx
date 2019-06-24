@@ -44,13 +44,13 @@ cdef class QuanserWrapper:
     cdef qt.t_uint32 num_led_w_channels
     cdef qt.t_double[::] led_w_buffer
 
-    cdef qt.t_double frequency, safe_operating_voltage
+    cdef qt.t_double frequency, max_voltage
     cdef qt.t_int samples_overflowed
     cdef bint task_started
 
     def __init__(
         self,
-        safe_operating_voltage,
+        max_voltage,
         analog_r_channels,
         analog_w_channels,
         digital_w_channels,
@@ -59,7 +59,7 @@ cdef class QuanserWrapper:
         led_w_channels,
         frequency=1000
     ):
-        self.safe_operating_voltage = safe_operating_voltage
+        self.max_voltage = max_voltage
         # Convert the channels into numpy arrays which are then stored in
         # memoryviews (to pass C buffers to the HIL API)
         self.num_analog_r_channels = len(analog_r_channels)
@@ -255,12 +255,8 @@ cdef class QuanserWrapper:
         assert isinstance(voltages_w, np.ndarray)
         assert voltages_w.shape == (self.num_analog_w_channels,)
         assert voltages_w.dtype == np.float64
-        for i in range(self.num_analog_w_channels):
-            assert (
-                -self.safe_operating_voltage
-                <= voltages_w[i]
-                <= self.safe_operating_voltage
-            )
+        # Clip voltages into the range of +- max_voltage
+        voltages_w = np.clip(voltages_w, -self.max_voltage, self.max_voltage)
 
         if led_w is not None:
             # Ensure safe LED data
@@ -335,7 +331,7 @@ cdef class QuanserAero(QuanserWrapper):
         if result < 0:
             raise IOError("Board could not be opened.")
 
-    def __init__(self, frequency=100):
+    def __init__(self, frequency=250, max_voltage=18.0):
         analog_r_channels = [0, 1]
         analog_w_channels = [0, 1]
         digital_w_channels = [0, 1]
@@ -346,7 +342,7 @@ cdef class QuanserAero(QuanserWrapper):
         led_w_channels = [11000, 11001, 11002]
 
         super(QuanserAero, self).__init__(
-            safe_operating_voltage=18.0,
+            max_voltage=max_voltage,
             analog_r_channels=analog_r_channels,
             analog_w_channels=analog_w_channels,
             digital_w_channels=digital_w_channels,
@@ -366,7 +362,7 @@ cdef class QubeServo2(QuanserWrapper):
         if result < 0:
             raise IOError("Board could not be opened.")
 
-    def __init__(self, frequency=100):
+    def __init__(self, frequency=250, max_voltage=18.0):
         analog_r_channels = [0]
         analog_w_channels = [0]
         digital_w_channels = [0]
@@ -375,7 +371,7 @@ cdef class QubeServo2(QuanserWrapper):
         led_w_channels = [11000, 11001, 11002]
 
         super(QubeServo2, self).__init__(
-            safe_operating_voltage=18.0,
+            max_voltage=max_voltage,
             analog_r_channels=analog_r_channels,
             analog_w_channels=analog_w_channels,
             digital_w_channels=digital_w_channels,
