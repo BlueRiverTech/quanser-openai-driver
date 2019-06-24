@@ -7,13 +7,6 @@ from gym import spaces
 from gym_brt.envs.qube_base_env import QubeBaseEnv
 
 
-OBS_HIGH = np.asarray(
-    [1, 1, 1, 1, np.inf, np.inf],  # cos/sin of theta  # cos/sin of alpha  # velocities
-    dtype=np.float64,
-)
-OBS_LOW = -OBS_HIGH
-
-
 class QubeBeginUprightReward(object):
     def __init__(self):
         pass
@@ -73,17 +66,15 @@ class QubeBeginUprightEnv(QubeBaseEnv):
     def __init__(self, frequency=250, **kwargs):
         super(QubeBeginUprightEnv, self).__init__(frequency=frequency, **kwargs)
         self.reward_fn = QubeBeginUprightReward()
-        self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
 
     def reset(self):
         super(QubeBeginUprightEnv, self).reset()
         # Start the pendulum stationary at the top (stable point)
-        state = self.flip_up()[:6]  # Simplify the state
+        state = self._reset_up()
         return state
 
     def step(self, action):
         state, reward, done, info = super(QubeBeginUprightEnv, self).step(action)
-        state = state[:6]  # Simplify the state (only angles & velocities)
-        self._isdone |= abs(self._alpha) > (20 * np.pi / 180)
+        self._isdone |= abs(info["alpha"]) > (20 * np.pi / 180)
 
         return state, reward, self._isdone, info
