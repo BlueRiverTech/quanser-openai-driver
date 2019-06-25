@@ -37,7 +37,7 @@ def constant_policy(state, **kwargs):
 
 # Rand input
 def random_policy(state, **kwargs):
-    return np.random.randn()
+    return np.asarray([np.random.randn()])
 
 
 # Square wave, switch every 85 ms
