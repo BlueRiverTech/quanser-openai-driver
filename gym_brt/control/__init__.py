@@ -1,8 +1,11 @@
-from gym_brt.control.control import Control
-from gym_brt.control.control import NoControl
-from gym_brt.control.control import RandomControl
-
-from gym_brt.control.control import AeroControl
-from gym_brt.control.control import QubeHoldControl
-from gym_brt.control.control import QubeFlipUpControl
-from gym_brt.control.control import QubeDampenControl
+from gym_brt.control.control import (
+    zero_policy,
+    constant_policy,
+    random_policy,
+    square_wave_policy,
+    energy_control_policy,
+    pd_control_policy,
+    flip_and_hold_policy,
+    square_wave_flip_and_hold_policy,
+    dampen_policy,
+)

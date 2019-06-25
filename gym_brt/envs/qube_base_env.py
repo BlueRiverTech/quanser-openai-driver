@@ -9,36 +9,18 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from gym_brt.quanser import QubeServo2
-from gym_brt.control import QubeFlipUpControl, QubeDampenControl
+from gym_brt.quanser import QubeHardware, QubeSimulator
 
 
 MAX_MOTOR_VOLTAGE = 3
-ACT_HIGH = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
-ACT_LOW = -ACT_HIGH
-
-# theta, alpha: positions, velocities, accelerations
-OBS_HIGH = np.asarray(
-    [
-        1,
-        1,
-        1,
-        1,  # cos/sin of angles
-        np.inf,
-        np.inf,  # velocities
-        np.inf,
-        np.inf,  # accelerations
-        np.inf,  # tach0
-        MAX_MOTOR_VOLTAGE / 8.4,  # current sense = max_voltage / R_equivalent
-    ],
-    dtype=np.float64,
-)
-OBS_LOW = -OBS_HIGH
+ACT_MAX = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
+# OBS_MAX = [cos(theta), sin(theta), cos(alpha), sin(alpha), theta_dot, alpha_dot]
+OBS_MAX = np.asarray([1, 1, 1, 1, np.inf, np.inf], dtype=np.float64)
 
 
 class QubeBaseReward(object):
     def __init__(self):
-        self.target_space = spaces.Box(low=ACT_LOW, high=ACT_HIGH, dtype=np.float32)
+        self.target_space = spaces.Box(low=-ACT_MAX, high=ACT_MAX, dtype=np.float32)
 
     def __call__(self, state, action):
         raise NotImplementedError
@@ -47,38 +29,50 @@ class QubeBaseReward(object):
 class QubeBaseEnv(gym.Env):
     """A base class for all qube-based environments."""
 
-    def __init__(self, frequency=1000, batch_size=2048, hard_reset_steps=100000):
-        self.observation_space = spaces.Box(OBS_LOW, OBS_HIGH)
-        self.action_space = spaces.Box(ACT_LOW, ACT_HIGH)
+    def __init__(
+        self,
+        frequency=1000,
+        batch_size=2048,
+        use_simulator=False,
+        encoder_reset_steps=100000,
+    ):
+        self.observation_space = spaces.Box(-OBS_MAX, OBS_MAX)
+        self.action_space = spaces.Box(-ACT_MAX, ACT_MAX)
         self.reward_fn = QubeBaseReward()
 
-        self._theta_velocity_cstate = 0
-        self._alpha_velocity_cstate = 0
-        self._theta_velocity = 0
-        self._alpha_velocity = 0
-        self._theta = 0
-        self._alpha = 0
         self._frequency = frequency
-
         # Ensures that samples in episode are the same as batch size
-        self._max_episode_steps = (
-            batch_size
-        )  # Reset every batch_size steps (2048 ~= 8.192 seconds)
+        # Reset every batch_size steps (2048 ~= 8.192 seconds)
+        self._max_episode_steps = batch_size
         self._episode_steps = 0
-        self._hard_reset_steps = hard_reset_steps
-        self._steps_since_hard_reset = 0
+        self._encoder_reset_steps = encoder_reset_steps
+        self._steps_since_encoder_reset = 0
         self._isdone = True
 
         # Open the Qube
-        self.qube = QubeServo2(frequency=frequency)
+        if use_simulator:
+            # TODO: Check assumption: ODE integration should be ~ once per ms
+            integration_steps = int(np.ceil(1000 / self._frequency))
+            self.qube = QubeSimulator(
+                forward_model="ode",
+                frequency=self._frequency,
+                integration_steps=integration_steps,
+                max_voltage=MAX_MOTOR_VOLTAGE,
+            )
+        else:
+            self.qube = QubeHardware(
+                frequency=self._frequency, max_voltage=MAX_MOTOR_VOLTAGE
+            )
         self.qube.__enter__()
+
         self.seed()
+        self._viewer = None
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
-        self.close()
+        self.close(type=type, value=value, traceback=traceback)
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -87,7 +81,7 @@ class QubeBaseEnv(gym.Env):
     def _step(self, action, led=None):
         if led is None:
             if self._isdone:  # Doing reset
-                led = [1.0, 1.0, 0.0]  # Yellow = [255, 255, 0]
+                led = [1.0, 1.0, 0.0]  # Yellow
             else:
                 if abs(self._alpha) > (20 * np.pi / 180):
                     led = [1.0, 0.0, 0.0]  # Red
@@ -96,145 +90,96 @@ class QubeBaseEnv(gym.Env):
                 else:
                     led = [0.0, 1.0, 0.0]  # Green
 
-        motor_voltages = np.clip(np.array(action, dtype=np.float64), ACT_LOW, ACT_HIGH)
-        currents, encoders, others = self.qube.action(motor_voltages, led_w=led)
-
-        self._sense = currents[0]
-        self._tach0 = others[0]
-
-        # Calculate alpha, theta, alpha_velocity, and theta_velocity
-        self._theta = encoders[0] * (-2.0 * np.pi / 2048)
-        # Alpha without normalizing
-        alpha_un = encoders[1] * (2.0 * np.pi / 2048)
-        # Normalized and shifted alpha
-        self._alpha = (alpha_un % (2.0 * np.pi)) - np.pi
-
-        # fmt: off
-        self._theta_velocity = -2500 * self._theta_velocity_cstate + 50 * self._theta
-        self._alpha_velocity = -2500 * self._alpha_velocity_cstate + 50 * alpha_un
-        self._theta_velocity_cstate += (-50 * self._theta_velocity_cstate + self._theta) / self._frequency
-        self._alpha_velocity_cstate += (-50 * self._alpha_velocity_cstate + alpha_un) / self._frequency
-        # fmt: on
-
-        return self._get_state()
+        action = np.clip(np.array(action, dtype=np.float64), -ACT_MAX, ACT_MAX)
+        state = self.qube.step(action, led=led)
+        self._theta, self._alpha, self._theta_dot, self._alpha_dot = state
 
     def _get_state(self):
-        state = np.asarray(
+        state = np.array(
             [
                 np.cos(self._theta),
                 np.sin(self._theta),
                 np.cos(self._alpha),
                 np.sin(self._alpha),
-                self._theta_velocity,
-                self._alpha_velocity,
-                self._tach0,
-                self._sense,
+                self._theta_dot,
+                self._alpha_dot,
             ],
-            dtype=np.float32,
+            dtype=np.float64,
         )
         return state
 
-    def _flip_up(self):
-        """Run classic control for flip-up until the pendulum is inverted for
-        a set amount of time. Assumes that initial state is stationary
-        downwards.
-        """
-        control = QubeFlipUpControl(env=self, sample_freq=self._frequency)
-        time_hold = 1.0 * self._frequency  # Number of samples to hold upright
-        sample = 0  # Samples since control system started
-        samples_upright = 0  # Consecutive samples pendulum is upright
-
-        action = self.action_space.sample()
-        state = self._step([1.0])
-        while True:
-            action = control.action(state)
-            state = self._step(action)
-            # Break if pendulum is inverted
-            if self._alpha < (10 * np.pi / 180):
-                if samples_upright > time_hold:
-                    break
-                samples_upright += 1
-            else:
-                samples_upright = 0
-            sample += 1
-
-        return state
-
-    def _dampen_down(self, min_hold_time=0.5):
-        action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
-
-        control = QubeDampenControl(env=self, sample_freq=self._frequency)
-        time_hold = min_hold_time * self._frequency
-        samples_downwards = 0  # Consecutive samples pendulum is stationary
-
-        state = self._step([1.0])
-        while True:
-            action = control.action(state)
-            state = self._step(action)
-
-            # Break if pendulum is stationary
-            ref_state = [0.0]
-            if abs(self._alpha) > (178 * np.pi / 180):
-                if samples_downwards > time_hold:
-                    break
-                samples_downwards += 1
-            else:
-                samples_downwards = 0
-        return state
-
-    def flip_up(self, early_quit=False, time_out=5, min_hold_time=1):
-        # Uncomment the following line for a more stable flip-up
-        # Note: uncommenting significantly increases the flip up time
-        # self.dampen_down()
-        return self._flip_up()
-
-    def dampen_down(self):
-        return self._dampen_down()
-
     def reset(self):
+        self._episode_steps = 0
         # Occasionaly reset the enocoders to remove sensor drift
-        if self._steps_since_hard_reset >= self._hard_reset_steps:
+        if self._steps_since_encoder_reset >= self._encoder_reset_steps:
             self.hard_reset()
-            self._steps_since_hard_reset = 0
+            self._steps_since_encoder_reset = 0
 
         action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
         return self._step(action)
 
-    def _done(self):
-        done = False
-        done |= self._episode_steps % self._max_episode_steps == 0
-        done |= abs(self._theta) > (90 * np.pi / 180)
-        return done
+    def _reset_up(self):
+        return self.qube.reset_up()
 
-    def hard_reset(self):
-        """Fully stop the pendulum at the bottom. """
-        self.dampen_down()
-        action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
-        self.step(action)
-        print("Hard reset")
-        time.sleep(5)  # Do nothing for 3 seconds to ensure pendulum is stopped
-
-        # This is needed to prevent sensor drift on the alpha/pendulum angle
-        # We ONLY reset the alpha channel because the dampen function stops the
-        # pendulum from moving but does not perfectly center the pendulum at the
-        # bottom (this way alpha is very close to perfect and theta does not
-        # drift much)
-        self.qube.reset_encoders(channels=[0])  # Alpha channel only
+    def _reset_down(self):
+        return self.qube.reset_down()
 
     def step(self, action):
-        state = self._step(action)
+        self._step(action)
+        state = self._get_state()
+
         reward = self.reward_fn(state, action)
 
         self._episode_steps += 1
-        self._steps_since_hard_reset += 1
+        self._steps_since_encoder_reset += 1
 
-        self._isdone = self._done()
-        info = {}
+        done = False
+        done |= self._episode_steps % self._max_episode_steps == 0
+        done |= abs(self._theta) > (90 * np.pi / 180)
+        self._isdone = done
+
+        info = {
+            "theta": self._theta,
+            "alpha": self._alpha,
+            "theta_dot": self._theta_dot,
+            "alpha_dot": self._alpha_dot,
+        }
         return state, reward, self._isdone, info
 
     def render(self, mode="human"):
-        pass
+        if self._viewer is None:
+            from gym.envs.classic_control import rendering
+
+            width, height = (640, 240)
+            self._viewer = rendering.Viewer(width, height)
+            l, r, t, b = (2, -2, 0, 100)
+            theta_poly = rendering.make_polygon([(l, b), (l, t), (r, t), (r, b)])
+            l, r, t, b = (2, -2, 0, 100)
+            alpha_poly = rendering.make_polygon([(l, b), (l, t), (r, t), (r, b)])
+            theta_circle = rendering.make_circle(radius=100, res=64, filled=False)
+            theta_circle.set_color(0.5, 0.5, 0.5)  # Theta is grey
+            alpha_circle = rendering.make_circle(radius=100, res=64, filled=False)
+            alpha_circle.set_color(0.8, 0.0, 0.0)  # Alpha is red
+            theta_origin = (width / 2 - 150, height / 2)
+            alpha_origin = (width / 2 + 150, height / 2)
+            self._theta_tx = rendering.Transform(translation=theta_origin)
+            self._alpha_tx = rendering.Transform(translation=alpha_origin)
+            theta_poly.add_attr(self._theta_tx)
+            alpha_poly.add_attr(self._alpha_tx)
+            theta_circle.add_attr(self._theta_tx)
+            alpha_circle.add_attr(self._alpha_tx)
+            self._viewer.add_geom(theta_poly)
+            self._viewer.add_geom(alpha_poly)
+            self._viewer.add_geom(theta_circle)
+            self._viewer.add_geom(alpha_circle)
+
+        self._theta_tx.set_rotation(self._theta + np.pi)
+        self._alpha_tx.set_rotation(self._alpha)
+
+        return self._viewer.render(return_rgb_array=mode == "rgb_array")
 
     def close(self, type=None, value=None, traceback=None):
-        # Safely close the Qube
-        self.qube.__exit__(type=type, value=value, traceback=traceback)
+        # Safely close the Qube (important on hardware)
+        self.qube.close(type=type, value=value, traceback=traceback)
+        if self._viewer:
+            self._viewer.close()
