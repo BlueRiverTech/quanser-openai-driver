@@ -119,10 +119,14 @@ class QubeBaseEnv(gym.Env):
         return self._step(action)
 
     def _reset_up(self):
-        return self.qube.reset_up()
+        self.qube.reset_up()
+        action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
+        return self._step(action)
 
     def _reset_down(self):
-        return self.qube.reset_down()
+        self.qube.reset_down()
+        action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
+        return self._step(action)
 
     def step(self, action):
         self._step(action)
