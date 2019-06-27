@@ -112,21 +112,24 @@ class QubeBaseEnv(gym.Env):
         self._episode_steps = 0
         # Occasionaly reset the enocoders to remove sensor drift
         if self._steps_since_encoder_reset >= self._encoder_reset_steps:
-            self.hard_reset()
+            self.qube.reset_encoders()
             self._steps_since_encoder_reset = 0
 
         action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
-        return self._step(action)
+        self._step(action)
+        return self._get_state()
 
     def _reset_up(self):
         self.qube.reset_up()
         action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
-        return self._step(action)
+        self._step(action)
+        return self._get_state()
 
     def _reset_down(self):
         self.qube.reset_down()
         action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
-        return self._step(action)
+        self._step(action)
+        return self._get_state()
 
     def step(self, action):
         self._step(action)
