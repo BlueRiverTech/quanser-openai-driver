@@ -143,7 +143,9 @@ def dampen_policy(state, **kwargs):
     state = _convert_state(state)
     theta, alpha, theta_dot, alpha_dot = state
 
-    if np.abs(alpha) > (14.0 * np.pi / 180.0) and np.abs(theta) < (np.pi / 4):
+    # Alt alpha angle: -pi to +pi, where 0 is the pendulum facing down (at rest)
+    alt_alpha = (alpha + 2 * np.pi) % (2 * np.pi) - np.pi
+    if np.abs(alt_alpha) < (20.0 * np.pi / 180.0) and np.abs(theta) < (np.pi / 4):
         kp_theta = -2
         kp_alpha = 35
         kd_theta = -1.5
@@ -165,4 +167,5 @@ def dampen_policy(state, **kwargs):
     else:
         action = 0
 
+    action = np.clip(action, -3.0, 3.0)
     return np.array([action], dtype=np.float64)
