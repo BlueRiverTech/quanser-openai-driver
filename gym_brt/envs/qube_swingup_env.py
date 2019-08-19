@@ -7,24 +7,7 @@ from gym import spaces
 from gym_brt.envs.qube_base_env import QubeBaseEnv
 
 
-class QubeBeginDownReward(object):
-    def __init__(self):
-        pass
-
-    def __call__(self, state, action):
-        theta_x, theta_y = state[0], state[1]
-        alpha_x, alpha_y = state[2], state[3]
-        theta = np.arctan2(theta_y, theta_x)
-        alpha = np.arctan2(alpha_y, alpha_x)
-
-        if abs(alpha) < (20 * np.pi / 180) and abs(theta) < (90 * np.pi / 180):
-            # Encourage alpha=0, theta=0
-            return 1 - 0.5 * (np.abs(alpha) + np.abs(theta))
-        else:
-            return 0
-
-
-class QubeBeginDownEnv(QubeBaseEnv):
+class QubeSwingupEnv(QubeBaseEnv):
     """
     Description:
         A pendulum is attached to an un-actuated joint to a horizontal arm,
@@ -43,23 +26,17 @@ class QubeBeginDownEnv(QubeBaseEnv):
     Observation:
         Type: Box(4)
         Num Observation                   Min         Max
-        0   Cos Arm angle (theta)        -1.0         1.0
-        1   Sin Arm angle (theta)        -1.0         1.0
-        2   Cos Pendulum angle (theta)   -1.0         1.0
-        3   Sin Pendulum angle (theta)   -1.0         1.0
-        4   Cart Velocity                -Inf         Inf
-        5   Pole Velocity                -Inf         Inf
+        0   Rotary arm angle (theta)     -90 deg      90 deg
+        1   Pendulum angle (alpha)       -180 deg     180 deg
+        2   Cart Velocity                -Inf         Inf
+        3   Pole Velocity                -Inf         Inf
         Note: the velocities are limited by the physical system.
 
     Actions:
         Type: Real number (1-D Continuous) (voltage applied to motor)
 
     Reward:
-        Reward is 0 for when the pendulum is not upright (alpha is greater than
-        ±20°). The reward is 1 - 0.5*abs(alpha) - 0.5*abs(theta) for every
-        step taken where the pendulum is upright (alpha is smaller in magnitude
-        than ±20°), this is scaled by a the number of consecutive steps that
-        the pendulum has been upright.
+        r(s_t, a_t) = 1 + 0.8 * np.cos(alpha) + 0.2 * np.cos(theta)
 
     Starting State:
         Use a classical controller to get the pendulum into it's initial
@@ -69,11 +46,36 @@ class QubeBeginDownEnv(QubeBaseEnv):
         When theta is greater than ±90° or after 2048 steps
     """
 
+    def reset(self):
+        super(QubeSwingupEnv, self).reset()
+        state = self._reset_down()
+        return state
+
+
+def target_angle():
+    max_angle = 80 * (np.pi / 180)  # 80 degrees
+    return np.random.uniform(-max_angle, max_angle)
+
+
+class QubeSwingupFollowEnv(QubeSwingupEnv):
     def __init__(self, frequency=250, **kwargs):
-        super(QubeBeginDownEnv, self).__init__(frequency=frequency, **kwargs)
-        self.reward_fn = QubeBeginDownReward()
+        super(QubeSwingupFollowEnv, self).__init__(frequency=frequency, **kwargs)
+        self._target_angle = target_angle()
+
+    def _get_state(self):
+        state = np.array(
+            [
+                self._theta,
+                self._alpha,
+                self._theta_dot,
+                self._alpha_dot,
+                self._target_angle,
+            ],
+            dtype=np.float64,
+        )
+        return state
 
     def reset(self):
-        super(QubeBeginDownEnv, self).reset()
-        state = self._reset_down()
+        super(QubeSwingupFollowEnv, self).reset()
+        self._target_angle = target_angle()
         return state
