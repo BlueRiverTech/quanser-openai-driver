@@ -18,6 +18,7 @@ Info:
 
 - Reset starts the pendulum from the bottom (at rest).
 - The task is to flip up the pendulum and hold it upright.
+- Episode ends once the theta angle is greater than 90 degrees.
 - Reward is a function of the angles theta (arm angle) and alpha (pendulum), and the alpha angular velocity.
     - Encourages the the arm to stay centered, the pendulum to stay upright, and to stay stationary.
 
@@ -27,17 +28,6 @@ Info:
 
 - Reset starts the pendulum from the top (flipped up/inverted).
 - The task is to hold the pendulum upright.
-- Episode ends once the angle is outside the tolerance angle (falls too much).
+- Episode ends once the alpha angle is greater the 20 degrees or theta angle is greater than 90 degrees.
 - Reward is a function of the angles theta (arm angle) and alpha (pendulum), and the alpha angular velocity.
     - Encourages the the arm to stay centered, the pendulum to stay upright, and to stay stationary.
-
-
-# Aero
-For more information about the Aero click [here](https://www.quanser.com/products/quanser-aero/)
-
-### AeroEnv
-The main Aero environment.
-Info:
-
-- Reset applies no action (0 voltages) to the motors for a set number of timesteps.
-- Reward is a function of the pitch and yaw compared to the reference pitch and yaw (the pitch and yaw at the start of the episode), and the velocities and accelerations in the x, y and z directions.

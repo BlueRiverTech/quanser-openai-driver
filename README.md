@@ -7,7 +7,6 @@ Has an OpenAI Gym wrapper for the Quanser Qube Servo 2 and Quanser Aero
     - [Recompiling Cython](#recompiling-cython-code)
 - [Basic Usage](#usage)
 - [Warning](#warning)
-    - [Quick fix](#the-fastest-solution-no-restart-required-is-to-remove-the-semaphore-of-the-board)
 
 
 # Setup
@@ -45,7 +44,7 @@ You can install the driver by cloning and pip-installing:
 
 Once you have that setup: Run the classical control baseline (ensure the Qube is connected to your computer)<br>
 ```bash
-python tests/test.py --env QubeFlipUpEnv --control flip-up
+python tests/test.py --env QubeSwingupEnv --control flip
 ```
 
 
@@ -56,12 +55,12 @@ Without safely closing the Env, bad things may happen. Usually you will not be a
 This can be done with a context manager using a `with` statement
 ```python
 import gym
-from gym_brt import QubeInvertedPendulumEnv
+from gym_brt import QubeSwingupEnv
 
 num_episodes = 10
 num_steps = 250
 
-with QubeInvertedPendulumEnv() as env:
+with QubeSwingupEnv() as env:
     for episode in range(num_episodes):
         state = env.reset()
         for step in range(num_steps):
@@ -86,15 +85,4 @@ Information about the Python wrapper for Quanser hardware and Qube Servo 2 simul
 
 # Warning
 Forgetting to close the environment or incorrectly closing the env leads to several possible issues. The worst including segfaults.
-
-The most common case when the env was not properly closed: you can not reopen the env and you get:
-```
-Error 1073: QERR_BOARD_ALREADY_OPEN: The HIL board is already opened by another process. The board does not support access from more than one process at the same time.
-```
-
-#### The fastest solution (no restart required) is to remove the semaphore of the board:
-1. Find the location of the semaphore by `ls /dev/shm`.
-    - It will start with `sem.qube_servo2_usb$xxxxxxxxxxxxx` (with the 'x's being some alphanumeric sequence).
-1. Use the `rm` command to remove it.
-    - Ex: `rm /dev/shm/sem.qube_servo2_usb$xxxxxxxxxxxxx`
 
