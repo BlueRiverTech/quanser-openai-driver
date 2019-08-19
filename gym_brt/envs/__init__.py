@@ -1,2 +1,19 @@
-from gym_brt.envs.qube_swingup_env import QubeSwingupEnv as QubeBeginDownEnv
-from gym_brt.envs.qube_balance_env import QubeBalanceEnv as QubeBeginUprightEnv
+from gym_brt.envs.qube_swingup_env import (
+    QubeSwingupEnv,
+    QubeSwingupSparseEnv,
+    QubeSwingupFollowEnv,
+    QubeSwingupFollowSparseEnv,
+)
+from gym_brt.envs.qube_balance_env import (
+    QubeBalanceEnv,
+    QubeBalanceSparseEnv,
+    QubeBalanceFollowEnv,
+    QubeBalanceFollowSparseEnv,
+)
+from gym_brt.envs.qube_dampen_env import (
+    QubeDampenEnv,
+    QubeDampenSparseEnv,
+    QubeDampenFollowEnv,
+    QubeDampenFollowSparseEnv,
+)
+from gym_brt.envs.qube_rotor_env import QubeRotorEnv, QubeRotorFollowEnv

@@ -34,14 +34,13 @@ class QubeBaseEnv(gym.Env):
 
     def __init__(
         self,
-        frequency=1000,
+        frequency=250,
         batch_size=2048,
         use_simulator=False,
         encoder_reset_steps=100000,
     ):
         self.observation_space = spaces.Box(-OBS_MAX, OBS_MAX)
         self.action_space = spaces.Box(-ACT_MAX, ACT_MAX)
-        self.reward_fn = QubeBaseReward()
 
         self._frequency = frequency
         # Ensures that samples in episode are the same as batch size
@@ -50,7 +49,6 @@ class QubeBaseEnv(gym.Env):
         self._episode_steps = 0
         self._encoder_reset_steps = encoder_reset_steps
         self._steps_since_encoder_reset = 0
-        self._isdone = True
         self._target_angle = 0
 
         self._theta, self._alpha, self._theta_dot, self._alpha_dot = 0, 0, 0, 0
@@ -87,7 +85,7 @@ class QubeBaseEnv(gym.Env):
 
     def _step(self, action, led=None):
         if led is None:
-            if self._isdone:  # Doing reset
+            if self._isdone():  # Doing reset
                 led = [1.0, 1.0, 0.0]  # Yellow
             else:
                 if abs(self._alpha) > (20 * np.pi / 180):
@@ -99,15 +97,10 @@ class QubeBaseEnv(gym.Env):
 
         action = np.clip(np.array(action, dtype=np.float64), -ACT_MAX, ACT_MAX)
         state = self.qube.step(action, led=led)
-        self._dtheta, self._dalpha = state[0] - self._theta, state[1] - self._alpha
-        self._theta, self._alpha, self._theta_dot, self._alpha_dot = state
 
-    def _get_state(self):
-        state = np.array(
-            [self._theta, self._alpha, self._theta_dot, self._alpha_dot],
-            dtype=np.float64,
-        )
-        return state
+        self._dtheta = state[0] - self._theta
+        self._dalpha = state[1] - self._alpha
+        self._theta, self._alpha, self._theta_dot, self._alpha_dot = state
 
     def reset(self):
         self._episode_steps = 0
@@ -115,7 +108,7 @@ class QubeBaseEnv(gym.Env):
         if self._steps_since_encoder_reset >= self._encoder_reset_steps:
             self.qube.reset_encoders()
             self._steps_since_encoder_reset = 0
-
+        self._target_angle = self._next_target_angle()
         action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
         self._step(action)
         return self._get_state()
@@ -132,30 +125,38 @@ class QubeBaseEnv(gym.Env):
         self._step(action)
         return self._get_state()
 
+    def _get_state(self):
+        return np.array(
+            [self._theta, self._alpha, self._theta_dot, self._alpha_dot],
+            dtype=np.float64,
+        )
+
+    def _next_target_angle(self):
+        return 0
+
+    def _reward(self):
+        raise NotImplementedError
+
+    def _isdone(self):
+        raise NotImplementedError
+
     def step(self, action):
         self._step(action)
         state = self._get_state()
-
         theta, alpha, theta_dot, alpha_dot = state
-        reward = 1 - (
-            (0.8 * np.abs(alpha) + 0.2 * np.abs(self._target_angle - theta)) / np.pi
-        )
-
-        self._episode_steps += 1
-        self._steps_since_encoder_reset += 1
-
-        done = False
-        done |= self._episode_steps % self._max_episode_steps == 0
-        done |= abs(theta) > (90 * np.pi / 180)
-        self._isdone = done
-
+        reward = self._reward()
+        done = self._isdone()
         info = {
             "theta": theta,
             "alpha": alpha,
             "theta_dot": theta_dot,
             "alpha_dot": alpha_dot,
         }
-        return state, reward, self._isdone, info
+
+        self._episode_steps += 1
+        self._steps_since_encoder_reset += 1
+
+        return state, reward, done, info
 
     def render(self, mode="human"):
         if self._viewer is None:

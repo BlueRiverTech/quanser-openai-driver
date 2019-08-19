@@ -6,9 +6,7 @@ import numpy as np
 from gym import spaces
 from gym_brt.envs.qube_base_env import QubeBaseEnv
 
-
-class QubeSwingupEnv(QubeBaseEnv):
-    """
+"""
     Description:
         A pendulum is attached to an un-actuated joint to a horizontal arm,
         which is actuated by a rotary motor. The pendulum begins
@@ -36,15 +34,29 @@ class QubeSwingupEnv(QubeBaseEnv):
         Type: Real number (1-D Continuous) (voltage applied to motor)
 
     Reward:
-        r(s_t, a_t) = 1 + 0.8 * np.cos(alpha) + 0.2 * np.cos(theta)
+        r(s_t, a_t) = 1 - (0.8 * abs(alpha) + 0.2 * abs(theta)) / pi
 
     Starting State:
-        Use a classical controller to get the pendulum into it's initial
-        downward stationary state.
+        Theta = 0 + noise, alpha = pi + noise
 
     Episode Termination:
         When theta is greater than ±90° or after 2048 steps
-    """
+"""
+
+
+class QubeSwingupEnv(QubeBaseEnv):
+    def _reward(self):
+        reward = 1 - (
+            (0.8 * np.abs(self._alpha) + 0.2 * np.abs(self._target_angle - self._theta))
+            / np.pi
+        )
+        return max(reward, 0)  # Clip for the follow env case
+
+    def _isdone(self):
+        done = False
+        done |= self._episode_steps >= self._max_episode_steps == 0
+        done |= abs(self._theta) > (90 * np.pi / 180)
+        return done
 
     def reset(self):
         super(QubeSwingupEnv, self).reset()
@@ -52,16 +64,15 @@ class QubeSwingupEnv(QubeBaseEnv):
         return state
 
 
-def target_angle():
-    max_angle = 80 * (np.pi / 180)  # 80 degrees
-    return np.random.uniform(-max_angle, max_angle)
+class QubeSwingupSparseEnv(QubeSwingupEnv):
+    def _reward(self):
+        within_range = True
+        within_range &= np.abs(self._alpha) < (1 * np.pi / 180)
+        within_range &= np.abs(self._theta) < (1 * np.pi / 180)
+        return 1 if within_range else 0
 
 
 class QubeSwingupFollowEnv(QubeSwingupEnv):
-    def __init__(self, frequency=250, **kwargs):
-        super(QubeSwingupFollowEnv, self).__init__(frequency=frequency, **kwargs)
-        self._target_angle = target_angle()
-
     def _get_state(self):
         state = np.array(
             [
@@ -75,7 +86,14 @@ class QubeSwingupFollowEnv(QubeSwingupEnv):
         )
         return state
 
-    def reset(self):
-        super(QubeSwingupFollowEnv, self).reset()
-        self._target_angle = target_angle()
-        return state
+    def _next_target_angle(self):
+        max_angle = 80 * (np.pi / 180)  # 80 degrees
+        return np.random.uniform(-max_angle, max_angle)
+
+
+class QubeSwingupFollowSparseEnv(QubeSwingupFollowEnv):
+    def _reward(self):
+        within_range = True
+        within_range &= np.abs(self._alpha) < (1 * np.pi / 180)
+        within_range &= np.abs(self._theta) < (1 * np.pi / 180)
+        return 1 if within_range else 0

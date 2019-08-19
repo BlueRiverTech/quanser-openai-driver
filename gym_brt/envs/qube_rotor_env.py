@@ -8,23 +8,41 @@ from gym_brt.envs.qube_base_env import QubeBaseEnv
 
 
 class QubeRotorEnv(QubeBaseEnv):
-    def __init__(self, frequency=250, **kwargs):
-        super(QubeRotorEnv, self).__init__(frequency=frequency, **kwargs)
-
-    def reset(self):
-        super(QubeRotorEnv, self).reset()
-        state = self._reset_down()
-        return state
-
-    def step(self, action):
-        state, reward, done, info = super(QubeDampenFollowEnv, self).step(action)
-        theta, alpha = state[:2]
-
-        theta, alpha, theta_dot, alpha_dot = state
+    def _reward(self):
         # Few options for reward:
         # - high reward for large alpha_dot and small theta
         # - reward for matching the action of the RPM controller
         # - reward for how close the pendulum matches a clock hand going at a certain RPM
-        reward = 0
 
-        return state, reward, self._isdone, info
+        theta_dist = (1 - np.abs(self._target_angle - self._theta)) / np.pi
+        return np.clip(theta_dist * self._alpha_dot / 20, 0, 20)
+
+    def _isdone(self):
+        done = False
+        done |= self._episode_steps >= self._max_episode_steps == 0
+        done |= abs(self._theta) > (90 * np.pi / 180)
+        return done
+
+    def reset(self):
+        super(QubeSwingupEnv, self).reset()
+        state = self._reset_down()
+        return state
+
+
+class QubeRotorFollowEnv(QubeRotorEnv):
+    def _get_state(self):
+        state = np.array(
+            [
+                self._theta,
+                self._alpha,
+                self._theta_dot,
+                self._alpha_dot,
+                self._target_angle,
+            ],
+            dtype=np.float64,
+        )
+        return state
+
+    def _next_target_angle(self):
+        max_angle = 80 * (np.pi / 180)  # 80 degrees
+        return np.random.uniform(-max_angle, max_angle)
