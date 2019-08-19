@@ -70,11 +70,16 @@ def forward_model_euler(theta, alpha, theta_dot, alpha_dot, Vm, dt, integration_
         alpha_dot_dot = float((2.0*Lp*Lr*mp*(4.0*Dr*theta_dot + Lp**2*alpha_dot*mp*theta_dot*np.sin(2.0*alpha) + 2.0*Lp*Lr*alpha_dot**2*mp*np.sin(alpha) - 4.0*tau)*np.cos(alpha) - 0.5*(4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp)*(-8.0*Dp*alpha_dot + Lp**2*mp*theta_dot**2*np.sin(2.0*alpha) + 4.0*Lp*g*mp*np.sin(alpha)))/(4.0*Lp**2*Lr**2*mp**2*np.cos(alpha)**2 - (4.0*Jp + Lp**2*mp)*(4.0*Jr + Lp**2*mp*np.sin(alpha)**2 + 4.0*Lr**2*mp)))
         # fmt: on
 
-        theta_dot += theta_dot_dot * dt
-        alpha_dot += alpha_dot_dot * dt
-
-        theta += theta_dot * dt
-        alpha += alpha_dot * dt
+        if True:  # semi-implicit euler (more accurate)
+            theta_dot += theta_dot_dot * dt
+            alpha_dot += alpha_dot_dot * dt
+            theta += theta_dot * dt
+            alpha += alpha_dot * dt
+        else:  # classic euler
+            theta += theta_dot * dt
+            alpha += alpha_dot * dt
+            theta_dot += theta_dot_dot * dt
+            alpha_dot += alpha_dot_dot * dt
 
         theta = ((theta + np.pi) % (2 * np.pi)) - np.pi
         alpha = ((alpha + np.pi) % (2 * np.pi)) - np.pi
