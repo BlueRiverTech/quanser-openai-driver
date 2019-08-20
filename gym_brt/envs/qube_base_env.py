@@ -19,14 +19,6 @@ ACT_MAX = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 OBS_MAX = np.asarray([np.pi / 2, np.pi, np.inf, np.inf], dtype=np.float64)
 
 
-class QubeBaseReward(object):
-    def __init__(self):
-        self.target_space = spaces.Box(low=-ACT_MAX, high=ACT_MAX, dtype=np.float32)
-
-    def __call__(self, state, action):
-        raise NotImplementedError
-
-
 class QubeBaseEnv(gym.Env):
     """A base class for all qube-based environments."""
 
@@ -141,14 +133,13 @@ class QubeBaseEnv(gym.Env):
     def step(self, action):
         self._step(action)
         state = self._get_state()
-        theta, alpha, theta_dot, alpha_dot = state
         reward = self._reward()
         done = self._isdone()
         info = {
-            "theta": theta,
-            "alpha": alpha,
-            "theta_dot": theta_dot,
-            "alpha_dot": alpha_dot,
+            "theta": self._theta,
+            "alpha": self._alpha,
+            "theta_dot": self._theta_dot,
+            "alpha_dot": self._alpha_dot,
         }
 
         self._episode_steps += 1

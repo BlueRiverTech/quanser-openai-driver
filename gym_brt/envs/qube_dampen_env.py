@@ -36,6 +36,13 @@ class QubeDampenSparseEnv(QubeDampenEnv):
 
 
 class QubeDampenFollowEnv(QubeDampenEnv):
+    def __init__(self, **kwargs):
+        super(QubeDampenFollowEnv, self).__init__(**kwargs)
+        obs_max = np.asarray(
+            [np.pi / 2, np.pi, np.inf, np.inf, 80 * (np.pi / 180)], dtype=np.float64
+        )
+        self.observation_space = spaces.Box(-obs_max, obs_max)
+
     def _get_state(self):
         state = np.array(
             [
