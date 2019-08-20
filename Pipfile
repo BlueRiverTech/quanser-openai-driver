@@ -12,6 +12,7 @@ tensorflow = "*"
 
 [packages]
 numpy = "*"
+vpython = "*"
 gym = "*"
 numba = "*"
 gym-brt = {path = ".", editable = true}
