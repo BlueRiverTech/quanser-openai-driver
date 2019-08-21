@@ -110,16 +110,19 @@ class QubeHardware(object):
     def reset_encoders(self):
         """Fully stop the pendulum at the bottom. Then reset the alpha encoder"""
         self.reset_down()
+
         self.step(np.array([0], dtype=np.float64))
         print("Doing a hard reset and, reseting the alpha encoder")
-        time.sleep(5)  # Do nothing for 3 seconds to ensure pendulum is stopped
+        time.sleep(10)  # Do nothing for 3 seconds to ensure pendulum is stopped
 
         # This is needed to prevent sensor drift on the alpha/pendulum angle
         # We ONLY reset the alpha channel because the dampen function stops the
         # pendulum from moving but does not perfectly center the pendulum at the
         # bottom (this way alpha is very close to perfect and theta does not
         # drift much)
-        self.qube.reset_encoders(channels=[0])  # Alpha channel only
+        print("Pre encoder reset:", self.qube.action(np.array([0], dtype=np.float64)))
+        self.qube.reset_encoders(channels=[1])  # Alpha channel only
+        print("After encoder reset:", self.qube.action(np.array([0], dtype=np.float64)))
 
     def close(self, type=None, value=None, traceback=None):
         # Safely close the Qube
