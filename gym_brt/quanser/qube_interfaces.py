@@ -113,7 +113,7 @@ class QubeHardware(object):
 
         self.step(np.array([0], dtype=np.float64))
         print("Doing a hard reset and, reseting the alpha encoder")
-        time.sleep(10)  # Do nothing for 3 seconds to ensure pendulum is stopped
+        time.sleep(25)  # Do nothing for 3 seconds to ensure pendulum is stopped
 
         # This is needed to prevent sensor drift on the alpha/pendulum angle
         # We ONLY reset the alpha channel because the dampen function stops the
