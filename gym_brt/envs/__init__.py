@@ -16,4 +16,10 @@ from gym_brt.envs.qube_dampen_env import (
     QubeDampenFollowEnv,
     QubeDampenFollowSparseEnv,
 )
+from gym_brt.envs.qube_test_env import (
+    QubeBalanceFollowSineWaveEnv,
+    QubeSwingupFollowSineWaveEnv,
+    QubeRotorFollowSineWaveEnv,
+    QubeDampenFollowSineWaveEnv,
+)
 from gym_brt.envs.qube_rotor_env import QubeRotorEnv, QubeRotorFollowEnv

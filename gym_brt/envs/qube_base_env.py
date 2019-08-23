@@ -27,7 +27,7 @@ class QubeBaseEnv(gym.Env):
         frequency=250,
         batch_size=2048,
         use_simulator=False,
-        encoder_reset_steps=100000,
+        encoder_reset_steps=int(1e6),
     ):
         self.observation_space = spaces.Box(-OBS_MAX, OBS_MAX)
         self.action_space = spaces.Box(-ACT_MAX, ACT_MAX)
@@ -98,7 +98,6 @@ class QubeBaseEnv(gym.Env):
         if self._steps_since_encoder_reset >= self._encoder_reset_steps:
             self.qube.reset_encoders()
             self._steps_since_encoder_reset = 0
-        self._target_angle = self._next_target_angle()
         action = np.zeros(shape=self.action_space.shape, dtype=self.action_space.dtype)
         self._step(action)
         return self._get_state()
@@ -144,6 +143,7 @@ class QubeBaseEnv(gym.Env):
 
         self._episode_steps += 1
         self._steps_since_encoder_reset += 1
+        self._target_angle = self._next_target_angle()
 
         return state, reward, done, info
 

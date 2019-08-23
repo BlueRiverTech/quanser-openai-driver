@@ -55,7 +55,7 @@ class QubeBalanceEnv(QubeBaseEnv):
 
     def _isdone(self):
         done = False
-        done |= self._episode_steps >= self._max_episode_steps == 0
+        done |= self._episode_steps >= self._max_episode_steps
         done |= abs(self._theta) > (90 * np.pi / 180)
         done |= abs(self._alpha) > (20 * np.pi / 180)
         return done
@@ -97,8 +97,12 @@ class QubeBalanceFollowEnv(QubeBalanceEnv):
         return state
 
     def _next_target_angle(self):
-        max_angle = 80 * (np.pi / 180)  # 80 degrees
-        return np.random.uniform(-max_angle, max_angle)
+        if self._episode_steps == self._max_episode_steps:
+            max_angle = 80 * (np.pi / 180)  # 80 degrees
+            angle = np.random.uniform(-max_angle, max_angle)
+        else:
+            angle = self._target_angle
+        return angle
 
 
 class QubeBalanceFollowSparseEnv(QubeBalanceFollowEnv):
