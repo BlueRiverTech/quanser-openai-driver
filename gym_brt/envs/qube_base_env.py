@@ -27,7 +27,7 @@ class QubeBaseEnv(gym.Env):
         frequency=250,
         batch_size=2048,
         use_simulator=False,
-        encoder_reset_steps=int(1e6),
+        encoder_reset_steps=int(1e8),
     ):
         self.observation_space = spaces.Box(-OBS_MAX, OBS_MAX)
         self.action_space = spaces.Box(-ACT_MAX, ACT_MAX)
