@@ -71,8 +71,8 @@ def test_env(
                 # print("step {}.{}".format(episode, step))
                 action = policy(state, step=step, frequency=frequency)
                 state, reward, done, info = env.step(action)
-                if done:
-                    break
+                # if done:
+                #     break
                 if verbose:
                     print_info(info, action, reward)
                 if render:
@@ -155,12 +155,12 @@ def main():
     args, _ = parser.parse_known_args()
 
     print("Testing Env:  {}".format(args.env))
-    print("Controller:   {}".format(args.control))
+    print("Controller:   {}".format(args.controller))
     print("{} steps over {} episodes".format(args.num_steps, args.num_episodes))
     print("Samples freq: {}".format(args.frequency))
     test_env(
         envs[args.env],
-        policies[args.control],
+        policies[args.controller],
         num_episodes=args.num_episodes,
         num_steps=args.num_steps,
         frequency=args.frequency,
