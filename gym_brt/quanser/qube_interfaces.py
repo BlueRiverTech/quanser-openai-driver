@@ -11,7 +11,13 @@ from gym import spaces
 from gym.utils import seeding
 
 from gym_brt.control import flip_and_hold_policy, dampen_policy
-from gym_brt.quanser.quanser_wrapper.quanser_wrapper import QubeServo2
+
+# For other platforms where it's impossible to install the HIL SDK
+try:
+    from gym_brt.quanser.quanser_wrapper.quanser_wrapper import QubeServo2
+except ImportError:
+    print("Warning: Can not import QubeServo2 in qube_interface.py")
+
 from gym_brt.quanser.qube_simulator import forward_model_euler, forward_model_ode
 
 

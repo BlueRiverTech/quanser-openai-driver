@@ -9,7 +9,14 @@ import numpy as np
 
 from gym import spaces
 from gym.utils import seeding
-from gym_brt.quanser import QubeHardware, QubeSimulator
+
+# For other platforms where it's impossible to install the HIL SDK
+try:
+    from gym_brt.quanser import QubeHardware
+except ImportError:
+    print("Warning: Can not import QubeHardware in qube_base_env.py")
+
+from gym_brt.quanser import QubeSimulator
 from gym_brt.envs.rendering import QubeRenderer
 
 
