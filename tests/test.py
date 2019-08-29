@@ -116,7 +116,7 @@ def main():
     parser.add_argument(
         "-e",
         "--env",
-        default="down",
+        default="QubeSwingupEnv",
         choices=list(envs.keys()),
         help="Enviroment to run.",
     )
