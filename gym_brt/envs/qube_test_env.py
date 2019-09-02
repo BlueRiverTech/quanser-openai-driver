@@ -20,22 +20,50 @@ the `Follow` environments.
 class QubeBalanceFollowSineWaveEnv(QubeBalanceFollowEnv):
     def _next_target_angle(self):
         # Sine wave between -180 to +180 degrees
-        return np.pi / 3 * np.cos(self._episode_steps / self._frequency)
+        print(
+            "T:{:05.2f}, C:{:05.2f}, Diff:{:05.2f}".format(
+                self._target_angle * (57.3),
+                57.3 * self._theta,
+                57.3 * (self._target_angle - self._theta),
+            )
+        )
+        return np.pi / 3 * np.sin(self._episode_steps / self._frequency)
 
 
 class QubeSwingupFollowSineWaveEnv(QubeSwingupFollowEnv):
     def _next_target_angle(self):
         # Sine wave between -180 to +180 degrees
-        return np.pi / 3 * np.cos(self._episode_steps / self._frequency)
+        print(
+            "T:{:05.2f}, C:{:05.2f}, Diff:{:05.2f}".format(
+                self._target_angle * (57.3),
+                57.3 * self._theta,
+                57.3 * (self._target_angle - self._theta),
+            )
+        )
+        return np.pi / 3 * np.sin(self._episode_steps / self._frequency)
 
 
 class QubeRotorFollowSineWaveEnv(QubeRotorFollowEnv):
     def _next_target_angle(self):
         # Sine wave between -180 to +180 degrees
-        return np.pi / 3 * np.cos(self._episode_steps / self._frequency)
+        print(
+            "T:{:05.2f}, C:{:05.2f}, Diff:{:05.2f}".format(
+                self._target_angle * (57.3),
+                57.3 * self._theta,
+                57.3 * (self._target_angle - self._theta),
+            )
+        )
+        return np.pi / 3 * np.sin(self._episode_steps / self._frequency)
 
 
 class QubeDampenFollowSineWaveEnv(QubeDampenFollowEnv):
     def _next_target_angle(self):
         # Sine wave between -180 to +180 degrees
-        return np.pi * np.cos(self._episode_steps / self._frequency)
+        print(
+            "T:{:05.2f}, C:{:05.2f}, Diff:{:05.2f}".format(
+                self._target_angle * (57.3),
+                57.3 * self._theta,
+                57.3 * (self._target_angle - self._theta),
+            )
+        )
+        return np.pi * np.sin(self._episode_steps / self._frequency)
