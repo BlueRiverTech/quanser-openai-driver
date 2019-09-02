@@ -97,7 +97,8 @@ class QubeBalanceFollowEnv(QubeBalanceEnv):
         return state
 
     def _next_target_angle(self):
-        if self._episode_steps == self._max_episode_steps:
+        # Update the target angle twice a second on average at random intervals
+        if np.random.randint(1, self._frequency / 2) == 1:
             max_angle = 80 * (np.pi / 180)  # 80 degrees
             angle = np.random.uniform(-max_angle, max_angle)
         else:
