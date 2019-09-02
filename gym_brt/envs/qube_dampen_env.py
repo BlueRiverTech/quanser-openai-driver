@@ -10,7 +10,12 @@ from gym_brt.envs.qube_base_env import QubeBaseEnv
 
 class QubeDampenEnv(QubeBaseEnv):
     def _reward(self):
-        reward = 0.5 + 0.5 * (np.abs(self._alpha) - np.abs(self._theta)) / np.pi
+        alpha = self._alpha
+        alpha = (alpha + 2 * np.pi) % (2 * np.pi) - np.pi
+        reward = 1 - (
+            (0.8 * np.abs(alpha) + 0.2 * np.abs(self._target_angle - self._theta))
+            / np.pi
+        )
         return max(reward, 0)  # Clip for the follow env case
 
     def _isdone(self):
