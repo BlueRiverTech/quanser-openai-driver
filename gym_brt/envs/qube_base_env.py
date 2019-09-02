@@ -80,17 +80,8 @@ class QubeBaseEnv(gym.Env):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
-    def _step(self, action, led=None):
-        if led is None:
-            if self._isdone():  # Doing reset
-                led = [1.0, 1.0, 0.0]  # Yellow
-            else:
-                if abs(self._alpha) > (20 * np.pi / 180):
-                    led = [1.0, 0.0, 0.0]  # Red
-                elif abs(self._theta) > (90 * np.pi / 180):
-                    led = [1.0, 0.0, 0.0]  # Red
-                else:
-                    led = [0.0, 1.0, 0.0]  # Green
+    def _step(self, action):
+        led = self._led()
 
         action = np.clip(np.array(action, dtype=np.float64), -ACT_MAX, ACT_MAX)
         state = self.qube.step(action, led=led)
@@ -135,6 +126,18 @@ class QubeBaseEnv(gym.Env):
 
     def _isdone(self):
         raise NotImplementedError
+
+    def _led(self):
+        if self._isdone():  # Doing reset
+            led = [1.0, 1.0, 0.0]  # Yellow
+        else:
+            if abs(self._alpha) > (20 * np.pi / 180):
+                led = [1.0, 0.0, 0.0]  # Red
+            elif abs(self._theta) > (90 * np.pi / 180):
+                led = [1.0, 0.0, 0.0]  # Red
+            else:
+                led = [0.0, 1.0, 0.0]  # Green
+        return led
 
     def step(self, action):
         self._step(action)
