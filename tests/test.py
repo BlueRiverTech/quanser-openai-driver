@@ -22,6 +22,10 @@ from gym_brt.envs import (
     QubeDampenFollowSparseEnv,
     QubeRotorEnv,
     QubeRotorFollowEnv,
+    QubeBalanceFollowSineWaveEnv,
+    QubeSwingupFollowSineWaveEnv,
+    QubeRotorFollowSineWaveEnv,
+    QubeDampenFollowSineWaveEnv,
 )
 
 from gym_brt.control import (
@@ -95,6 +99,10 @@ def main():
         "QubeDampenFollowSparseEnv": QubeDampenFollowSparseEnv,
         "QubeRotorEnv": QubeRotorEnv,
         "QubeRotorFollowEnv": QubeRotorFollowEnv,
+        "QubeBalanceFollowSineWaveEnv": QubeBalanceFollowSineWaveEnv,
+        "QubeSwingupFollowSineWaveEnv": QubeSwingupFollowSineWaveEnv,
+        "QubeRotorFollowSineWaveEnv": QubeRotorFollowSineWaveEnv,
+        "QubeDampenFollowSineWaveEnv": QubeDampenFollowSineWaveEnv,
     }
     policies = {
         "none": zero_policy,
@@ -165,7 +173,7 @@ def main():
         num_steps=args.num_steps,
         frequency=args.frequency,
         verbose=args.verbose,
-        use_simulator=True,  # args.use_simulator,
+        use_simulator=args.use_simulator,
         render=args.render,
     )
 
