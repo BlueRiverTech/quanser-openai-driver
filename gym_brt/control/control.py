@@ -9,6 +9,8 @@ def _convert_state(state):
     state = np.asarray(state)
     if state.shape == (4,):
         return state
+    if state.shape == (5,):
+        return state
     elif state.shape == (6,):
         # Get the angles
         theta_x, theta_y = state[0], state[1]
@@ -169,3 +171,27 @@ def dampen_policy(state, **kwargs):
 
     action = np.clip(action, -3.0, 3.0)
     return np.array([action], dtype=np.float64)
+
+
+# Hold policy
+def pd_tracking_control_policy(state, **kwargs):
+    state = _convert_state(state)
+    theta, alpha, theta_dot, alpha_dot, theta_target = state
+    # multiply by proportional and derivative gains
+    kp_theta = -2.0
+    kp_alpha = 35.0
+    kd_theta = -1.5
+    kd_alpha = 3.0
+
+    # If pendulum is within 20 degrees of upright, enable balance control, else zero
+    if np.abs(alpha) <= (20.0 * np.pi / 180.0):
+        action = (
+            (theta - theta_target) * kp_theta
+            + alpha * kp_alpha
+            + theta_dot * kd_theta
+            + alpha_dot * kd_alpha
+        )
+    else:
+        action = 0.0
+    action = np.clip(action, -3.0, 3.0)
+    return np.array([action])
