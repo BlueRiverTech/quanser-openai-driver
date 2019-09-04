@@ -1,3 +1,4 @@
+import os
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 
@@ -39,13 +40,19 @@ try:
 except ImportError:
     pass
 
+
+# Hacky way to check if the HIL SDK is installed (allows to run on Mac OS)
+is_hil_sdk_installed = False
+if os.path.isdir("/opt/quanser/hil_sdk/lib"):
+    is_hil_sdk_installed = True
+
 setup(
     name="gym_brt",
     version=0.1,
-    cmdclass={"build_ext": build_ext},
+    cmdclass={"build_ext": build_ext} if is_hil_sdk_installed else {},
     install_requires=["numpy", "gym"],
     setup_requires=["numpy"],
-    ext_modules=extensions,
+    ext_modules=extensions if is_hil_sdk_installed else None,
     description="Blue River's OpenAI Gym wrapper around Quanser hardware.",
     url="https://github.com/BlueRiverTech/quanser-openai-driver/",
     author="Blue River Technology",
