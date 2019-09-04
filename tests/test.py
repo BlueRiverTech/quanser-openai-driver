@@ -7,7 +7,26 @@ import time
 import argparse
 import numpy as np
 
-from gym_brt.envs import QubeBeginDownEnv, QubeBeginUprightEnv
+from gym_brt.envs import (
+    QubeSwingupEnv,
+    QubeSwingupSparseEnv,
+    QubeSwingupFollowEnv,
+    QubeSwingupFollowSparseEnv,
+    QubeBalanceEnv,
+    QubeBalanceSparseEnv,
+    QubeBalanceFollowEnv,
+    QubeBalanceFollowSparseEnv,
+    QubeDampenEnv,
+    QubeDampenSparseEnv,
+    QubeDampenFollowEnv,
+    QubeDampenFollowSparseEnv,
+    QubeRotorEnv,
+    QubeRotorFollowEnv,
+    QubeBalanceFollowSineWaveEnv,
+    QubeSwingupFollowSineWaveEnv,
+    QubeRotorFollowSineWaveEnv,
+    QubeDampenFollowSineWaveEnv,
+)
 
 from gym_brt.control import (
     zero_policy,
@@ -22,12 +41,11 @@ from gym_brt.control import (
 )
 
 
-def print_info(state, action, reward):
-    theta_x, theta_y = state[0], state[1]
-    alpha_x, alpha_y = state[2], state[3]
-    theta = np.arctan2(theta_y, theta_x)
-    alpha = np.arctan2(alpha_y, alpha_x)
-    theta_dot, alpha_dot = state[4], state[5]
+def print_info(state_info, action, reward):
+    theta = state_info["theta"]
+    alpha = state_info["alpha"]
+    theta_dot = state_info["theta_dot"]
+    alpha_dot = state_info["alpha_dot"]
     print(
         "State: theta={:06.3f}, alpha={:06.3f}, theta_dot={:06.3f}, alpha_dot={:06.3f}".format(
             theta, alpha, theta_dot, alpha_dot
@@ -51,21 +69,41 @@ def test_env(
     with env_name(use_simulator=use_simulator, frequency=frequency) as env:
         for episode in range(num_episodes):
             state = env.reset()
+            state, reward, done, info = env.step(np.array([0], dtype=np.float64))
             # print("Started episode {}".format(episode))
             for step in range(num_steps):
                 # print("step {}.{}".format(episode, step))
                 action = policy(state, step=step, frequency=frequency)
-                state, reward, done, _ = env.step(action)
-                if done:
-                    pass  # break
+                state, reward, done, info = env.step(action)
+                # if done:
+                #     break
                 if verbose:
-                    print_info(state, action, reward)
+                    print_info(info, action, reward)
                 if render:
                     env.render()
 
 
 def main():
-    envs = {"down": QubeBeginDownEnv, "up": QubeBeginUprightEnv}
+    envs = {
+        "QubeSwingupEnv": QubeSwingupEnv,
+        "QubeSwingupSparseEnv": QubeSwingupSparseEnv,
+        "QubeSwingupFollowEnv": QubeSwingupFollowEnv,
+        "QubeSwingupFollowSparseEnv": QubeSwingupFollowSparseEnv,
+        "QubeBalanceEnv": QubeBalanceEnv,
+        "QubeBalanceSparseEnv": QubeBalanceSparseEnv,
+        "QubeBalanceFollowEnv": QubeBalanceFollowEnv,
+        "QubeBalanceFollowSparseEnv": QubeBalanceFollowSparseEnv,
+        "QubeDampenEnv": QubeDampenEnv,
+        "QubeDampenSparseEnv": QubeDampenSparseEnv,
+        "QubeDampenFollowEnv": QubeDampenFollowEnv,
+        "QubeDampenFollowSparseEnv": QubeDampenFollowSparseEnv,
+        "QubeRotorEnv": QubeRotorEnv,
+        "QubeRotorFollowEnv": QubeRotorFollowEnv,
+        "QubeBalanceFollowSineWaveEnv": QubeBalanceFollowSineWaveEnv,
+        "QubeSwingupFollowSineWaveEnv": QubeSwingupFollowSineWaveEnv,
+        "QubeRotorFollowSineWaveEnv": QubeRotorFollowSineWaveEnv,
+        "QubeDampenFollowSineWaveEnv": QubeDampenFollowSineWaveEnv,
+    }
     policies = {
         "none": zero_policy,
         "zero": zero_policy,
@@ -73,7 +111,6 @@ def main():
         "rand": random_policy,
         "random": random_policy,
         "sw": square_wave_policy,
-        "energy": energy_control_policy,
         "energy": energy_control_policy,
         "pd": pd_control_policy,
         "hold": pd_control_policy,
@@ -87,13 +124,13 @@ def main():
     parser.add_argument(
         "-e",
         "--env",
-        default="down",
+        default="QubeSwingupEnv",
         choices=list(envs.keys()),
         help="Enviroment to run.",
     )
     parser.add_argument(
         "-c",
-        "--control",
+        "--controller",
         default="random",
         choices=list(policies.keys()),
         help="Select what type of action to take.",
@@ -126,12 +163,12 @@ def main():
     args, _ = parser.parse_known_args()
 
     print("Testing Env:  {}".format(args.env))
-    print("Controller:   {}".format(args.control))
+    print("Controller:   {}".format(args.controller))
     print("{} steps over {} episodes".format(args.num_steps, args.num_episodes))
     print("Samples freq: {}".format(args.frequency))
     test_env(
         envs[args.env],
-        policies[args.control],
+        policies[args.controller],
         num_episodes=args.num_episodes,
         num_steps=args.num_steps,
         frequency=args.frequency,

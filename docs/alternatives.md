@@ -5,12 +5,12 @@ In addition to a [context manager (recommended)](../README.md#usage), the enviro
 
 ```python
 import gym
-from gym_brt import AeroPositionEnv
+from gym_brt import QubeSwingupEnv
 
 num_episodes = 10
 num_steps = 250
 
-env = AeroPositionEnv()
+env = QubeSwingupEnv()
 try:
     for episode in range(num_episodes):
         state = env.reset()

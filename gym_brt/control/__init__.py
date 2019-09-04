@@ -8,4 +8,5 @@ from gym_brt.control.control import (
     flip_and_hold_policy,
     square_wave_flip_and_hold_policy,
     dampen_policy,
+    pd_tracking_control_policy,
 )
