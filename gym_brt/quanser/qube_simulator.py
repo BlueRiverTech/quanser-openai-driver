@@ -3,10 +3,6 @@ from __future__ import print_function
 from __future__ import division
 
 from scipy.integrate import odeint
-try:
-    from numba import jit
-except:
-    print("Can't import numba")
 import math
 
 

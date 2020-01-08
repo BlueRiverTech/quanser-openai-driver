@@ -5,14 +5,11 @@ name = "pypi"
 
 [dev-packages]
 cython = "*"
-scipy = "*"
 autograd = "*"
-baselines = "*"
-tensorflow = "*"
 
 [packages]
-numpy = "*"
-vpython = "*"
 gym = "*"
-numba = "*"
+numpy = "*"
+scipy = "*"
+vpython = "*"
 gym-brt = {path = ".", editable = true}

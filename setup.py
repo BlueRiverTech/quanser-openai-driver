@@ -50,7 +50,7 @@ setup(
     name="gym_brt",
     version=0.1,
     cmdclass={"build_ext": build_ext} if is_hil_sdk_installed else {},
-    install_requires=["numpy", "gym"],
+    install_requires=["numpy", "gym", "scipy", "vpython"],
     setup_requires=["numpy"],
     ext_modules=extensions if is_hil_sdk_installed else None,
     description="Blue River's OpenAI Gym wrapper around Quanser hardware.",
