@@ -15,11 +15,12 @@ We have tested on Ubuntu 16.04 LTS and Ubuntu 18.04 LTS using Python 2.7 and Pyt
 
 ### Prerequisites
 Install the HIL SDK from Quanser.<br>
-A mirror is available at https://github.com/BlueRiverTech/hil_sdk_linux_x86_64.<br>
+A mirror is available at https://github.com/quanser/hil_sdk_linux_x86_64.<br>
 
 You can install the driver by:
 ```bash
-    git clone https://github.com/BlueRiverTech/hil_sdk_linux_x86_64.git
+    git clone https://github.com/quanser/hil_sdk_linux_x86_64.git
+    sudo chmod a+x ./hil_sdk_linux_x86_64/setup_hil_sdk ./hil_sdk_linux_x86_64/uninstall_hil_sdk
     sudo ./hil_sdk_linux_x86_64/setup_hil_sdk
 ```
 
@@ -28,12 +29,9 @@ You also must have pip installed:
     sudo apt-get install python3-pip
 ```
 
-**Note:** this requires a version of the HIL SDK that supports buffer overwrite on overflow (circular buffers).<br>
-(The mirror posted above supports buffer overflow.)<br>
-
 
 ### Installation
-We recommend that you use a virtual environment such as [virtualenv](https://virtualenv.pypa.io/en/stable/), [conda](https://conda.io/docs/user-guide/getting-started.html), or [Pipenv](https://pipenv.readthedocs.io/en/latest/)
+We recommend that you use a virtual environment such as [conda (recommended)](https://conda.io/docs/user-guide/getting-started.html), [virtualenv](https://virtualenv.pypa.io/en/stable/), or [Pipenv](https://pipenv.readthedocs.io/en/latest/)
 
 You can install the driver by cloning and pip-installing:
 ```bash
@@ -72,7 +70,7 @@ Or can be closed manually by using `env.close()`. You can see an [example here](
 
 
 # Environments
-Information about various environments can be found in [docs/envs](docs/envs.md).
+Information about various environments can be found in [docs/envs](docs/envs.md) and our [whitepaper](https://arxiv.org/abs/2001.02254).
 
 
 # Control
@@ -80,9 +78,18 @@ Information about baselines can be found in [docs/control](docs/control.md).
 
 
 # Hardware Wrapper
-Information about the Python wrapper for Quanser hardware and Qube Servo 2 simulator can be found in [docs/quanser](docs/quanser.md).
+Information about the Python wrapper for Quanser hardware and Qube Servo 2 simulator can be found in [docs/quanser](docs/quanser.md) and our [whitepaper](https://arxiv.org/abs/2001.02254).
 
 
-# Warning
-Forgetting to close the environment or incorrectly closing the env leads to several possible issues. The worst including segfaults.
+# Citing
+If you use this in your research please cite the following [whitepaper](https://arxiv.org/abs/2001.02254):
 
+```
+@misc{2001.02254,
+  author = {{Polzounov}, Kirill and {Sundar}, Ramitha and {Redden}, Lee},
+  title = "{Blue River Controls: A toolkit for Reinforcement Learning Control Systems on Hardware}",
+  year = {2019},
+  eprint = {arXiv:2001.02254},
+  howpublished = {Accepted at the Workshop on Deep Reinforcement Learning at the 33rd Conference on Neural Information Processing Systems (NeurIPS 2019), Vancouver, Canada.}
+}
+```

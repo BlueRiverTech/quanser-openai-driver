@@ -3,8 +3,6 @@ from __future__ import print_function
 from __future__ import division
 
 from scipy.integrate import odeint
-from numba import jit
-import numpy as np
 import math
 
 

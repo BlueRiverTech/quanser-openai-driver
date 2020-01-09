@@ -27,96 +27,79 @@ def _convert_state(state):
         )
 
 
-# No input
 def zero_policy(state, **kwargs):
+    """Output a constant 0V action."""
     return np.array([0.0])
 
 
-# Constant input
 def constant_policy(state, **kwargs):
+    """Output a constant 3V action."""
     return np.array([3.0])
 
 
-# Rand input
 def random_policy(state, **kwargs):
+    """Output a random action sampled from a Gaussian"""
     return np.asarray([np.random.randn()])
 
 
-# Square wave, switch every 85 ms
 def square_wave_policy(state, step, frequency=250, **kwargs):
-    steps_until_85ms = int(85 * (frequency / 300))
+    """Output a square wave with an amplitude of 3V and period of ~566ms."""
     state = _convert_state(state)
-    # Switch between positive and negative every 85 ms
-    mod_170ms = step % (2 * steps_until_85ms)
-    if mod_170ms < steps_until_85ms:
+    steps_until_283ms = int(283 * (frequency / 1000))
+
+    # Switch between positive and negative every 283ms
+    mod_566ms = step % (2 * steps_until_283ms)
+    if mod_566ms < steps_until_283ms:
         action = 3.0
     else:
         action = -3.0
     return np.array([action])
 
 
-# Flip policy
 def energy_control_policy(state, **kwargs):
-    state = _convert_state(state)
-    # Run energy-based control to flip up the pendulum
-    theta, alpha, theta_dot, alpha_dot = state
-    # alpha_dot += alpha_dot + 1e-15
+    """Uses an energy controller to flip the pendulum.
 
-    """Implements a energy based swing-up controller"""
+    Increase the energy of the pendulum until the total energy (sum of potential
+    and kinetic) is equal to the reference energy Er, where Er is the maximum 
+    potential energy (ie energy of the pendulum inverted and stationary)
+    """
+    state = _convert_state(state)
+    theta, alpha, theta_dot, alpha_dot = state
+    alpha_dot += alpha_dot + 1e-15
     mu = 50.0  # in m/s/J
     ref_energy = 30.0 / 1000.0  # Er in joules
 
-    # TODO: Which one is correct?
-    max_u = 6  # Max action is 6m/s^2
-    # max_u = 0.85  # Max action is 6m/s^2
-
     # System parameters
-    jp = 3.3282e-5
-    lp = 0.129
-    lr = 0.085
-    mp = 0.024
-    mr = 0.095
-    rm = 8.4
-    g = 9.81
-    kt = 0.042
+    lp, lr, mp, mr = 0.129, 0.085, 0.024, 0.095
+    jp, rm, g, kt = 3.3282e-5, 8.4, 9.81, 0.042
 
     pend_torque = (1 / 2) * mp * g * lp * (1 + np.cos(alpha))
     energy = pend_torque + (jp / 2.0) * alpha_dot * alpha_dot
-
     u = mu * (energy - ref_energy) * np.sign(-1 * np.cos(alpha) * alpha_dot)
-    u = np.clip(u, -max_u, max_u)
-
     torque = (mr * lr) * u
     voltage = (rm / kt) * torque
     return np.array([-voltage])
 
 
-# Hold policy
-def pd_control_policy(state, **kwargs):
+def pd_control_policy(state, ref_angle=0, **kwargs):
+    """Use a PD controller to stabilize the inverted pendulum."""
     state = _convert_state(state)
     theta, alpha, theta_dot, alpha_dot = state
-    # multiply by proportional and derivative gains
-    kp_theta = -2.0
-    kp_alpha = 35.0
-    kd_theta = -1.5
-    kd_alpha = 3.0
-
     # If pendulum is within 20 degrees of upright, enable balance control, else zero
     if np.abs(alpha) <= (20.0 * np.pi / 180.0):
         action = (
-            theta * kp_theta
+            (theta - ref_angle) * kp_theta
             + alpha * kp_alpha
             + theta_dot * kd_theta
             + alpha_dot * kd_alpha
         )
     else:
         action = 0.0
-    action = np.clip(action, -3.0, 3.0)
     return np.array([action])
 
 
-# Flip and Hold
 def flip_and_hold_policy(state, **kwargs):
+    """A complete mixed-mode controller that combines energy and PD control."""
     state = _convert_state(state)
     theta, alpha, theta_dot, alpha_dot = state
 
@@ -128,8 +111,8 @@ def flip_and_hold_policy(state, **kwargs):
     return action
 
 
-# Square wave instead of energy controller flip and hold
 def square_wave_flip_and_hold_policy(state, **kwargs):
+    """Square wave instead of energy controller flip and hold """
     state = _convert_state(state)
     theta, alpha, theta_dot, alpha_dot = state
 
@@ -148,10 +131,7 @@ def dampen_policy(state, **kwargs):
     # Alt alpha angle: -pi to +pi, where 0 is the pendulum facing down (at rest)
     alt_alpha = (alpha + 2 * np.pi) % (2 * np.pi) - np.pi
     if np.abs(alt_alpha) < (20.0 * np.pi / 180.0) and np.abs(theta) < (np.pi / 4):
-        kp_theta = -2
-        kp_alpha = 35
-        kd_theta = -1.5
-        kd_alpha = 3
+        kp_theta, kp_alpha, kd_theta, kd_alpha = -2.0, 35.0, -1.5, 3.0
         if alpha >= 0:
             action = (
                 -theta * kp_theta
@@ -169,29 +149,10 @@ def dampen_policy(state, **kwargs):
     else:
         action = 0
 
-    action = np.clip(action, -3.0, 3.0)
     return np.array([action], dtype=np.float64)
 
 
-# Hold policy
 def pd_tracking_control_policy(state, **kwargs):
     state = _convert_state(state)
-    theta, alpha, theta_dot, alpha_dot, theta_target = state
-    # multiply by proportional and derivative gains
-    kp_theta = -2.0
-    kp_alpha = 35.0
-    kd_theta = -1.5
-    kd_alpha = 3.0
-
-    # If pendulum is within 20 degrees of upright, enable balance control, else zero
-    if np.abs(alpha) <= (20.0 * np.pi / 180.0):
-        action = (
-            (theta - theta_target) * kp_theta
-            + alpha * kp_alpha
-            + theta_dot * kd_theta
-            + alpha_dot * kd_alpha
-        )
-    else:
-        action = 0.0
-    action = np.clip(action, -3.0, 3.0)
-    return np.array([action])
+    _, _, _, _, theta_target = state
+    return pd_control_policy(state[:4], theta_target)

@@ -70,13 +70,11 @@ def test_env(
         for episode in range(num_episodes):
             state = env.reset()
             state, reward, done, info = env.step(np.array([0], dtype=np.float64))
-            # print("Started episode {}".format(episode))
             for step in range(num_steps):
-                # print("step {}.{}".format(episode, step))
                 action = policy(state, step=step, frequency=frequency)
                 state, reward, done, info = env.step(action)
-                # if done:
-                #     break
+                if done:
+                    break
                 if verbose:
                     print_info(info, action, reward)
                 if render:
