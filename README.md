@@ -83,6 +83,15 @@ Information about baselines can be found in [docs/control](docs/control.md).
 Information about the Python wrapper for Quanser hardware and Qube Servo 2 simulator can be found in [docs/quanser](docs/quanser.md).
 
 
-# Warning
-Forgetting to close the environment or incorrectly closing the env leads to several possible issues. The worst including segfaults.
+# Citing
+If you use this in your research please cite the following whitepaper:
 
+```
+@misc{2001.02254,
+  author = {{Polzounov}, Kirill and {Sundar}, Ramitha and {Redden}, Lee},
+  title = "{Blue River Controls: A toolkit for Reinforcement Learning Control Systems on Hardware}",
+  year = {2019},
+  eprint = {arXiv:2001.02254},
+  howpublished = {Accepted at the Workshop on Deep Reinforcement Learning at the 33rd Conference on Neural Information Processing Systems (NeurIPS 2019), Vancouver, Canada.}
+}
+```
