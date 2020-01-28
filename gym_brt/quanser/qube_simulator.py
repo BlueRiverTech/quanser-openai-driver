@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import division
 
 from scipy.integrate import odeint
+import numpy as np
 import math
 
 
