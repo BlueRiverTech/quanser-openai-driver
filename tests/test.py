@@ -38,6 +38,7 @@ from gym_brt.control import (
     flip_and_hold_policy,
     square_wave_flip_and_hold_policy,
     dampen_policy,
+    pd_tracking_control_policy,
 )
 
 
@@ -115,6 +116,7 @@ def main():
         "flip": flip_and_hold_policy,
         "sw-hold": square_wave_flip_and_hold_policy,
         "damp": dampen_policy,
+        "track": pd_tracking_control_policy,
     }
 
     # Parse command line args
