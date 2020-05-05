@@ -30,7 +30,7 @@ cdef class QuanserWrapper:
 
     cdef qt.t_uint32[::] digital_w_channels
     cdef qt.t_uint32 num_digital_w_channels
-    cdef qt.t_boolean[::] enables_w
+    cdef np.npy_int8[::] enables_w  # Uses npy_int8 due to arm problem
 
     cdef qt.t_uint32[::] encoder_r_channels
     cdef qt.t_uint32 num_encoder_r_channels
