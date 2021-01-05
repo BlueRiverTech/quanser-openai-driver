@@ -42,7 +42,7 @@ You can install the driver by cloning and pip-installing:
 
 Once you have that setup: Run the classical control baseline (ensure the Qube is connected to your computer)<br>
 ```bash
-python tests/test.py --env QubeSwingupEnv --control flip
+python tests/test.py --env QubeSwingupEnv --controller flip
 ```
 
 
