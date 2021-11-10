@@ -1,4 +1,9 @@
-from gym.envs.classic_control import rendering
+try:
+    # If you use a device such as a headless raspberry pi this may not work
+    from gym.envs.classic_control import rendering
+except:
+    print("Warning: Can not import classic_control rendering in qube_render.py")
+
 import vpython as vp
 import numpy as np
 
