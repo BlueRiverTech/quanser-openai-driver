@@ -146,23 +146,23 @@ def dampen_policy(state, **kwargs):
     # Alt alpha angle: -pi to +pi, where 0 is the pendulum facing down (at rest)
     alt_alpha = (alpha + 2 * np.pi) % (2 * np.pi) - np.pi
     if np.abs(alt_alpha) < (20.0 * np.pi / 180.0) and np.abs(theta) < (np.pi / 4):
-        kp_theta = -2
-        kp_alpha = 35
-        kd_theta = -1.5
-        kd_alpha = 3
+        kp_theta = 0.9
+        kp_alpha = -3.6
+        kd_theta = 0.7
+        kd_alpha = -0.285
         if alpha >= 0:
             action = (
-                -theta * kp_theta
-                + (np.pi - alpha) * kp_alpha
-                + -theta_dot * kd_theta
-                + -alpha_dot * kd_alpha
+                theta * kp_theta
+                + (alpha - np.pi) * kp_alpha
+                + theta_dot * kd_theta
+                + alpha_dot * kd_alpha
             )
         else:
             action = (
-                -theta * kp_theta
-                + (-np.pi - alpha) * kp_alpha
-                + -theta_dot * kd_theta
-                + -alpha_dot * kd_alpha
+                theta * kp_theta
+                + (alpha + np.pi) * kp_alpha
+                + theta_dot * kd_theta
+                + alpha_dot * kd_alpha
             )
     else:
         action = 0
