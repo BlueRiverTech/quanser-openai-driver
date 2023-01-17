@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
-cython = "*"
+Cython = 0.29.32
 autograd = "*"
 
 [packages]
-gym = "*"
-numpy = "*"
-scipy = "*"
-vpython = "*"
+gym = 0.21.0
+numpy = 1.21.6
+scipy = 1.7.3
+vpython = 7.6.4
 gym-brt = {path = ".", editable = true}

@@ -21,4 +21,5 @@ extensions = [
         library_dirs=["/opt/quanser/hil_sdk/lib"],
     )
 ]
-setup(ext_modules=cythonize(extensions), include_dirs=[numpy.get_include()])
+cy_extensions = cythonize(extensions, compiler_directives={"language_level" : "3"})
+setup(ext_modules=cy_extensions, include_dirs=[numpy.get_include()])
