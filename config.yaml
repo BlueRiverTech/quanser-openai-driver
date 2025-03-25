@@ -1,0 +1,36 @@
+#config that can be used to store hardware-specific information.
+qube_servo2_usb:
+  board_type: "qube_servo2_usb"
+  max_voltage: 18.0
+  # Motor
+  Rm: 8.4 # Motor resistance (Ohm)
+  kt: 0.042 # Current-torque (N-m/A)
+  km: 0.042 # Back-emf constant (V-s/rad)
+  # Rotary Arm
+  mr: 0.095 # Mass (kg)
+  Lr: 0.085 # Total Length (m)
+  Dr: 0.00027  # Equivalent viscous damping coefficient (N-m-s/rad)
+  # Pendulum Link
+  mp: 0.024  # Mass (kg)
+  Lp: 0.129  # Total length (m)
+  Dp: 0.00005  # Equivalent viscous damping coefficient (N-m-s/rad)
+  #Environmental Parameters
+  g: 9.81  # Gravity (m/s^2)
+
+qube_servo3_usb:
+  board_type: "qube_servo3_usb"
+  max_voltage: 24.0
+  # Motor
+  Rm: 7.5 # Motor resistance (Ohm)
+  kt: 0.042 # Current-torque (N-m/A)
+  km: 0.042 # Back-emf constant (V-s/rad)
+  # Rotary Arm
+  mr: 0.095 # Mass (kg)
+  Lr: 0.085 # Total Length (m)
+  Dr: 0.00027  # Equivalent viscous damping coefficient (N-m-s/rad)
+  # Pendulum Link
+  mp: 0.024  # Mass (kg)
+  Lp: 0.129  # Total length (m)
+  Dp: 0.00005  # Equivalent viscous damping coefficient (N-m-s/rad)
+  #Environmental Parameters
+  g: 9.81  # Gravity (m/s^2)

@@ -18,9 +18,10 @@ except ImportError:
 
 from gym_brt.quanser import QubeSimulator
 from gym_brt.envs.rendering import QubeRenderer
+from load_config import load_config
 
 
-MAX_MOTOR_VOLTAGE = 3
+MAX_MOTOR_VOLTAGE = load_config()['max_voltage'] #TODO: make this dynamic based on hardware environment variable
 ACT_MAX = np.asarray([MAX_MOTOR_VOLTAGE], dtype=np.float64)
 # OBS_MAX = [theta, alpha, theta_dot, alpha_dot]
 OBS_MAX = np.asarray([np.pi / 2, np.pi, np.inf, np.inf], dtype=np.float64)

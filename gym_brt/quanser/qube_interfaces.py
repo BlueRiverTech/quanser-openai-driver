@@ -14,9 +14,9 @@ from gym_brt.control import flip_and_hold_policy, dampen_policy
 
 # For other platforms where it's impossible to install the HIL SDK
 try:
-    from gym_brt.quanser.quanser_wrapper.quanser_wrapper import QubeServo2
+    from gym_brt.quanser.quanser_wrapper.quanser_wrapper import QubeServo
 except ImportError:
-    print("Warning: Can not import QubeServo2 in qube_interface.py")
+    print("Warning: Can not import QubeServo in qube_interface.py")
 
 from gym_brt.quanser.qube_simulator import forward_model_euler, forward_model_ode
 
@@ -30,7 +30,7 @@ class QubeHardware(object):
         self._frequency = frequency
 
         # Open the Qube
-        self.qube = QubeServo2(frequency=frequency)  # TODO: max_voltage=max_voltage
+        self.qube = QubeServo(frequency=frequency)  # TODO: max_voltage=max_voltage
         self.qube.__enter__()
 
         self.state = np.array([0, 0, 0, 0], dtype=np.float64)

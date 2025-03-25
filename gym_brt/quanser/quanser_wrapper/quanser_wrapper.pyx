@@ -9,6 +9,7 @@ cimport numpy as np
 from gym_brt.quanser.quanser_wrapper.error_codes import error_codes
 import numpy as np
 
+from load_config import load_config
 
 cdef print_possible_error(int result):
     """If there is an error, print the error code"""
@@ -352,17 +353,16 @@ cdef class QuanserAero(QuanserWrapper):
             frequency=frequency
         )
 
-
-cdef class QubeServo2(QuanserWrapper):
+cdef class QubeServo(QuanserWrapper):
     def __cinit__(self):
-        board_type = b"qube_servo2_usb"
+        board_type = load_config()["board_type"].encode('utf-8')
         board_identifier = b"0"
         result = hil.hil_open(board_type, board_identifier, &self.board)
         print_possible_error(result)
         if result < 0:
             raise IOError("Board could not be opened.")
 
-    def __init__(self, frequency=250, max_voltage=18.0):
+    def __init__(self, frequency=250):
         analog_r_channels = [0]
         analog_w_channels = [0]
         digital_w_channels = [0]
@@ -370,8 +370,8 @@ cdef class QubeServo2(QuanserWrapper):
         other_r_channels = [14000]
         led_w_channels = [11000, 11001, 11002]
 
-        super(QubeServo2, self).__init__(
-            max_voltage=max_voltage,
+        super(QubeServo, self).__init__(
+            max_voltage=load_config()["max_voltage"],
             analog_r_channels=analog_r_channels,
             analog_w_channels=analog_w_channels,
             digital_w_channels=digital_w_channels,

@@ -5,26 +5,27 @@ from __future__ import division
 from scipy.integrate import odeint
 import numpy as np
 import math
+from load_config import load_config
 
-
+cfg = load_config()
 # Motor
-Rm = 8.4  # Resistance
-kt = 0.042  # Current-torque (N-m/A)
-km = 0.042  # Back-emf constant (V-s/rad)
+Rm = cfg['Rm']  # Resistance
+kt = cfg['kt']  # Current-torque (N-m/A)
+km = cfg['km']  # Back-emf constant (V-s/rad)
 
 # Rotary Arm
-mr = 0.095  # Mass (kg)
-Lr = 0.085  # Total length (m)
+mr = cfg['mr']  # Mass (kg)
+Lr = cfg['Lr']  # Total length (m)
 Jr = mr * Lr ** 2 / 12  # Moment of inertia about pivot (kg-m^2)
-Dr = 0.00027  # Equivalent viscous damping coefficient (N-m-s/rad)
+Dr = cfg['Dr']  # Equivalent viscous damping coefficient (N-m-s/rad)
 
 # Pendulum Link
-mp = 0.024  # Mass (kg)
-Lp = 0.129  # Total length (m)
+mp = cfg['mp']  # Mass (kg)
+Lp = cfg['Lp']  # Total length (m)
 Jp = mp * Lp ** 2 / 12  # Moment of inertia about pivot (kg-m^2)
-Dp = 0.00005  # Equivalent viscous damping coefficient (N-m-s/rad)
+Dp = cfg['Dp']  # Equivalent viscous damping coefficient (N-m-s/rad)
 
-g = 9.81  # Gravity constant
+g = cfg['g']  # Gravity constant
 
 
 def diff_forward_model_ode(state, t, action, dt):
